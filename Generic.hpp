@@ -12,28 +12,46 @@ using namespace std;
 template <class T> class GenericMethod
 {
 public:
+	template <class U> static char test_print_lambdacout(decltype(std::cout << std::declval<const U&>()));
+	template <class U> static long test_print_lambdacout(...);
 	template <class U> static char test_add_operator(decltype(&U::operator+));
 	template <class U> static long test_add_operator(...);
 	template <class U> static char test_sub_operator(decltype(&U::operator-));
 	template <class U> static long test_sub_operator(...);
 	enum
 	{
+		printable = sizeof(test_print_lambdacout<T>(cout)) == sizeof(char),
 		has_add_operator = sizeof(test_add_operator<T>(0)) == sizeof(char),
 		has_sub_operator = sizeof(test_sub_operator<T>(0)) == sizeof(char)
 	};
+
+	template <class U> static function<ostream&(ostream&, void *)> print_lambda(decltype(std::cout << std::declval<const U&>()))
+	{
+		return [](ostream& out, void *data) -> ostream&
+		{
+			cout << "print" << endl;
+			return out << *(U *)data;
+		};
+	}
+	template <class U> static function<ostream&(ostream&, void *)> print_lambda(const ostream&)
+	{
+		return [](ostream& out, void *data) -> ostream&
+		{
+			return out << "<no print function>";
+		};
+	}
+	static function<ostream&(ostream&, void *)> print()
+	{
+		return print_lambda<T>(cout);
+	}
 };
 
 struct Type
 {
 	function<void(void *)> destructor;
 	function<void *(void *)> copy;
+	function<ostream& (ostream&, void *)> print;
 	Type(){}
-	Type(function<void(void *)> destructor,
-		 function<void *(void *)> copy)
-	: destructor(destructor), copy(copy)
-	{
-
-	}
 };
 
 class Generic
@@ -70,23 +88,26 @@ public:
 		return *(T *)data;
 	}
 
+
 	template <class T> static void configureType()
 	{
 		size_t hash = typeid(T).hash_code();
 		if(Generic::types.find(hash) == Generic::types.end())
 		{
-			Generic::types[hash] = Type(
-			[](void *data)
+			Type type;
+			type.destructor = [](void *data)
 			{
 				if(data)
 				{
 					delete (T *)data;
 				}
-			},
-			[](void *data)
+			};
+			type.copy = [](void *data)
 			{
 				return new T(*(T *)data);
-			});
+			};
+			type.print = GenericMethod<T>::print();
+			Generic::types[hash] = type;
 		}
 	}
 

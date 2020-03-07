@@ -1,5 +1,5 @@
 #include "Generic.hpp"
-
+#include <vector>
 
 struct Point
 {
@@ -19,17 +19,16 @@ struct Point
 };
 
 
-
 int main(int argc, char const *argv[])
 {
 	Generic v = 3.14;
 
 	v = Point(5, 10);
 
+	//v = vector<int>();
 
-	
-	cout << GenericMethod<Point>::has_add_operator << endl;
-	
+	//cout << GenericMethod<Point>::printable << endl;
+	cout << v << endl;
 
 	return 0;
 }

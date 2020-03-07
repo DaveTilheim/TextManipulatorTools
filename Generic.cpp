@@ -34,5 +34,5 @@ Generic& Generic::operator=(const Generic& other)
 
 ostream& operator<<(ostream& out, const Generic& value)
 {
-	return out << value.typeHash;
+	return Generic::types[value.typeHash].print(out, value.data);
 }
