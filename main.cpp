@@ -1,4 +1,4 @@
-#include "Command.hpp"
+#include "Generic.hpp"
 
 
 struct Point
@@ -11,23 +11,24 @@ struct Point
 	{
 		return out << "(" << pt.x << " " << pt.y << ")";
 	}
+
+	Point operator+(const Point& pt)
+	{
+		return Point(pt.x + x, pt.y + y);
+	}
 };
+
 
 
 int main(int argc, char const *argv[])
 {
-	Value v = vector<string>();
+	Generic v = 3.14;
 
-	v.ref<vector<string>>().push_back("Hello");
-	v.ref<vector<string>>().push_back("world!");
+	v = Point(5, 10);
 
-	
-
-	Value s = "Hello";
-	
-	cout << s << " " << (string&)s << endl;
 
 	
+	cout << GenericMethod<Point>::has_add_operator << endl;
 	
 
 	return 0;

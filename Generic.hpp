@@ -1,5 +1,5 @@
-#ifndef VALUE_HPP
-#define VALUE_HPP
+#ifndef GENERIC_HPP
+#define GENERIC_HPP
 #include <functional>
 #include <map>
 #include <typeinfo>
@@ -7,6 +7,21 @@
 #include <iostream>
 
 using namespace std;
+
+
+template <class T> class GenericMethod
+{
+public:
+	template <class U> static char test_add_operator(decltype(&U::operator+));
+	template <class U> static long test_add_operator(...);
+	template <class U> static char test_sub_operator(decltype(&U::operator-));
+	template <class U> static long test_sub_operator(...);
+	enum
+	{
+		has_add_operator = sizeof(test_add_operator<T>(0)) == sizeof(char),
+		has_sub_operator = sizeof(test_sub_operator<T>(0)) == sizeof(char)
+	};
+};
 
 struct Type
 {
@@ -21,7 +36,7 @@ struct Type
 	}
 };
 
-class Value
+class Generic
 {
 private:
 	void *data = nullptr;
@@ -29,16 +44,16 @@ private:
 	static map<size_t, Type> types;
 public:
 
-	template <class T> Value(const T& value)
+	template <class T> Generic(const T& value)
 	{
-		Value::configureType<T>();
+		Generic::configureType<T>();
 		typeHash = typeid(T).hash_code();
 		data = new T(value);
 	}
 
-	Value(const Value& other);
-	Value(const char *str);
-	~Value();
+	Generic(const Generic& other);
+	Generic(const char *str);
+	~Generic();
 
 	template <class T> operator T&()
 	{
@@ -58,9 +73,9 @@ public:
 	template <class T> static void configureType()
 	{
 		size_t hash = typeid(T).hash_code();
-		if(Value::types.find(hash) == Value::types.end())
+		if(Generic::types.find(hash) == Generic::types.end())
 		{
-			Value::types[hash] = Type(
+			Generic::types[hash] = Type(
 			[](void *data)
 			{
 				if(data)
@@ -84,8 +99,8 @@ public:
 		}
 		else
 		{
-			Value::types[typeHash].destructor(data);
-			Value::configureType<T>();
+			Generic::types[typeHash].destructor(data);
+			Generic::configureType<T>();
 			typeHash = typeid(T).hash_code();
 			data = new T(value);
 		}
@@ -93,8 +108,8 @@ public:
 	}
 
 	string& operator=(const char *str);
-	Value& operator=(const Value& other);
-	friend ostream& operator<<(ostream& out, const Value& value);
+	Generic& operator=(const Generic& other);
+	friend ostream& operator<<(ostream& out, const Generic& value);
 };
 
 #endif
