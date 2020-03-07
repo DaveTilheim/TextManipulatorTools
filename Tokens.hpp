@@ -30,6 +30,7 @@ public:
 	void resetIndex();
 	void foreach(function<void(String& token)> operation);
 	Tokens partial() const;
+	int partialSize() const;
 	bool read(istream& in, char del='\n');
 	void clean();
 	Tokens& operator=(const Tokens& other);

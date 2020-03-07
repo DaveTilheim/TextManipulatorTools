@@ -8,6 +8,7 @@ Tokens::Tokens()
 	setKeepSeparator(false);
 }
 
+
 Tokens::Tokens(const String& str, const string& sep, bool keep)
 {
 	setIndex(0);
@@ -128,6 +129,11 @@ Tokens Tokens::partial() const
 	Tokens copy = *this;
 	copy.erase(copy.begin() + 0, copy.begin() + copy.getIndex());
 	return copy;
+}
+
+int Tokens::partialSize() const
+{
+	return size() - getIndex();
 }
 
 bool Tokens::read(istream& in, char del)

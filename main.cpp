@@ -1,26 +1,34 @@
-#include "Tokens.hpp"
+#include "Command.hpp"
+
+
+struct Point
+{
+	int x, y;
+
+	Point(int x, int y) : x(x), y(y){}
+
+	friend ostream& operator<<(ostream& out, const Point& pt)
+	{
+		return out << "(" << pt.x << " " << pt.y << ")";
+	}
+};
+
 
 int main(int argc, char const *argv[])
 {
-	Tokens toks;
-	ifstream file("main.cpp");
+	Value v = vector<string>();
 
-	while(toks.read(file))
-	{
-		toks.foreach([](String& s)
-		{
-			s.remove("\t");
-		});
-		toks.clean();
-		if(toks.size())
-			cout << toks << endl;
-	}
+	v.ref<vector<string>>().push_back("Hello");
+	v.ref<vector<string>>().push_back("world!");
 
-	file.close();
+	
 
+	Value s = "Hello";
+	
+	cout << s << " " << (string&)s << endl;
 
-
-
+	
+	
 
 	return 0;
 }
