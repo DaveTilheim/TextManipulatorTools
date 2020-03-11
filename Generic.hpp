@@ -8,28 +8,15 @@
 
 using namespace std;
 
+class Generic;
 
 template <class T> class GenericMethod
 {
 public:
-	template <class U> static char test_print_lambdacout(decltype(std::cout << std::declval<const U&>()));
-	template <class U> static long test_print_lambdacout(...);
-	template <class U> static char test_add_operator(decltype(&U::operator+));
-	template <class U> static long test_add_operator(...);
-	template <class U> static char test_sub_operator(decltype(&U::operator-));
-	template <class U> static long test_sub_operator(...);
-	enum
-	{
-		printable = sizeof(test_print_lambdacout<T>(cout)) == sizeof(char),
-		has_add_operator = sizeof(test_add_operator<T>(0)) == sizeof(char),
-		has_sub_operator = sizeof(test_sub_operator<T>(0)) == sizeof(char)
-	};
-
 	template <class U> static function<ostream&(ostream&, void *)> print_lambda(decltype(std::cout << std::declval<const U&>()))
 	{
 		return [](ostream& out, void *data) -> ostream&
 		{
-			cout << "print" << endl;
 			return out << *(U *)data;
 		};
 	}
@@ -37,12 +24,120 @@ public:
 	{
 		return [](ostream& out, void *data) -> ostream&
 		{
-			return out << "<no print function>";
+			return out << typeid(U).name() <<":"<<data;
 		};
 	}
+
 	static function<ostream&(ostream&, void *)> print()
 	{
 		return print_lambda<T>(cout);
+	}
+
+
+	template <class U> static function<istream&(istream&, void *)> input_lambda(decltype(std::cin >> std::declval<U&>()))
+	{
+		return [](istream& in, void *data) -> istream&
+		{
+			return in >> *(U *)data;
+		};
+	}
+	template <class U> static function<istream&(istream&, void *)> input_lambda(const istream&)
+	{
+		return [](istream& in, void *data) -> istream&
+		{
+			return in;
+		};
+	}
+
+	static function<istream&(istream&, void *)> input()
+	{
+		return input_lambda<T>(cin);
+	}
+
+	template <class U> static function<Generic(void *, void *)> add_operator_lambda(decltype(U() + U()))
+	{
+		return [](void *u1, void *u2)
+		{
+			return Generic(*(U *)u1 + *(U *)u2);
+		};
+	}
+
+	template <class U> static function<Generic(void *, void *)> add_operator_lambda(U)
+	{
+		return [](void *, void *)
+		{
+			return Generic(U());
+		};
+	}
+
+	static function<Generic(void *, void *)> add_operator()
+	{
+		return add_operator_lambda<T>(T());
+	}
+
+
+	template <class U> static function<Generic(void *, void *)> sub_operator_lambda(decltype(U() - U()))
+	{
+		return [](void *u1, void *u2)
+		{
+			return Generic(*(U *)u1 - *(U *)u2);
+		};
+	}
+
+	template <class U> static function<Generic(void *, void *)> sub_operator_lambda(U)
+	{
+		return [](void *, void *)
+		{
+			return Generic(U());
+		};
+	}
+
+	static function<Generic(void *, void *)> sub_operator()
+	{
+		return sub_operator_lambda<T>(T());
+	}
+
+	template <class U> static function<Generic(void *, void *)> mul_operator_lambda(decltype(U() * U()))
+	{
+		return [](void *u1, void *u2)
+		{
+			return Generic(*(U *)u1 * *(U *)u2);
+		};
+	}
+
+	template <class U> static function<Generic(void *, void *)> mul_operator_lambda(U)
+	{
+		return [](void *, void *)
+		{
+			return Generic(U());
+		};
+	}
+
+	static function<Generic(void *, void *)> mul_operator()
+	{
+		return mul_operator_lambda<T>(T());
+	}
+
+
+	template <class U> static function<Generic(void *, void *)> div_operator_lambda(decltype(U() / U()))
+	{
+		return [](void *u1, void *u2)
+		{
+			return Generic(*(U *)u1 / *(U *)u2);
+		};
+	}
+
+	template <class U> static function<Generic(void *, void *)> div_operator_lambda(U)
+	{
+		return [](void *, void *)
+		{
+			return Generic(U());
+		};
+	}
+
+	static function<Generic(void *, void *)> div_operator()
+	{
+		return div_operator_lambda<T>(T());
 	}
 };
 
@@ -51,6 +146,11 @@ struct Type
 	function<void(void *)> destructor;
 	function<void *(void *)> copy;
 	function<ostream& (ostream&, void *)> print;
+	function<istream& (istream&, void *)> input;
+	function<Generic (void *, void *)> add_operator;
+	function<Generic (void *, void *)> sub_operator;
+	function<Generic (void *, void *)> mul_operator;
+	function<Generic (void *, void *)> div_operator;
 	Type(){}
 };
 
@@ -107,6 +207,11 @@ public:
 				return new T(*(T *)data);
 			};
 			type.print = GenericMethod<T>::print();
+			type.input = GenericMethod<T>::input();
+			type.add_operator = GenericMethod<T>::add_operator();
+			type.sub_operator = GenericMethod<T>::sub_operator();
+			type.mul_operator = GenericMethod<T>::mul_operator();
+			type.div_operator = GenericMethod<T>::div_operator();
 			Generic::types[hash] = type;
 		}
 	}
@@ -128,9 +233,15 @@ public:
 		return *(T *)data;
 	}
 
+	size_t type() const;
 	string& operator=(const char *str);
 	Generic& operator=(const Generic& other);
+	Generic operator+(const Generic&);
+	Generic operator-(const Generic&);
+	Generic operator*(const Generic&);
+	Generic operator/(const Generic&);
 	friend ostream& operator<<(ostream& out, const Generic& value);
+	friend istream& operator>>(istream& in, const Generic& value);
 };
 
 #endif
