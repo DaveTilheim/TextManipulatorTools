@@ -66,4 +66,24 @@ vector<string> String::split_std(string sep, bool keepsep) const
 	return tmp;
 }
 
+int String::toInt() const
+{
+	return atoi(c_str());
+}
+
+double String::toDouble() const
+{
+	return atof(c_str());
+}
+
+String::operator int() const
+{
+	return toInt();
+}
+
+String::operator double() const
+{
+	return toDouble();
+}
+
 

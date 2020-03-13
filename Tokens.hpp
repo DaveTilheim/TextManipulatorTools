@@ -13,6 +13,7 @@ private:
 public:
 	Tokens();
 	Tokens(const String& str, const string& sep=" ", bool keep=false);
+	Tokens(const string& str, const string& sep=" ", bool keep=false);
 	Tokens(const Tokens& other);
 	Tokens(const vector<String>& vec, const string& sep=" ", bool keep=false);
 	void setTokens(const String& str);
@@ -36,6 +37,8 @@ public:
 	Tokens& operator=(const Tokens& other);
 	operator string();
 	operator String();
+	operator int();
+	operator double();
 	friend ostream& operator<<(ostream& out, const Tokens& tokens);
 };
 

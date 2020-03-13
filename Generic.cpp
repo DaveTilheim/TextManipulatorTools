@@ -19,31 +19,6 @@ Generic::~Generic()
 	Generic::types[typeHash].destructor(data);
 }
 
-size_t Generic::type() const
-{
-	return typeHash;
-}
-
-Generic Generic::operator+(const Generic& g1)
-{
-	return Generic::types[typeHash].add_operator(data, g1.data);
-}
-
-Generic Generic::operator-(const Generic& g1)
-{
-	return Generic::types[typeHash].sub_operator(data, g1.data);
-}
-
-Generic Generic::operator*(const Generic& g1)
-{
-	return Generic::types[typeHash].mul_operator(data, g1.data);
-}
-
-Generic Generic::operator/(const Generic& g1)
-{
-	return Generic::types[typeHash].div_operator(data, g1.data);
-}
-
 string& Generic::operator=(const char *str)
 {
 	return operator=<string>(string(str));
@@ -60,9 +35,4 @@ Generic& Generic::operator=(const Generic& other)
 ostream& operator<<(ostream& out, const Generic& value)
 {
 	return Generic::types[value.typeHash].print(out, value.data);
-}
-
-istream& operator>>(istream& in, const Generic& value)
-{
-	return Generic::types[value.typeHash].input(in, value.data);
 }

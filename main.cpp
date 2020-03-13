@@ -1,10 +1,10 @@
-#include "Generic.hpp"
+#include "Command.hpp"
 #include <vector>
 
 struct Point
 {
-	int x=666, y=666;
-	Point(){}
+	int x, y;
+
 	Point(int x, int y) : x(x), y(y){}
 
 	friend ostream& operator<<(ostream& out, const Point& pt)
@@ -12,45 +12,35 @@ struct Point
 		return out << "(" << pt.x << " " << pt.y << ")";
 	}
 
-	friend istream& operator>>(istream& in, Point& pt)
-	{
-		return in >> pt.x >> pt.y;
-	}
-
 	Point operator+(const Point& pt)
 	{
 		return Point(pt.x + x, pt.y + y);
-	}
-
-	Point operator-(const Point& pt)
-	{
-		return Point(pt.x - x, pt.y - y);
-	}
-
-	void hello()
-	{
-		cout << "AH" << endl;
 	}
 };
 
 
 int main(int argc, char const *argv[])
 {
-	Generic v = 3.14;
+	Command c("hello");
+	c.setAction(3, [](Args args)
+	{
+		String s = args;
+		int i = args;
+		double d = args;
+		cout << s << " " << i << " " << d << endl;
+		return "";
+	});
 	
-
-	v = Point(5, 10);
-
-	v = v + v;
-	v.ref<Point>().hello();
-
-	cout << v << endl;
-	v = v * Point(5,5);
-
-
-	cout << v << endl;
-
-	
+	try
+	{
+		c.setChild("world");
+		c.setChild("world");
+		c.check("ahah ha");
+	}
+	catch(const Exception& e)
+	{
+		cout << e.what() << endl;
+	}
 
 	return 0;
 }

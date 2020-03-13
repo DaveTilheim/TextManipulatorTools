@@ -17,6 +17,14 @@ Tokens::Tokens(const String& str, const string& sep, bool keep)
 	setTokens(str);
 }
 
+Tokens::Tokens(const string& str, const string& sep, bool keep)
+{
+	setIndex(0);
+	setSeparator(sep);
+	setKeepSeparator(keep);
+	setTokens(str);
+}
+
 Tokens::Tokens(const Tokens& other) : vector<String>(other)
 {
 	setIndex(other.getIndex());
@@ -181,6 +189,16 @@ Tokens::operator String()
 	String current = getCurrent();
 	next();
 	return current;
+}
+
+Tokens::operator int()
+{
+	return getCurrent().toInt();
+}
+
+Tokens::operator double()
+{
+	return getCurrent().toDouble();
 }
 
 ostream& operator<<(ostream& out, const Tokens& tokens)
