@@ -9,20 +9,31 @@ Tokens::Tokens()
 }
 
 
-Tokens::Tokens(const String& str, const string& sep, bool keep)
+Tokens::Tokens(const String& str, const string& sep, const string& block, bool keep)
 {
 	setIndex(0);
 	setSeparator(sep);
 	setKeepSeparator(keep);
-	setTokens(str);
+	if(block.size())
+		setTokens(str, block);
+	else
+		setTokens(str);
 }
 
-Tokens::Tokens(const string& str, const string& sep, bool keep)
+Tokens::Tokens(const string& str, const string& sep, const string& block, bool keep)
 {
 	setIndex(0);
 	setSeparator(sep);
 	setKeepSeparator(keep);
-	setTokens(str);
+	if(block.size())
+		setTokens(str, block);
+	else
+		setTokens(str);
+}
+
+Tokens::Tokens(const char* str, const string& sep, const string& block, bool keep) : Tokens(string(str), sep, block, keep)
+{
+
 }
 
 Tokens::Tokens(const Tokens& other) : vector<String>(other)
@@ -48,6 +59,34 @@ void Tokens::setTokens(const String& str)
 	else
 	{
 		clear();
+	}
+}
+
+void Tokens::setTokens(const String& str, string block)
+{
+	vector<String> blocks = str.split(block, true);
+	bool inBlock = false;
+	for(auto b : blocks)
+	{
+		if(b == block)
+		{
+			inBlock = not inBlock;
+		}
+		else
+		{
+			if(inBlock)
+			{
+				push_back(b);
+			}
+			else
+			{
+				auto tokens = b.split(getSeparator(), getKeepSeparator());
+				for(auto tok : tokens)
+				{
+					push_back(tok);
+				}
+			}
+		}
 	}
 }
 

@@ -1,19 +1,17 @@
 #ifndef COMMAND_HPP
 #define COMMAND_HPP
-#include "Tokens.hpp"
+#include "Action.hpp"
 #include "Exception.hpp"
 #include <map>
-#include <functional>
 #include <cstdlib>
 
-typedef Tokens Args;
 
 class Command final
 {
 private:
 	const string name;
 	const Command *super;
-	map<int, function<string(Tokens)>> actions;
+	map<int, Action *> actions;
 	vector<Command *> childs;
 public:
 	Command() = delete;
@@ -23,11 +21,11 @@ public:
 	string getName() const;
 	string getFullName() const;
 	const Command& getSuper() const;
-	const map<int, function<string(Tokens)>>& getActions() const;
+	const map<int, Action *>& getActions() const;
 	const vector<Command *>& getChilds() const;
 	Command& getChild(string name);
-	function<string(Tokens)> getAction(Tokens& args);
-	void setAction(int nargs, function<string(Tokens)> action);
+	Action& getAction(Tokens& args);
+	void setAction(int nargs, const Action& action);
 	void setChild(string name);
 	void setSuper(const Command *super);
 	bool isChild(string name) const;

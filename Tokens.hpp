@@ -12,11 +12,13 @@ private:
 	string separator;
 public:
 	Tokens();
-	Tokens(const String& str, const string& sep=" ", bool keep=false);
-	Tokens(const string& str, const string& sep=" ", bool keep=false);
+	Tokens(const String& str, const string& sep=" ", const string& block="\"", bool keep=false);
+	Tokens(const string& str, const string& sep=" ", const string& block="\"", bool keep=false);
+	Tokens(const char* str, const string& sep=" ", const string& block="\"", bool keep=false);
 	Tokens(const Tokens& other);
 	Tokens(const vector<String>& vec, const string& sep=" ", bool keep=false);
 	void setTokens(const String& str);
+	void setTokens(const String& str, string block);
 	void setIndex(int i);
 	void setSeparator(string sep);
 	void setKeepSeparator(bool state);

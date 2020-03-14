@@ -1,0 +1,96 @@
+#include "Action.hpp"
+
+
+Action::Action(const Action& other) : func(other.getFunction()), namedArgs(other.getNamed()), separator(other.getSeparator())
+{
+
+}
+
+Action::Action(function<string(Args)> func, string separator) : func(func), separator(separator)
+{
+
+}
+
+const function<string(Args)>& Action::getFunction() const
+{
+	return func;
+}
+
+const vector<string>& Action::getNamed() const
+{
+	return namedArgs;
+}
+
+string Action::getSeparator() const
+{
+	return separator;
+}
+
+void Action::setNamed(string name)
+{
+	if(not nameExists(name))
+	{
+		namedArgs.push_back(name);
+	}
+}
+
+bool Action::nameExists(string name) const
+{
+	for(auto n : namedArgs)
+	{
+		if(n == name) return true;
+	}
+	return false;
+}
+
+string Action::run(Tokens args)
+{
+	map<string, string> namedContent;
+	Tokens sequArgs;
+	for(auto n : namedArgs)
+	{
+		namedContent[n] = "unused";
+	}
+	while(not args.oob())
+	{
+		String elem = args;
+		auto splitString = elem.split(getSeparator());
+		if(nameExists(splitString[0]))
+		{
+			if(splitString.size() == 2)
+				namedContent[splitString[0]] = splitString[1];
+			else
+				namedContent[splitString[0]] = "used";
+		}
+		else
+		{
+			sequArgs.push_back(elem);
+		}
+	}
+	Args_t actionArgs(sequArgs, namedContent);
+	return func(actionArgs);
+}
+
+int Action::namedNumber(const Tokens& args) const
+{
+	auto size = args.size();
+	int counter = 0;
+	for(int i = args.getIndex(); i < size; i++)
+	{
+		if(nameExists(args[i]))
+			counter++;
+	}
+	return counter;
+}
+
+Action& Action::operator=(const Action& other)
+{
+	func = other.getFunction();
+	namedArgs = other.getNamed();
+	return *this;
+}
+
+ostream& operator<<(ostream& out, const Action& action)
+{
+	return out;
+}

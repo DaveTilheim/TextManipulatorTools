@@ -18,7 +18,10 @@ Command::~Command()
 	{
 		delete cmdit;
 	}
-	cout << getFullName() + " destroyed" << endl;
+	for(auto it : actions)
+	{
+		delete it.second;
+	}
 }
 
 string Command::getName() const
@@ -29,7 +32,7 @@ string Command::getName() const
 string Command::getFullName() const
 {
 	if(super)
-		return super->getFullName() + getName();
+		return super->getFullName() + "." + getName();
 	return getName();
 }
 
@@ -38,7 +41,7 @@ const Command& Command::getSuper() const
 	return *super;
 }
 
-const map<int, function<string(Tokens)>>& Command::getActions() const
+const map<int, Action *>& Command::getActions() const
 {
 	return actions;
 }
@@ -60,19 +63,19 @@ Command& Command::getChild(string name)
 	throw Exception("No child named '" + name + "' for '" + getFullName() + "' Command");
 }
 
-function<string(Tokens)> Command::getAction(Tokens& args)
+Action& Command::getAction(Tokens& args)
 {
 	int nargs = args.size();
 	if(actions.find(nargs) != actions.end())
 	{
-		return actions[nargs];
+		return *actions[nargs];
 	}
 	throw Exception("No action takes " + to_string(nargs) + " number of parameters for '" + getFullName() + "' Command");
 }
 
-void Command::setAction(int nargs, function<string(Tokens)> action)
+void Command::setAction(int nargs, const Action& action)
 {
-	actions[nargs] = action;
+	actions[nargs] = new Action(action);
 }
 
 void Command::setChild(string name)
@@ -84,7 +87,7 @@ void Command::setChild(string name)
 			throw Exception("'" + name + "' child already exists for '" + getFullName() + "' Command");
 		}
 	}
-	childs.push_back(new Command(name));
+	childs.push_back(new Command(name, this));
 }
 
 void Command::setSuper(const Command *superc)
@@ -108,9 +111,9 @@ string Command::action(string sargs) noexcept
 	int nargs = args.size();
 	if(actions.find(nargs) == actions.end())
 	{
-		return actions[-1](args);
+		return actions[-1]->run(args);
 	}
-	return actions[nargs](args);
+	return actions[nargs]->run(args);
 }
 
 string Command::exe(Tokens& args) noexcept
@@ -125,11 +128,13 @@ string Command::exe(Tokens& args) noexcept
 			return getChild(child).exe(args);
 		}
 	}
+
 	if(actions.find(nargs) == actions.end())
 	{
-		return actions[-1](args);
+		return actions[-1]->run(args);
 	}
-	return actions[nargs](args);
+
+	return actions[nargs]->run(args);
 }
 
 string Command::exe(string sargs) noexcept

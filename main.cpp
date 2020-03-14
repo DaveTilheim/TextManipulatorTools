@@ -21,26 +21,23 @@ struct Point
 
 int main(int argc, char const *argv[])
 {
-	Command c("hello");
-	c.setAction(3, [](Args args)
+	Command print("print");
+
+	Action action([](Args args)
 	{
-		String s = args;
-		int i = args;
-		double d = args;
-		cout << s << " " << i << " " << d << endl;
+		cout << "Hello " << args.use("user") << endl;
 		return "";
 	});
-	
-	try
-	{
-		c.setChild("world");
-		c.setChild("world");
-		c.check("ahah ha");
-	}
-	catch(const Exception& e)
-	{
-		cout << e.what() << endl;
-	}
+	action.setNamed("user");
+	print.setAction(1, action);
+
+
+	print.exe("\"user=Arthur Detrembleur\"");
+
+
+
+
+
 
 	return 0;
 }
