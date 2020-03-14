@@ -160,12 +160,13 @@ string Command::run(Tokens& args, int forceNargs)
 		}
 
 		int i = 0;
-		while(i < nargs) //parcourir les nargs arguments de la commande
+		int ret = nargs;
+		if(nargs == -1) nargs = args.partialSize();
+		while(i < nargs and not args.oob()) //parcourir les nargs arguments de la commande
 		{
 			args.next();
 			if(Command::isCommand(element)) //si on détecte une commande root
 			{
-				cout << "ROOT" << endl;
 				string ret = getCommand(element).run(args, attributes.nargs);
 				arguments.push_back(ret);
 			}
@@ -177,8 +178,13 @@ string Command::run(Tokens& args, int forceNargs)
 			attributes = Command::extractAttributes(element);
 			i++;
 		}
+		if(ret == -1) nargs = ret;
+		else if(forceNargs == -2) nargs = arguments.size();
+		else
+		{
+			if(nargs != arguments.size()) throw Exception(to_string(nargs) + " arguments gived but expected " + to_string(arguments.size()));
+		}
 	}
-
 	if(actions.find(nargs) == actions.end()) //si pas de prototype
 	{
 		if(actions.find(-1) != actions.end()) //si prototype indéfinit
@@ -190,7 +196,7 @@ string Command::run(Tokens& args, int forceNargs)
 			throw Exception(getFullName() + " has no function which takes " + to_string(nargs) + " parameters");
 		}
 	}
-	cout << "CALL" << endl;
+	
 	return actions[nargs]->run(arguments); //execution classique
 }
 
