@@ -1,15 +1,20 @@
 #include "Command.hpp"
 
-Command::Command(const Command& other)
-: name(other.getName()), super(&other.getSuper()),
-  actions(other.getActions()), childs(other.getChilds())
-{
 
+map<string, Command *> Command::commandList = map<string, Command *>();
+
+
+Command::Command(const Command& other)
+: Command(other.getName(), &other.getSuper())
+{
+	actions = other.getActions();
+	childs = other.getChilds();
 }
 
 Command::Command(string name, const Command *super) : name(name), super(super)
 {
-
+	if(not super) //!!!!
+		Command::commandList[name] = this;
 }
 
 Command::~Command()
@@ -73,6 +78,16 @@ Action& Command::getAction(Tokens& args)
 	throw Exception("No action takes " + to_string(nargs) + " number of parameters for '" + getFullName() + "' Command");
 }
 
+int Command::getMaximumNargs() const
+{
+	int maxi = -2;
+	for(auto it : actions)
+	{
+		maxi = it.first;
+	}
+	return maxi;
+}
+
 void Command::setAction(int nargs, const Action& action)
 {
 	actions[nargs] = new Action(action);
@@ -119,47 +134,64 @@ string Command::action(string sargs) noexcept
 string Command::run(Tokens& args, int forceNargs)
 {
 	int nargs = args.partialSize();
-	if(forceNargs > -2)
+	if(forceNargs > -2) // si un nombre d'argument est imposé
 	{
-		if(nargs < forceNargs)
+		if(nargs < forceNargs) // si le nombre imposé n'est pas respecté
 		{
 			throw Exception(to_string(nargs) + " given but expected " + to_string(forceNargs));
 		}
+		nargs = forceNargs;
 	}
-	if(nargs)
+	else
 	{
-		string element = args.getCurrent();
-		if(isChild(element))
-		{
-			args.next();
-			return getChild(element).run(args);
-		}
-		/*if(isCommand(element))
-		{
-			args.next();
-			string ret = getCommand(element).run(args);
-		}*/
+		if(nargs > getMaximumNargs()) // mise à niveau du nombre d'arguments afin de ne pas dépasser de la commande courrante
+			nargs = getMaximumNargs();
 	}
 
-	if(actions.find(nargs) == actions.end())
+	Tokens arguments;
+	if(nargs) // cas d'une commande possédant des arguments
 	{
-		if(actions.find(-1) != actions.end())
+		String element = args.getCurrent();
+		Attributes attributes = Command::extractAttributes(element);
+		if(forceNargs == -2 and not attributes.root and isChild(element)) //commande fille
 		{
-			return actions[-1]->run(args);
+			args.next();
+			return getChild(element).run(args, attributes.nargs);
+		}
+
+		int i = 0;
+		while(i < nargs) //parcourir les nargs arguments de la commande
+		{
+			args.next();
+			if(Command::isCommand(element)) //si on détecte une commande root
+			{
+				cout << "ROOT" << endl;
+				string ret = getCommand(element).run(args, attributes.nargs);
+				arguments.push_back(ret);
+			}
+			else //si on détecte une constante
+			{
+				arguments.push_back(element);
+			}
+			element = args.getCurrent();
+			attributes = Command::extractAttributes(element);
+			i++;
+		}
+	}
+
+	if(actions.find(nargs) == actions.end()) //si pas de prototype
+	{
+		if(actions.find(-1) != actions.end()) //si prototype indéfinit
+		{
+			return actions[-1]->run(arguments);
 		}
 		else
 		{
-			while(--nargs >= 0)
-			{
-				if(actions.find(nargs) != actions.end())
-				{
-					return actions[nargs]->run(args);
-				}
-			}
+			throw Exception(getFullName() + " has no function which takes " + to_string(nargs) + " parameters");
 		}
 	}
-
-	return actions[nargs]->run(args);
+	cout << "CALL" << endl;
+	return actions[nargs]->run(arguments); //execution classique
 }
 
 string Command::run(string sargs, int forceNargs)
@@ -169,7 +201,7 @@ string Command::run(string sargs, int forceNargs)
 }
 
 
-Attributes Command::extractAttributes(String& commandName) const
+Attributes Command::extractAttributes(String& commandName)
 {
 	int i;
 	Attributes attr;
@@ -201,3 +233,30 @@ ostream& operator<<(ostream& out, const Command& self)
 {
 	return out << self.getFullName();
 }
+
+
+bool Command::isCommand(string name)
+{
+	return commandList.find(name) != commandList.end();
+}
+
+Command& Command::getCommand(string name)
+{
+	return *commandList[name];
+}
+
+vector<string> Command::launch(string expr)
+{
+	Tokens exprTok = expr;
+	vector<string> ret;
+	while(not exprTok.oob())
+	{
+		String commandName = exprTok;
+		Attributes attributes = Command::extractAttributes(commandName);
+		ret.push_back(Command::getCommand(commandName).run(exprTok, attributes.nargs));
+	}
+	return ret;
+}
+
+
+

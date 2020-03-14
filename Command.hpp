@@ -14,11 +14,16 @@ struct Attributes
 class Command final
 {
 private:
+	static map<string, Command *> commandList;
 	const string name;
 	const Command *super;
 	map<int, Action *> actions;
 	vector<Command *> childs;
 public:
+	static bool isCommand(string name);
+	static Command& getCommand(string name);
+	static Attributes extractAttributes(String& commandName);
+	static vector<string> launch(string expr);
 	Command() = delete;
 	Command(const Command& other);
 	Command(string name, const Command *super=nullptr);
@@ -29,6 +34,7 @@ public:
 	const map<int, Action *>& getActions() const;
 	const vector<Command *>& getChilds() const;
 	Command& getChild(string name);
+	int getMaximumNargs() const;
 	Action& getAction(Tokens& args);
 	void setAction(int nargs, const Action& action);
 	void setChild(string name);
@@ -37,7 +43,6 @@ public:
 	string action(string args="") noexcept;
 	string run(string args="", int forceNargs=-2);
 	string run(Tokens& args, int forceNargs=-2);
-	Attributes extractAttributes(String& commandName) const;
 	Command& operator=(const Command& other) = delete;
 	friend ostream& operator<<(ostream& out, const Command& self);
 };
