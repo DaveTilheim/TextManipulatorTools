@@ -5,6 +5,11 @@
 #include <map>
 #include <cstdlib>
 
+struct Attributes
+{
+	bool root = false;
+	int nargs = -2;
+};
 
 class Command final
 {
@@ -30,10 +35,9 @@ public:
 	void setSuper(const Command *super);
 	bool isChild(string name) const;
 	string action(string args="") noexcept;
-	string exe(string args="") noexcept;
-	string exe(Tokens& args) noexcept;
-	void check(string args="") noexcept(false);
-	void check(Tokens& args) noexcept(false);
+	string run(string args="", int forceNargs=-2);
+	string run(Tokens& args, int forceNargs=-2);
+	Attributes extractAttributes(String& commandName) const;
 	Command& operator=(const Command& other) = delete;
 	friend ostream& operator<<(ostream& out, const Command& self);
 };

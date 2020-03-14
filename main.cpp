@@ -1,43 +1,17 @@
 #include "Command.hpp"
-#include <vector>
 
-struct Point
-{
-	int x, y;
 
-	Point(int x, int y) : x(x), y(y){}
-
-	friend ostream& operator<<(ostream& out, const Point& pt)
-	{
-		return out << "(" << pt.x << " " << pt.y << ")";
-	}
-
-	Point operator+(const Point& pt)
-	{
-		return Point(pt.x + x, pt.y + y);
-	}
-};
 
 
 int main(int argc, char const *argv[])
 {
-	Command print("print");
-
-	Action action([](Args args)
+	Command add("add");
+	add.setAction(2, Action([](Args args)
 	{
-		cout << "Hello " << args.use("user") << endl;
-		return "";
-	});
-	action.setNamed("user");
-	print.setAction(1, action);
+		return to_string((int) args.list() + (int) args.list());
+	}));
 
-
-	print.exe("\"user=Arthur Detrembleur\"");
-
-
-
-
-
+	cout << add.run("5 10 test error") << endl;
 
 	return 0;
 }

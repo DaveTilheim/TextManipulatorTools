@@ -116,59 +116,85 @@ string Command::action(string sargs) noexcept
 	return actions[nargs]->run(args);
 }
 
-string Command::exe(Tokens& args) noexcept
+string Command::run(Tokens& args, int forceNargs)
 {
 	int nargs = args.partialSize();
+	if(forceNargs > -2)
+	{
+		if(nargs < forceNargs)
+		{
+			throw Exception(to_string(nargs) + " given but expected " + to_string(forceNargs));
+		}
+	}
 	if(nargs)
 	{
-		string child = args.getCurrent();
-		if(isChild(child))
+		string element = args.getCurrent();
+		if(isChild(element))
 		{
 			args.next();
-			return getChild(child).exe(args);
+			return getChild(element).run(args);
 		}
+		/*if(isCommand(element))
+		{
+			args.next();
+			string ret = getCommand(element).run(args);
+		}*/
 	}
 
 	if(actions.find(nargs) == actions.end())
 	{
-		return actions[-1]->run(args);
+		if(actions.find(-1) != actions.end())
+		{
+			return actions[-1]->run(args);
+		}
+		else
+		{
+			while(--nargs >= 0)
+			{
+				if(actions.find(nargs) != actions.end())
+				{
+					return actions[nargs]->run(args);
+				}
+			}
+		}
 	}
 
 	return actions[nargs]->run(args);
 }
 
-string Command::exe(string sargs) noexcept
+string Command::run(string sargs, int forceNargs)
 {
 	Tokens args = sargs;
-	return exe(args);
+	return run(args, forceNargs);
 }
 
-void Command::check(string sargs) noexcept(false)
-{
-	Tokens args = sargs;
-	check(args);
-}
 
-void Command::check(Tokens& args) noexcept(false)
+Attributes Command::extractAttributes(String& commandName) const
 {
-	int nargs = args.partialSize();
-	if(nargs)
+	int i;
+	Attributes attr;
+	if((i = commandName.find(":")) != string::npos)
 	{
-		string child = args.getCurrent();
-		if(isChild(child))
+		string name = commandName.substr(0, i);
+		String attributes = commandName.substr(i);
+		if(attributes != ":")
+			attributes.erase(0, 1);
+		commandName = name;
+		attributes.remove(".");
+		if(attributes.size())
 		{
-			args.next();
-			getChild(child).check(args);
-			return;
+			if(attributes.find("root") != string::npos)
+			{
+				attr.root = true;
+				attributes.remove("root");
+			}
+			if(attributes.size())
+			{
+				attr.nargs = atoi(attributes.c_str());
+			}
 		}
 	}
-	if(actions.find(nargs) == actions.end())
-	{
-		if(actions.find(-1) == actions.end())
-		{
-			throw Exception("No action for " + to_string(nargs) + " number of arguments for '" + getFullName() + "' Command");
-		}
-	}
+	return attr;
 }
 
 ostream& operator<<(ostream& out, const Command& self)

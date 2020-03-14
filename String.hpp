@@ -20,6 +20,8 @@ public:
 	vector<string> stepSplit_std(string sep1="(", string sep2=")", bool keepsep=false) const;
 	int toInt() const;
 	double toDouble() const;
+	void pack(string expr="[");
+	void unpack(string expr="[");
 	operator int() const;
 	operator double() const;
 };

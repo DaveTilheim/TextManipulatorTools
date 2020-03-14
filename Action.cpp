@@ -64,6 +64,7 @@ string Action::run(Tokens args)
 		}
 		else
 		{
+			elem.unpack("["); //surround command / subcommand / named parameter
 			sequArgs.push_back(elem);
 		}
 	}

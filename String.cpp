@@ -107,6 +107,36 @@ double String::toDouble() const
 	return atof(c_str());
 }
 
+void String::pack(string expr)
+{
+	if(expr == "(") *this = expr + *this + ")";
+	else if(expr == "[") *this = expr + *this + "]";
+	else if(expr == "{") *this = expr + *this + "}";
+	else if(expr == "<") *this = expr + *this + ">";
+	else *this = expr + *this + expr;
+}
+
+void String::unpack(string expr)
+{
+	auto esize = expr.size();
+	auto tsize = size();
+	if(substr(0, esize) == expr)
+	{
+		string sub = substr(tsize - esize);
+		bool has = false;
+		if(expr == "(" and sub == ")") has = true;
+		else if(expr == "[" and sub == "]") has = true;
+		else if(expr == "{" and sub == "}") has = true;
+		else if(expr == "<" and sub == ">") has = true;
+		else if(sub == expr) has = true;
+		if(has)
+		{
+			erase(tsize - esize);
+			erase(0, esize);
+		}
+	}
+}
+
 String::operator int() const
 {
 	return toInt();

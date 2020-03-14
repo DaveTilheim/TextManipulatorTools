@@ -232,12 +232,16 @@ Tokens::operator String()
 
 Tokens::operator int()
 {
-	return getCurrent().toInt();
+	int i = getCurrent().toInt();
+	next();
+	return i;
 }
 
 Tokens::operator double()
 {
-	return getCurrent().toDouble();
+	int d = getCurrent().toDouble();
+	next();
+	return d;
 }
 
 ostream& operator<<(ostream& out, const Tokens& tokens)
