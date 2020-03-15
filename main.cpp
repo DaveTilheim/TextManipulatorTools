@@ -5,49 +5,55 @@
 
 int main(int argc, char const *argv[])
 {
+	Command print("print");
+	print.setAction(-1, Action([](Args args)
+	{
+		cout << args.list() << endl;
+		return "null";
+	}));
+
+	print.child("user").setAction(0, Action([](Args args)
+	{
+		cout << "Hello dear user!" << endl;
+		return "";
+	}));
+
+	Command puser("puser");
+	puser.alias(print.child("user"));
+
 	Command add("add");
 	add.setAction(2, Action([](Args args)
 	{
-		//cout << "C1 " << args.list() << endl;
-		return to_string((int) args.list() + (int) args.list());
-	}));
-	add.setAction(1, Action([](Args args)
-	{
-		//cout << "C2" << endl;
-		int n = args.list();
-		return to_string(n + n);
-	}));
-	add.setChild("add");
-	add.getChild("add").setAction(2, Action([](Args args)
-	{
-		//cout << "C3 " << args.list() << endl;
-		return "0";
+		double d = args.list();
+		double dd = args.list();
+		return to_string(d + dd);
 	}));
 
-	Command test("test");
-	test.setAction(0, Action([](Args args)
+	Command sub("sub");
+	sub.setAction(2, Action([](Args args)
 	{
-		return "1000";
+		double d = args.list();
+		double dd = args.list();
+		return to_string(d - dd);
 	}));
 
-	Command print("print");
-	auto a = Action([](Args args)
+	Command mul("mul");
+	mul.setAction(2, Action([](Args args)
 	{
-		cout << args.list().partial() << " => " << args("name") << endl;
-		return "50";
-	});
-	a.setNamed("name");
-	print.setAction(-1, a);
+		double d = args.list();
+		double dd = args.list();
+		return to_string(d * dd);
+	}));
 
-	
-
-	//cout << add.run("add 3 3 add 3 4") << endl;
-
-	auto ret = Command::launch("add print:2 \"1 [name]\" 666");
-	for(auto r : ret)
+	Command divi("div");
+	divi.setAction(2, Action([](Args args)
 	{
-		cout << "> " << r << endl;
-	}
+		double d = args.list();
+		double dd = args.list();
+		return to_string(d / dd);
+	}));
 
+
+	Command::interpretFile("file.cmd");
 	return 0;
 }

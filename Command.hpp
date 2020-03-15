@@ -2,6 +2,7 @@
 #define COMMAND_HPP
 #include "Action.hpp"
 #include "Exception.hpp"
+#include "FileReader.hpp"
 #include <map>
 #include <cstdlib>
 
@@ -17,17 +18,23 @@ private:
 	static map<string, Command *> commandList;
 	const string name;
 	const Command *super;
+	static void preinterpreterFile();
 	map<int, Action *> actions;
 	vector<Command *> childs;
+	bool isAlias = false;
 public:
+	static FileReader fileReader;
 	static bool isCommand(string name);
 	static Command& getCommand(string name);
 	static Attributes extractAttributes(String& commandName);
 	static vector<string> launch(string expr);
+	static void interpretFile(string filename);
 	Command() = delete;
 	Command(const Command& other);
 	Command(string name, const Command *super=nullptr);
 	~Command();
+	Command& alias(const Command& cmd);
+	Command& child(string childname);
 	string getName() const;
 	string getFullName() const;
 	const Command& getSuper() const;
@@ -36,7 +43,7 @@ public:
 	Command& getChild(string name);
 	int getMaximumNargs() const;
 	Action& getAction(Tokens& args);
-	void setAction(int nargs, const Action& action);
+	Command& setAction(int nargs, const Action& action);
 	void setChild(string name);
 	void setSuper(const Command *super);
 	bool isChild(string name) const;

@@ -34,6 +34,13 @@ void Action::setNamed(string name)
 	}
 }
 
+Action& Action::named(string name)
+{
+	if(nameExists(name)) return *this;
+	setNamed(name);
+	return *this;
+}
+
 bool Action::nameExists(string name) const
 {
 	for(auto n : namedArgs)

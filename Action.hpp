@@ -41,6 +41,7 @@ public:
 	const function<string(Args)>& getFunction() const;
 	const vector<string>& getNamed() const;
 	string getSeparator() const;
+	Action& named(string name);
 	void setNamed(string name);
 	bool nameExists(string name) const;
 	int namedNumber(const Tokens& args) const;

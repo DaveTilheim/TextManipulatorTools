@@ -19,14 +19,25 @@ Command::Command(string name, const Command *super) : name(name), super(super)
 
 Command::~Command()
 {
-	for(auto *cmdit : childs)
+	if(not isAlias)
 	{
-		delete cmdit;
+		for(auto *cmdit : childs)
+		{
+			delete cmdit;
+		}
+		for(auto it : actions)
+		{
+			delete it.second;
+		}
 	}
-	for(auto it : actions)
-	{
-		delete it.second;
-	}
+}
+
+Command& Command::alias(const Command& cmd)
+{
+	isAlias = true;
+	actions = cmd.getActions();
+	childs = cmd.getChilds();
+	return *this;
 }
 
 string Command::getName() const
@@ -88,9 +99,10 @@ int Command::getMaximumNargs() const
 	return maxi;
 }
 
-void Command::setAction(int nargs, const Action& action)
+Command& Command::setAction(int nargs, const Action& action)
 {
 	actions[nargs] = new Action(action);
+	return *this;
 }
 
 void Command::setChild(string name)
@@ -138,7 +150,7 @@ string Command::run(Tokens& args, int forceNargs)
 	{
 		if(nargs < forceNargs) // si le nombre imposé n'est pas respecté
 		{
-			throw Exception(to_string(nargs) + " given but expected " + to_string(forceNargs));
+			throw Exception(getFullName() + " => " + to_string(nargs) + " given but expected " + to_string(forceNargs));
 		}
 		nargs = forceNargs;
 	}
@@ -182,7 +194,7 @@ string Command::run(Tokens& args, int forceNargs)
 		else if(forceNargs == -2) nargs = arguments.size();
 		else
 		{
-			if(nargs != arguments.size()) throw Exception(to_string(nargs) + " arguments gived but expected " + to_string(arguments.size()));
+			if(nargs != arguments.size()) throw Exception(getFullName() + " => " + to_string(nargs) + " arguments gived but expected " + to_string(arguments.size()));
 		}
 	}
 	if(actions.find(nargs) == actions.end()) //si pas de prototype
@@ -259,6 +271,8 @@ vector<string> Command::launch(string expr)
 	{
 		String commandName = exprTok;
 		Attributes attributes = Command::extractAttributes(commandName);
+		if(not Command::isCommand(commandName))
+			throw Exception("'" + commandName + "' is not a recognised Command");
 		ret.push_back(Command::getCommand(commandName).run(exprTok, attributes.nargs));
 	}
 	return ret;
@@ -266,3 +280,76 @@ vector<string> Command::launch(string expr)
 
 
 
+Command& Command::child(string ch)
+{
+	if(isChild(ch))
+	{
+		return getChild(ch);
+	}
+	setChild(ch);
+	return getChild(ch);
+}
+
+FileReader Command::fileReader = FileReader();
+
+void Command::preinterpreterFile()
+{
+	bool commentaryBlock = false;
+	bool begCommentary = false;
+	while(not fileReader.end())
+	{
+		String &line = fileReader.getLine();
+		line.remove();
+		int i;
+		
+		if(not commentaryBlock)
+		{
+			if((i = line.find("/*")) != string::npos)
+			{
+				commentaryBlock = true;
+				begCommentary = true;
+				line.erase(i);
+			}
+			else if((i = line.find("//")) != string::npos)
+			{
+				line.erase(i);
+			}
+		}
+		if((i = line.find("*/")) != string::npos)
+		{
+			commentaryBlock = false;
+			line.erase(0, i + string("*/").size());
+		}
+		
+
+		if(not begCommentary and (commentaryBlock or not line.size()))
+		{
+			fileReader.drop();
+			fileReader.prec();
+		}
+		else if(begCommentary) begCommentary = false;
+		fileReader.next();
+	}
+	fileReader.setIndex(0);
+}
+
+
+void Command::interpretFile(string filename)
+{
+	fileReader.update(filename);
+	preinterpreterFile();
+	try
+	{
+		while(not fileReader.end())
+		{
+			String line = fileReader.getLine();
+			//cout << "> " << line << endl;
+			Command::launch(line);
+			fileReader.next();
+		}
+	}
+	catch(const Exception& e)
+	{
+		cout << e.what() << endl;
+	}
+}

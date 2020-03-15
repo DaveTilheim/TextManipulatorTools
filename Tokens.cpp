@@ -239,7 +239,7 @@ Tokens::operator int()
 
 Tokens::operator double()
 {
-	int d = getCurrent().toDouble();
+	double d = getCurrent().toDouble();
 	next();
 	return d;
 }
