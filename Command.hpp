@@ -2,7 +2,6 @@
 #define COMMAND_HPP
 #include "Action.hpp"
 #include "Exception.hpp"
-#include "FileReader.hpp"
 #include <map>
 #include <cstdlib>
 
@@ -12,23 +11,21 @@ struct Attributes
 	int nargs = -2;
 };
 
-class Command final
+class Command
 {
-private:
+protected:
 	static map<string, Command *> commandList;
 	const string name;
 	const Command *super;
-	static void preinterpreterFile();
 	map<int, Action *> actions;
 	vector<Command *> childs;
 	bool isAlias = false;
 public:
-	static FileReader fileReader;
+	static void eraseCommand(string name);
+	static void eraseCommandsWithPrefix(string prefix);
 	static bool isCommand(string name);
 	static Command& getCommand(string name);
 	static Attributes extractAttributes(String& commandName);
-	static vector<string> launch(string expr);
-	static void interpretFile(string filename);
 	Command() = delete;
 	Command(const Command& other);
 	Command(string name, const Command *super=nullptr);
@@ -49,9 +46,18 @@ public:
 	bool isChild(string name) const;
 	string action(string args="") noexcept;
 	string run(string args="", int forceNargs=-2);
-	string run(Tokens& args, int forceNargs=-2);
+	virtual string run(Tokens& args, int forceNargs=-2);
 	Command& operator=(const Command& other) = delete;
 	friend ostream& operator<<(ostream& out, const Command& self);
+};
+
+class IndependantCommand : public Command
+{
+public:
+	IndependantCommand(string name);
+	string run(Tokens& args, int forceNargs=-2) override;
+	void setChild(string name);
+	string getFullName() const;
 };
 
 #endif

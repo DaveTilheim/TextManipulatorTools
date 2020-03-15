@@ -12,18 +12,28 @@ FileReader::FileReader() : index(0)
 	
 }
 
-void FileReader::update(string filename)
+void FileReader::update(string filename, bool flush)
 {
+	if(flush) content.clear();
 	setIndex(0);
 	ifstream file(filename);
 	if(file)
 	{
-		string buf;
+		currentFile = filename;
+		String buf;
 		while(getline(file, buf))
 		{
-			content.push_back(buf);
+			buf.remove();
+			if(buf.size())
+			{
+				content.push_back(buf);
+			}
 		}
 		file.close();
+	}
+	else
+	{
+		throw Exception("'" + filename + "' file does not exists");
 	}
 }
 
@@ -31,6 +41,11 @@ void FileReader::drop()
 {
 	content.erase(content.begin() + index);
 
+}
+
+string FileReader::getCurrentFile() const
+{
+	return currentFile;
 }
 
 String& FileReader::getLine(int i)
@@ -64,4 +79,39 @@ void FileReader::prec()
 bool FileReader::end() const
 {
 	return getIndex() >= content.size();
+}
+
+void FileReader::insert(FileReader& other)
+{
+	other.foreach([this](String& line)
+	{
+		content.insert(content.begin() + getIndex(), line);
+		next();
+	});
+}
+
+void FileReader::foreach(function<void(String&)> action)
+{
+	setIndex(0);
+	while(not end())
+	{
+		action(getLine());
+		next();
+	}
+	setIndex(0);
+}
+
+int FileReader::size() const
+{
+	return content.size();
+}
+
+ostream& operator<<(ostream& out, const FileReader& fr)
+{
+	int line = 1;
+	for(auto s : fr.content)
+	{
+		out << line++ << ": " << s << endl;
+	}
+	return out;
 }

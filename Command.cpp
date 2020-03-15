@@ -32,6 +32,33 @@ Command::~Command()
 	}
 }
 
+void Command::eraseCommand(string name)
+{
+	if(isCommand(name))
+	{
+		delete commandList[name];
+		commandList.erase(name);
+	}
+}
+
+void Command::eraseCommandsWithPrefix(string prefix)
+{
+	vector<string> toRemove;
+	for(auto it : commandList)
+	{
+		if(it.first.find(prefix) == 0)
+		{
+			delete it.second;
+			toRemove.push_back(it.first);
+		}
+	}
+	for(auto c : toRemove)
+	{
+		cout << "erase " << c << endl;
+		commandList.erase(c);
+	}
+}
+
 Command& Command::alias(const Command& cmd)
 {
 	isAlias = true;
@@ -263,23 +290,6 @@ Command& Command::getCommand(string name)
 	return *commandList[name];
 }
 
-vector<string> Command::launch(string expr)
-{
-	Tokens exprTok = expr;
-	vector<string> ret;
-	while(not exprTok.oob())
-	{
-		String commandName = exprTok;
-		Attributes attributes = Command::extractAttributes(commandName);
-		if(not Command::isCommand(commandName))
-			throw Exception("'" + commandName + "' is not a recognised Command");
-		ret.push_back(Command::getCommand(commandName).run(exprTok, attributes.nargs));
-	}
-	return ret;
-}
-
-
-
 Command& Command::child(string ch)
 {
 	if(isChild(ch))
@@ -290,66 +300,59 @@ Command& Command::child(string ch)
 	return getChild(ch);
 }
 
-FileReader Command::fileReader = FileReader();
-
-void Command::preinterpreterFile()
+IndependantCommand::IndependantCommand(string name) : Command(name, this)
 {
-	bool commentaryBlock = false;
-	bool begCommentary = false;
-	while(not fileReader.end())
-	{
-		String &line = fileReader.getLine();
-		line.remove();
-		int i;
-		
-		if(not commentaryBlock)
-		{
-			if((i = line.find("/*")) != string::npos)
-			{
-				commentaryBlock = true;
-				begCommentary = true;
-				line.erase(i);
-			}
-			else if((i = line.find("//")) != string::npos)
-			{
-				line.erase(i);
-			}
-		}
-		if((i = line.find("*/")) != string::npos)
-		{
-			commentaryBlock = false;
-			line.erase(0, i + string("*/").size());
-		}
-		
 
-		if(not begCommentary and (commentaryBlock or not line.size()))
+}
+
+string IndependantCommand::run(Tokens& args, int forceNargs)
+{
+	int nargs = args.partialSize();
+
+	if(nargs) // cas d'une commande possédant des arguments
+	{
+		String element = args.getCurrent();
+		if(isChild(element)) //commande fille
 		{
-			fileReader.drop();
-			fileReader.prec();
+			args.next();
+			return getChild(element).run(args);
 		}
-		else if(begCommentary) begCommentary = false;
-		fileReader.next();
 	}
-	fileReader.setIndex(0);
+	if(actions.find(nargs) == actions.end()) //si pas de prototype
+	{
+		if(actions.find(-1) != actions.end()) //si prototype indéfinit
+		{
+			return actions[-1]->run(args);
+		}
+		else
+		{
+			throw Exception(getFullName() + " has no function which takes " + to_string(nargs) + " parameters");
+		}
+	}
+	
+	return actions[nargs]->run(args); //execution classique
+}
+
+void IndependantCommand::setChild(string name)
+{
+	for(auto *cmdit : childs)
+	{
+		if(cmdit->getName() == name)
+		{
+			throw Exception("'" + name + "' child already exists for '" + getFullName() + "' Command");
+		}
+	}
+	IndependantCommand *child = new IndependantCommand(name);
+	child->setSuper(this);
+	childs.push_back(child);
+}
+
+string IndependantCommand::getFullName() const
+{
+	if(super and super != this)
+		return super->getFullName() + "." + getName();
+	return getName();
 }
 
 
-void Command::interpretFile(string filename)
-{
-	fileReader.update(filename);
-	preinterpreterFile();
-	try
-	{
-		while(not fileReader.end())
-		{
-			String line = fileReader.getLine();
-			//cout << "> " << line << endl;
-			Command::launch(line);
-			fileReader.next();
-		}
-	}
-	catch(const Exception& e)
-	{
-		cout << e.what() << endl;
-	}
-}
+

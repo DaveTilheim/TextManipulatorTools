@@ -1,6 +1,9 @@
-#include "Command.hpp"
+#include "Interpreter.hpp"
 
 
+Interpreter interpreter;
+
+Interpreter interpreter2;
 
 
 int main(int argc, char const *argv[])
@@ -53,7 +56,21 @@ int main(int argc, char const *argv[])
 		return to_string(d / dd);
 	}));
 
-
-	Command::interpretFile("file.cmd");
+	Command test("test");
+	test.setAction(0, Action([](Args args){ cout << "GLOBAL COMMAND"<<endl; return"";}));
+	interpreter.setCommentarySymbol("--");
+	interpreter.attributedCommand("test").setAction(0, Action([](Args args)
+	{
+		cout << "ATTRIBUTED COMMAND INTERPRETER" << endl;
+		return "";
+	}));
+	interpreter.launchFile("file.cmd");
+	interpreter2.setCommentarySymbol("--");
+	interpreter2.attributedCommand("test").setAction(0, Action([](Args args)
+	{
+		cout << "ATTRIBUTED COMMAND INTERPRETER1" << endl;
+		return "";
+	}));
+	interpreter2.launchFile("file.cmd");
 	return 0;
 }
