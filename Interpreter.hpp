@@ -1,23 +1,25 @@
 #ifndef INTERPRETER_HPP
 #define INTERPRETER_HPP
 #include "Command.hpp"
-#include "FileReader.hpp"
+#include "FileLoader.hpp"
+#include <stdint.h>
 
 class Interpreter
 {
 private:
-	static FileReader *mainFileReader;
-	FileReader fileReader;
+	static FileLoader *mainFileLoader;
+	FileLoader fileLoader;
 	map<string, IndependantCommand *> preIntCommands;
 	vector<string> linkedFiles;
 	vector<string> commentarySymbols;
+	vector<const Command *> attributedCommands;
 	void preinterpretation();
 	void removeCommentary();
 	void preIntCommandsRun();
 	void setAttributedCommandTag();
-	FileReader& getFileReader();
+	FileLoader& getFileLoader();
 public:
-	static FileReader& getMainFileReader();
+	static FileLoader& getMainFileLoader();
 	Interpreter();
 	~Interpreter();
 	vector<string> launchFile(string filename);
@@ -26,7 +28,10 @@ public:
 	bool isPreInt(string str);
 	bool alreadyLinked(string filename) const;
 	Command& preIntCommand(string name);
-	Command& attributedCommand(string name) const;
+	Command& attributedCommand(string name);
+	Command& getLinker();
+	void renamePreInt(string, string name);
+	void removeAttributed();
 };
 
 #endif

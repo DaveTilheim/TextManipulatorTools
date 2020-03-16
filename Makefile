@@ -2,7 +2,7 @@ CC = g++
 LD = g++
 STD = -std=c++2a
 EXE = exe
-SRC = $(wildcard *.cpp)
+SRC = $(wildcard *.cpp) $(wildcard Lizzy/*.cpp)
 OBJS = $(SRC:.cpp=.o)
 
 all : $(EXE)
@@ -19,5 +19,7 @@ main.o : main.cpp
 clean:
 	@rm -f *.o
 	@rm -f $(EXE)
+	@rm -f Lizzy/*.o
+
 
 

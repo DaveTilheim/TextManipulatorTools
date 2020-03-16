@@ -9,15 +9,15 @@
 using namespace std;
 
 
-class FileReader
+class FileLoader
 {
 private:
 	vector<String> content;
 	string currentFile;
 	int index;
 public:
-	FileReader();
-	FileReader(string filename);
+	FileLoader();
+	FileLoader(string filename);
 	void update(string filename, bool flush=true);
 	String& getLine(int i=-1);
 	string getCurrentFile() const;
@@ -27,10 +27,10 @@ public:
 	void next();
 	void prec();
 	bool end() const;
-	void insert(FileReader& other);
+	void insert(FileLoader& other);
 	void foreach(function<void(String&)> action);
 	int size() const;
-	friend ostream& operator<<(ostream& out, const FileReader& fr);
+	friend ostream& operator<<(ostream& out, const FileLoader& fr);
 };
 
 

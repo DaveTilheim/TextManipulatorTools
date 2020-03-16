@@ -1,18 +1,18 @@
-#include "FileReader.hpp"
+#include "FileLoader.hpp"
 
 
 
-FileReader::FileReader(string filename)
+FileLoader::FileLoader(string filename)
 {
 	update(filename);
 }
 
-FileReader::FileReader() : index(0)
+FileLoader::FileLoader() : index(0)
 {
 	
 }
 
-void FileReader::update(string filename, bool flush)
+void FileLoader::update(string filename, bool flush)
 {
 	if(flush) content.clear();
 	setIndex(0);
@@ -37,51 +37,51 @@ void FileReader::update(string filename, bool flush)
 	}
 }
 
-void FileReader::drop()
+void FileLoader::drop()
 {
 	content.erase(content.begin() + index);
 
 }
 
-string FileReader::getCurrentFile() const
+string FileLoader::getCurrentFile() const
 {
 	return currentFile;
 }
 
-String& FileReader::getLine(int i)
+String& FileLoader::getLine(int i)
 {
 	if(i == -1) return content[getIndex()];
 	return content[i];
 }
 
-int FileReader::getIndex() const
+int FileLoader::getIndex() const
 {
 	return index;
 }
 
-void FileReader::setIndex(int i)
+void FileLoader::setIndex(int i)
 {
 	if(i < 0) i = 0;
 	else if(i > content.size()) i = content.size();
 	index = i;
 }
 
-void FileReader::next()
+void FileLoader::next()
 {
 	setIndex(getIndex() + 1);
 }
 
-void FileReader::prec()
+void FileLoader::prec()
 {
 	setIndex(getIndex() - 1);
 }
 
-bool FileReader::end() const
+bool FileLoader::end() const
 {
 	return getIndex() >= content.size();
 }
 
-void FileReader::insert(FileReader& other)
+void FileLoader::insert(FileLoader& other)
 {
 	other.foreach([this](String& line)
 	{
@@ -90,7 +90,7 @@ void FileReader::insert(FileReader& other)
 	});
 }
 
-void FileReader::foreach(function<void(String&)> action)
+void FileLoader::foreach(function<void(String&)> action)
 {
 	setIndex(0);
 	while(not end())
@@ -101,12 +101,12 @@ void FileReader::foreach(function<void(String&)> action)
 	setIndex(0);
 }
 
-int FileReader::size() const
+int FileLoader::size() const
 {
 	return content.size();
 }
 
-ostream& operator<<(ostream& out, const FileReader& fr)
+ostream& operator<<(ostream& out, const FileLoader& fr)
 {
 	int line = 1;
 	for(auto s : fr.content)

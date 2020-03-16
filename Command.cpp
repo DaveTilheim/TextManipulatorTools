@@ -41,23 +41,6 @@ void Command::eraseCommand(string name)
 	}
 }
 
-void Command::eraseCommandsWithPrefix(string prefix)
-{
-	vector<string> toRemove;
-	for(auto it : commandList)
-	{
-		if(it.first.find(prefix) == 0)
-		{
-			delete it.second;
-			toRemove.push_back(it.first);
-		}
-	}
-	for(auto c : toRemove)
-	{
-		cout << "erase " << c << endl;
-		commandList.erase(c);
-	}
-}
 
 Command& Command::alias(const Command& cmd)
 {
@@ -219,10 +202,8 @@ string Command::run(Tokens& args, int forceNargs)
 		}
 		if(ret == -1) nargs = ret;
 		else if(forceNargs == -2) nargs = arguments.size();
-		else
-		{
-			if(nargs != arguments.size()) throw Exception(getFullName() + " => " + to_string(nargs) + " arguments gived but expected " + to_string(arguments.size()));
-		}
+		else if(nargs != arguments.size())
+			throw Exception(getFullName() + " => " + to_string(nargs) + " arguments gived but expected " + to_string(arguments.size()));
 	}
 	if(actions.find(nargs) == actions.end()) //si pas de prototype
 	{
@@ -298,6 +279,20 @@ Command& Command::child(string ch)
 	}
 	setChild(ch);
 	return getChild(ch);
+}
+
+void Command::rename(string name)
+{
+	string old = getName();
+	if(not super)
+	{
+		if(not isCommand(name))
+		{
+			Command::commandList.erase(old);
+			Command::commandList[name] = this;
+			this->name = name;
+		}
+	}
 }
 
 IndependantCommand::IndependantCommand(string name) : Command(name, this)

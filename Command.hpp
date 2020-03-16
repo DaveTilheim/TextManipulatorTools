@@ -11,18 +11,19 @@ struct Attributes
 	int nargs = -2;
 };
 
+#define PermCommand static Command
+
 class Command
 {
 protected:
 	static map<string, Command *> commandList;
-	const string name;
+	string name;
 	const Command *super;
 	map<int, Action *> actions;
 	vector<Command *> childs;
 	bool isAlias = false;
 public:
 	static void eraseCommand(string name);
-	static void eraseCommandsWithPrefix(string prefix);
 	static bool isCommand(string name);
 	static Command& getCommand(string name);
 	static Attributes extractAttributes(String& commandName);
@@ -33,7 +34,7 @@ public:
 	Command& alias(const Command& cmd);
 	Command& child(string childname);
 	string getName() const;
-	string getFullName() const;
+	virtual string getFullName() const;
 	const Command& getSuper() const;
 	const map<int, Action *>& getActions() const;
 	const vector<Command *>& getChilds() const;
@@ -47,6 +48,7 @@ public:
 	string action(string args="") noexcept;
 	string run(string args="", int forceNargs=-2);
 	virtual string run(Tokens& args, int forceNargs=-2);
+	void rename(string name);
 	Command& operator=(const Command& other) = delete;
 	friend ostream& operator<<(ostream& out, const Command& self);
 };
@@ -57,7 +59,9 @@ public:
 	IndependantCommand(string name);
 	string run(Tokens& args, int forceNargs=-2) override;
 	void setChild(string name);
-	string getFullName() const;
+	string getFullName() const override;
 };
+
+
 
 #endif

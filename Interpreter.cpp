@@ -1,13 +1,13 @@
 #include "Interpreter.hpp"
 
 
-FileReader *Interpreter::mainFileReader = nullptr;
+FileLoader *Interpreter::mainFileLoader = nullptr;
 
-Interpreter::Interpreter() : fileReader()
+Interpreter::Interpreter() : fileLoader()
 {
-	if(not Interpreter::mainFileReader)
+	if(not Interpreter::mainFileLoader)
 	{
-		Interpreter::mainFileReader = &fileReader;
+		Interpreter::mainFileLoader = &fileLoader;
 	}
 	
 	Action linkAction([this](Args args) -> string
@@ -15,19 +15,43 @@ Interpreter::Interpreter() : fileReader()
 		string filename = args("file");
 		if(alreadyLinked(filename))
 		{
-			fileReader.drop();fileReader.prec();
+			fileLoader.drop();fileLoader.prec();
 			return "";
 		}
-		FileReader fr(filename);
+		FileLoader fr(filename);
 		linkedFiles.push_back(filename);
-		fileReader.drop();
-		int i = fileReader.getIndex() - 1;
-		fileReader.insert(fr);
-		fileReader.setIndex(i);
+		fileLoader.drop();
+		int i = fileLoader.getIndex() - 1;
+		fileLoader.insert(fr);
+		fileLoader.setIndex(i);
 		return filename;
 	});
 	linkAction.setNamed("file");
-	preIntCommand("link").setAction(1, linkAction);
+	preIntCommand("#link").setAction(1, linkAction);
+}
+
+Command& Interpreter::getLinker()
+{
+	return preIntCommand("#link");
+}
+
+void Interpreter::renamePreInt(string cmdname, string name)
+{
+	string old = cmdname;
+	if(not isPreInt(name))
+	{
+		IndependantCommand *ic = preIntCommands[old];
+		preIntCommands.erase(old);
+		preIntCommands[name] = ic;
+		preIntCommands[name]->rename(name);
+	}
+}
+void Interpreter::removeAttributed()
+{
+	for(auto att : attributedCommands)
+	{
+		delete att;
+	}
 }
 
 Interpreter::~Interpreter()
@@ -36,12 +60,12 @@ Interpreter::~Interpreter()
 	{
 		delete c.second;
 	}
-	Command::eraseCommandsWithPrefix(to_string((long)this));
+	removeAttributed();
 }
 
 void Interpreter::removeCommentary()
 {
-	fileReader.foreach([this](String& line)
+	fileLoader.foreach([this](String& line)
 	{
 		int i;
 		for(auto comSymbol : commentarySymbols)
@@ -70,7 +94,7 @@ bool Interpreter::alreadyLinked(string filename) const
 
 void Interpreter::preIntCommandsRun()
 {
-	fileReader.foreach([this](String& line)
+	fileLoader.foreach([this](String& line)
 	{
 		Tokens tok = line;
 		String cname = tok;
@@ -83,9 +107,9 @@ void Interpreter::preIntCommandsRun()
 
 void Interpreter::setAttributedCommandTag()
 {
-	fileReader.foreach([this](String& line)
+	fileLoader.foreach([this](String& line)
 	{
-		line.replace("@", to_string((long)this));
+		line.replace("@", to_string(reinterpret_cast<uintptr_t>(this)));
 	});
 }
 
@@ -117,37 +141,30 @@ vector<string> Interpreter::launch(string expr)
 vector<string>  Interpreter::launchFile(string filename)
 {
 	vector<string> results;
-	fileReader.update(filename);
+	fileLoader.update(filename);
 	linkedFiles.push_back(filename);
-	try
+	preinterpretation();
+	while(not fileLoader.end())
 	{
-		preinterpretation();
-		while(not fileReader.end())
+		String line = fileLoader.getLine();
+		for(auto res : Interpreter::launch(line))
 		{
-			String line = fileReader.getLine();
-			for(auto res : Interpreter::launch(line))
-			{
-				results.push_back(res);
-			}
-			fileReader.next();
+			results.push_back(res);
 		}
-	}
-	catch(const Exception& e)
-	{
-		cout << e.what() << endl;
+		fileLoader.next();
 	}
 	linkedFiles.clear();
 	return results;
 }
 
-FileReader& Interpreter::getFileReader()
+FileLoader& Interpreter::getFileLoader()
 {
-	return fileReader;
+	return fileLoader;
 }
 
-FileReader& Interpreter::getMainFileReader()
+FileLoader& Interpreter::getMainFileLoader()
 {
-	return *Interpreter::mainFileReader;
+	return *Interpreter::mainFileLoader;
 }
 
 void Interpreter::setCommentarySymbol(string symbol)
@@ -157,19 +174,22 @@ void Interpreter::setCommentarySymbol(string symbol)
 
 Command& Interpreter::preIntCommand(string name)
 {
+	if(name.size() and name[0] != '#') name = "#" + name;
 	if(isPreInt(name)) return *preIntCommands[name];
 	IndependantCommand *c = new IndependantCommand(name);
 	preIntCommands[name] = c;
 	return *c;
 }
 
-Command& Interpreter::attributedCommand(string name) const
+Command& Interpreter::attributedCommand(string name)
 {
-	string cid = to_string((long)this) + name;
+	string cid = to_string(reinterpret_cast<uintptr_t>(this)) + name;
 	if(Command::isCommand(cid))
 	{
 		return Command::getCommand(cid);
 	}
-	return *new Command(cid);
+	Command *c = new Command(cid);
+	attributedCommands.push_back(c);
+	return *c;
 }
 
