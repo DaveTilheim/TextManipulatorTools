@@ -7,12 +7,13 @@
 
 namespace Lizzy
 {
-	class LizzyInterpreter final : public Package, public Interpreter
+	class LizzyPkg final : public Package
 	{
 	public:
-		LizzyInterpreter();
-		void init() override;
-		static LizzyInterpreter lizzyi;
+		LizzyPkg();
+		void load() override;
+		static LizzyPkg lizzyPkg;
+		static Interpreter lizzyInt;
 	};
 }
 

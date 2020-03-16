@@ -36,7 +36,6 @@ void Command::eraseCommand(string name)
 {
 	if(isCommand(name))
 	{
-		delete commandList[name];
 		commandList.erase(name);
 	}
 }
@@ -268,6 +267,7 @@ bool Command::isCommand(string name)
 
 Command& Command::getCommand(string name)
 {
+	if(not Command::isCommand(name)) throw Exception(name + " is not a recognized Command");
 	return *commandList[name];
 }
 

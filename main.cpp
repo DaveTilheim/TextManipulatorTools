@@ -1,4 +1,5 @@
 #include "Lizzy/Lizzy.hpp"
+#include "Interpreter.hpp"
 
 using namespace Lizzy;
 
@@ -6,8 +7,8 @@ int main(int argc, char const *argv[])
 {
 	try
 	{
-		LizzyInterpreter::lizzyi.init();
-		LizzyInterpreter::lizzyi.launchFile("main.lz");
+		LizzyPkg::lizzyPkg.load();
+		LizzyPkg::lizzyInt.launchFile("main.lz");
 	}
 	catch(const Exception& e)
 	{

@@ -6,16 +6,17 @@
 
 namespace Lizzy
 {
-	class LizzyI;
-
-	class Std final : public Package
+	class StdPkg final : public Package
 	{
-	private:
-		void init() override;
-		friend class LizzyI;
+	protected:
+		_decl_action(alias_action)
+		_decl_action(print_action)
+		_decl_action(println_action)
+	protected:
+		void load() override;
 	public:
-		static Std std;
-		Std();
+		static StdPkg std;
+		StdPkg();
 	};
 }
 

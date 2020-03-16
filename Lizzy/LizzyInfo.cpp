@@ -1,33 +1,32 @@
 #include "LizzyInfo.hpp"
 
+using namespace Lizzy;
 
-Lizzy::Info Lizzy::Info::info = Info();
+InfoPkg InfoPkg::info = InfoPkg();
 
-const string Lizzy::Info::VERSION = "1.0.0";
-
-
-
+const string InfoPkg::VERSION = "1.0.0";
 
 
-string Lizzy::Info::version_action(Args args)
+
+
+_def_action(InfoPkg::version_action)
 {
-	cout << "Lizzy version " << Lizzy::Info::VERSION << endl;
-	return Lizzy::Info::VERSION;
+	cout << "Lizzy version " << InfoPkg::VERSION << endl;
+	return InfoPkg::VERSION;
 }
 
 
 
 
 
-Lizzy::Info::Info() : Lizzy::Package("Info")
+InfoPkg::InfoPkg() : Package("InfoPkg")
 {
 	LOAD_ONCE
 }
 
-void Lizzy::Info::init()
+void InfoPkg::load()
 {
 	LOAD_ONCE
-	PermCommand version("version");
 	Action versionAction(version_action);
-	version.setAction(0, versionAction);
+	cmd("version").setAction(0, versionAction);
 }

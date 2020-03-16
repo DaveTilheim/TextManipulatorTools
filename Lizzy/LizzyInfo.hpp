@@ -6,18 +6,16 @@
 
 namespace Lizzy
 {
-	class LizzyI;
-
-	class Info final : public Package
+	class InfoPkg final : public Package
 	{
-	private:
-		static string version_action(Args);
+	protected:
+		_decl_action(version_action)
+	protected:
 		static const string VERSION;
-		void init() override;
-		friend class LizzyI;
+		void load() override;
 	public:
-		static Info info;
-		Info();
+		static InfoPkg info;
+		InfoPkg();
 	};
 }
 

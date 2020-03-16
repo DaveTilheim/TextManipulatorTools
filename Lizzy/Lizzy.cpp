@@ -1,20 +1,22 @@
 #include "Lizzy.hpp"
 
-Lizzy::LizzyInterpreter Lizzy::LizzyInterpreter::lizzyi = Lizzy::LizzyInterpreter();
+Interpreter Lizzy::LizzyPkg::lizzyInt = Interpreter();
+Lizzy::LizzyPkg Lizzy::LizzyPkg::lizzyPkg = Lizzy::LizzyPkg();
 
-Lizzy::LizzyInterpreter::LizzyInterpreter() : Lizzy::Package("Lizzy"), Interpreter()
+Lizzy::LizzyPkg::LizzyPkg() : Lizzy::Package("LizzyPkg")
 {
 	LOAD_ONCE
-	addDependance(Lizzy::Info::info);
-	addDependance(Lizzy::Std::std);
+	Lizzy::LizzyPkg::lizzyInt.setCommentarySymbol("//");
+	addSubPackage(Lizzy::InfoPkg::info);
+	addSubPackage(Lizzy::StdPkg::std);
 }
 
-void Lizzy::LizzyInterpreter::init()
+void Lizzy::LizzyPkg::load()
 {
 	LOAD_ONCE
 	try
 	{
-		loadDependances();
+		loadSubPackages();
 	}
 	catch(const Exception& e)
 	{

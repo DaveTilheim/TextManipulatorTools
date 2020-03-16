@@ -1,1 +1,3 @@
-version
+alias [version] v
+alias [println] out
+out hello
