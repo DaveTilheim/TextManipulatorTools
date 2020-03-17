@@ -3,7 +3,7 @@
 Interpreter Lizzy::LizzyPkg::lizzyInt = Interpreter();
 Lizzy::LizzyPkg Lizzy::LizzyPkg::lizzyPkg = Lizzy::LizzyPkg();
 
-Lizzy::LizzyPkg::LizzyPkg() : Lizzy::Package("LizzyPkg")
+Lizzy::LizzyPkg::LizzyPkg() : Package("Lizzy")
 {
 	LOAD_ONCE
 	Lizzy::LizzyPkg::lizzyInt.setCommentarySymbol("//");
@@ -14,12 +14,7 @@ Lizzy::LizzyPkg::LizzyPkg() : Lizzy::Package("LizzyPkg")
 void Lizzy::LizzyPkg::load()
 {
 	LOAD_ONCE
-	try
-	{
-		loadSubPackages();
-	}
-	catch(const Exception& e)
-	{
-		cout << e.what() << endl;
-	}
+
+	loadSubPackages();
+
 }

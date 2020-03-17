@@ -1,22 +1,19 @@
 #ifndef LIZZY_INFO_HPP
 #define LIZZY_INFO_HPP
 #include "../Command.hpp"
-#include "LizzyPackage.hpp"
+#include "../Package.hpp"
 
 
 namespace Lizzy
 {
-	class InfoPkg final : public Package
-	{
-	protected:
-		_decl_action(version_action)
-	protected:
+	PKG
+	(
+		InfoPkg,
 		static const string VERSION;
-		void load() override;
-	public:
-		static InfoPkg info;
-		InfoPkg();
-	};
+		_decl_action(version_action),
+		info
+	)
+	typedef InfoPkg Info;
 }
 
 #endif

@@ -32,6 +32,7 @@ public:
 	Command(string name, const Command *super=nullptr);
 	~Command();
 	Command& alias(const Command& cmd);
+	Command& alias(string otherName);
 	Command& child(string childname);
 	string getName() const;
 	virtual string getFullName() const;

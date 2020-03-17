@@ -14,7 +14,9 @@ Command::Command(const Command& other)
 Command::Command(string name, const Command *super) : name(name), super(super)
 {
 	if(not super) //!!!!
+	{
 		Command::commandList[name] = this;
+	}
 }
 
 Command::~Command()
@@ -47,6 +49,16 @@ Command& Command::alias(const Command& cmd)
 	actions = cmd.getActions();
 	childs = cmd.getChilds();
 	return *this;
+}
+
+Command& Command::alias(string otherName)
+{
+	if(not isCommand(otherName))
+	{
+		Command::commandList[otherName] = this;
+		return *this;
+	}
+	throw Exception(otherName +  " Command already exists");
 }
 
 string Command::getName() const

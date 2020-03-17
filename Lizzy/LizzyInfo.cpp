@@ -11,7 +11,6 @@ const string InfoPkg::VERSION = "1.0.0";
 
 _def_action(InfoPkg::version_action)
 {
-	cout << "Lizzy version " << InfoPkg::VERSION << endl;
 	return InfoPkg::VERSION;
 }
 
@@ -19,7 +18,7 @@ _def_action(InfoPkg::version_action)
 
 
 
-InfoPkg::InfoPkg() : Package("InfoPkg")
+InfoPkg::InfoPkg() : Package("Info")
 {
 	LOAD_ONCE
 }

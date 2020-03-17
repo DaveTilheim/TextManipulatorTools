@@ -1,23 +1,21 @@
 #ifndef LIZZY_STD_HPP
 #define LIZZY_STD_HPP
 #include "../Command.hpp"
-#include "LizzyPackage.hpp"
+#include "../Package.hpp"
 
 
 namespace Lizzy
 {
-	class StdPkg final : public Package
-	{
-	protected:
+	PKG
+	(
+		StdPkg,
 		_decl_action(alias_action)
 		_decl_action(print_action)
-		_decl_action(println_action)
-	protected:
-		void load() override;
-	public:
-		static StdPkg std;
-		StdPkg();
-	};
+		_decl_action(println_action),
+		std
+	)
+	
+	typedef StdPkg Std;
 }
 
 #endif

@@ -1,3 +1,2 @@
-alias [version] v
-alias [println] out
-out hello
+
+Std.println "Hello world from Lizzy version" version !

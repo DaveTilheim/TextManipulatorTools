@@ -10,7 +10,7 @@ _def_action(StdPkg::alias_action)
 {
 	string oldname = args.list();
 	string newname = args.list();
-	StdPkg::std.addCommand(newname, true).alias(Command::getCommand(oldname));
+	Command::getCommand(oldname).alias(newname);
 	return newname;
 }
 
@@ -27,7 +27,7 @@ _def_action(StdPkg::println_action)
 	return ret;
 }
 
-StdPkg::StdPkg() : Package("StdPkg")
+StdPkg::StdPkg() : Package("Std")
 {
 	LOAD_ONCE
 }
