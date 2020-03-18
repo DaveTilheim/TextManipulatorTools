@@ -9,31 +9,8 @@ Interpreter::Interpreter() : fileLoader()
 	{
 		Interpreter::mainFileLoader = &fileLoader;
 	}
-	
-	Action linkAction([this](Args args) -> string
-	{
-		string filename = args("file");
-		if(alreadyLinked(filename))
-		{
-			fileLoader.drop();fileLoader.prec();
-			return "";
-		}
-		FileLoader fr(filename);
-		linkedFiles.push_back(filename);
-		fileLoader.drop();
-		int i = fileLoader.getIndex() - 1;
-		fileLoader.insert(fr);
-		fileLoader.setIndex(i);
-		return filename;
-	});
-	linkAction.setNamed("file");
-	preIntCommand("#link").setAction(1, linkAction);
 }
 
-Command& Interpreter::getLinker()
-{
-	return preIntCommand("#link");
-}
 
 void Interpreter::renamePreInt(string cmdname, string name)
 {
@@ -83,15 +60,6 @@ bool Interpreter::isPreInt(string str)
 	return preIntCommands.find(str) != preIntCommands.end();
 }
 
-bool Interpreter::alreadyLinked(string filename) const
-{
-	for(string f : linkedFiles)
-	{
-		if(f == filename) return true;
-	}
-	return false;
-}
-
 void Interpreter::preIntCommandsRun()
 {
 	fileLoader.foreach([this](String& line)
@@ -101,6 +69,8 @@ void Interpreter::preIntCommandsRun()
 		if(isPreInt(cname))
 		{
 			preIntCommands[cname]->run(tok);
+			fileLoader.drop();
+			fileLoader.prec();
 		}
 	});
 }
@@ -142,7 +112,6 @@ vector<string>  Interpreter::launchFile(string filename)
 {
 	vector<string> results;
 	fileLoader.update(filename);
-	linkedFiles.push_back(filename);
 	preinterpretation();
 	while(not fileLoader.end())
 	{
@@ -153,7 +122,6 @@ vector<string>  Interpreter::launchFile(string filename)
 		}
 		fileLoader.next();
 	}
-	linkedFiles.clear();
 	return results;
 }
 

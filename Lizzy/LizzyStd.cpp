@@ -2,9 +2,26 @@
 
 using namespace Lizzy;
 
-StdPkg StdPkg::std = StdPkg();
+_def_action(StdPkg::reload_package_action)
+{
+	string pkg = args("name");
+	Package::getPackage(pkg).reload();
+	return pkg;
+}
 
+_def_action(StdPkg::unload_package_action)
+{
+	string pkg = args("name");
+	Package::getPackage(pkg).unload();
+	return pkg;
+}
 
+_def_action(StdPkg::load_package_action)
+{
+	string pkg = args("name");
+	Package::getPackage(pkg).load();
+	return pkg;
+}
 
 _def_action(StdPkg::alias_action)
 {
@@ -14,31 +31,27 @@ _def_action(StdPkg::alias_action)
 	return newname;
 }
 
-_def_action(StdPkg::print_action)
-{
-	cout << args.list();
-	return to_string(args.list().size());
-}
 
-_def_action(StdPkg::println_action)
-{
-	string ret = print_action(args);
-	cout << endl;
-	return ret;
-}
 
 StdPkg::StdPkg() : Package("Std")
 {
-	LOAD_ONCE
+	addSubPackage(new IoPkg());
 }
 
 void StdPkg::load()
 {
-	LOAD_ONCE
+	CALL_ONCE
+	loadSubPackages();
 	Action aliasAction(alias_action);
-	Action printAction(print_action);
-	Action printlnAction(println_action);
+	Action unload_packageAction(unload_package_action);
+	unload_packageAction.setNamed("name");
+	Action reload_packageAction(reload_package_action);
+	reload_packageAction.setNamed("name");
+	Action load_packageAction(load_package_action);
+	load_packageAction.setNamed("name");
+
 	cmd("alias").setAction(2, aliasAction);
-	cmd("print").setAction(-1, printAction);
-	cmd("println").setAction(-1, printlnAction);
+	cmd("unload").child("package").setAction(1, unload_packageAction);
+	cmd("reload").child("package").setAction(1, reload_packageAction);
+	cmd("load").child("package").setAction(1, load_packageAction);
 }

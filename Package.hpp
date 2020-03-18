@@ -4,29 +4,36 @@
 
 using namespace std;
 
-#define LOAD_ONCE static bool loaded=false; if(loaded) throw Exception(getName() + " Package already loaded"); loaded=true;
 
 #define _decl_action(name) static string name(Args args);
 #define _def_action(fullname) string fullname(Args args)
+#define _decl_pre(name) static string name(Args args);
+#define _def_pre(fullname) string fullname(Args args)
 
-#define PKG(name, decl, obj) class name:public Package{protected:decl void load()override;public:name();static name obj;};
-
+#define CALL_ONCE static bool _once_guard=false; if(_once_guard) throw Exception(getName() + " is already loaded");_once_guard = true;
 
 
 class Package
 {
 private:
-	string name;
+	const string name;
+	const Package *super = nullptr;
 	vector<Package *> subPackages;
 	vector<Command *> commands;
 protected:
 	Package(string name);
 	virtual ~Package();
-	void addSubPackage(Package& pkg);
+public:
+	static vector<Package *> packages;
+	virtual void load() = 0;
+	static bool isPackage(string pkg);
+	static Package& getPackage(string pkg);
+	void setSuper(const Package *pkg);
+	void reload();
+	void addSubPackage(Package* pkg);
 	void loadSubPackages();
 	void unload();
 	void unloadSubPackage(string pkg);
-	virtual void load() = 0;
 	string getName() const;
 	bool in(string) const;
 	Command& getCommand(string name);

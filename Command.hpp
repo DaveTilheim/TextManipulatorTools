@@ -27,6 +27,7 @@ public:
 	static bool isCommand(string name);
 	static Command& getCommand(string name);
 	static Attributes extractAttributes(String& commandName);
+	static Command& addCommand(Command *cmd);
 	Command() = delete;
 	Command(const Command& other);
 	Command(string name, const Command *super=nullptr);

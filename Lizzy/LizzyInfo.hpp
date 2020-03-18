@@ -6,13 +6,17 @@
 
 namespace Lizzy
 {
-	PKG
-	(
-		InfoPkg,
+	class InfoPkg : public Package
+	{
+	private:
 		static const string VERSION;
-		_decl_action(version_action),
-		info
-	)
+	protected:
+		_decl_action(version_action)
+	public:
+		InfoPkg();
+		void load() override;
+	};
+
 	typedef InfoPkg Info;
 }
 

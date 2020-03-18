@@ -61,7 +61,7 @@ int FileLoader::getIndex() const
 
 void FileLoader::setIndex(int i)
 {
-	if(i < 0) i = 0;
+	if(i < 0) i = -1;
 	else if(i > content.size()) i = content.size();
 	index = i;
 }

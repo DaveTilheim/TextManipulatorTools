@@ -1,2 +1,11 @@
+#load package Lizzy.Std
+println version
+//#load package Lizzy.Info
+load package Lizzy.Info
 
-Std.println "Hello world from Lizzy version" version !
+println "Hello world!"
+Lizzy.Std.Io.println "Hello world!"
+
+alias [Lizzy.Std.Io.println] out
+
+out version

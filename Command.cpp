@@ -17,6 +17,7 @@ Command::Command(string name, const Command *super) : name(name), super(super)
 	{
 		Command::commandList[name] = this;
 	}
+	//cout << "Command " << getFullName() << endl; 
 }
 
 Command::~Command()
@@ -32,13 +33,31 @@ Command::~Command()
 			delete it.second;
 		}
 	}
+//cout << "~Command " << getFullName() << endl; 
+}
+
+Command& Command::addCommand(Command *cmd)
+{
+	if(cmd->super)
+	{
+		throw Exception("can not add " + cmd->getFullName() + " as gloabal command because it is a child Command of " + cmd->super->getFullName());
+	}
+	if(not isCommand(cmd->getName()))
+	{
+		Command::commandList[cmd->getName()] = cmd;
+	}
+	else
+	{
+		throw Exception(cmd->getName() + " already exists");
+	}
+	return *cmd;
 }
 
 void Command::eraseCommand(string name)
 {
-	if(isCommand(name))
+	if(Command::isCommand(name))
 	{
-		commandList.erase(name);
+		Command::commandList.erase(name);
 	}
 }
 
@@ -68,7 +87,7 @@ string Command::getName() const
 
 string Command::getFullName() const
 {
-	if(super)
+	if(super and super != this)
 		return super->getFullName() + "." + getName();
 	return getName();
 }
@@ -274,7 +293,7 @@ ostream& operator<<(ostream& out, const Command& self)
 
 bool Command::isCommand(string name)
 {
-	return commandList.find(name) != commandList.end();
+	return Command::commandList.find(name) != Command::commandList.end();
 }
 
 Command& Command::getCommand(string name)

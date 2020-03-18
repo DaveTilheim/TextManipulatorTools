@@ -5,10 +5,18 @@ using namespace Lizzy;
 
 int main(int argc, char const *argv[])
 {
+	LizzyPkg lizzyPkg;
+	
 	try
 	{
-		LizzyPkg::lizzyPkg.load();
-		LizzyPkg::lizzyInt.launchFile("main.lz");
+		//lizzyPkg.load();
+		cout <<"---------------------------------------" << endl;
+		lizzyPkg.lizzyInt.launchFile("main.lz");
+		cout <<"---------------------------------------" << endl;
+		for(auto pkg : Package::packages)
+		{
+			cout << pkg->getName() << endl;
+		}
 	}
 	catch(const Exception& e)
 	{

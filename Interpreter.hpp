@@ -10,7 +10,6 @@ private:
 	static FileLoader *mainFileLoader;
 	FileLoader fileLoader;
 	map<string, IndependantCommand *> preIntCommands;
-	vector<string> linkedFiles;
 	vector<string> commentarySymbols;
 	vector<const Command *> attributedCommands;
 	void preinterpretation();
@@ -26,10 +25,8 @@ public:
 	vector<string> launch(string expr);
 	void setCommentarySymbol(string symbol);
 	bool isPreInt(string str);
-	bool alreadyLinked(string filename) const;
 	Command& preIntCommand(string name);
 	Command& attributedCommand(string name);
-	Command& getLinker();
 	void renamePreInt(string, string name);
 	void removeAttributed();
 };

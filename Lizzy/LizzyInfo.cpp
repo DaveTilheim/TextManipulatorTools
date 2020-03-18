@@ -2,7 +2,6 @@
 
 using namespace Lizzy;
 
-InfoPkg InfoPkg::info = InfoPkg();
 
 const string InfoPkg::VERSION = "1.0.0";
 
@@ -20,12 +19,12 @@ _def_action(InfoPkg::version_action)
 
 InfoPkg::InfoPkg() : Package("Info")
 {
-	LOAD_ONCE
+	
 }
 
 void InfoPkg::load()
 {
-	LOAD_ONCE
+	CALL_ONCE
 	Action versionAction(version_action);
 	cmd("version").setAction(0, versionAction);
 }

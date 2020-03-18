@@ -1,20 +1,70 @@
 #include "Package.hpp"
 
+
+vector<Package *> Package::packages = vector<Package *>();
+
+
 Package::Package(string name) : name(name)
 {
-	cout << "Package created: " << name << endl;
+	cout << "Package created: " << getName() << endl;
+	Package::packages.push_back(this);
 }
 
 Package::~Package()
 {
-	unload();
-	cout << "Package " << getName() << " unloaded" << endl;
+	for(auto *cmd : commands)
+	{
+		delete cmd;
+	}
+	for(auto *pkg : subPackages)
+	{
+		delete pkg;
+	}
+	commands.clear();
+	subPackages.clear();
+	cout << "Package destroyed: " << getName() << endl;
 }
 
-void Package::addSubPackage(Package& pkg)
+bool Package::isPackage(string pkgn)
 {
-	cout << "Dependance of " + getName() + " : " << pkg.getName() << endl;
-	subPackages.push_back(&pkg);
+	for(auto *pkg : packages)
+	{
+		if(pkg->getName() == pkgn) return true;
+	}
+	return false;
+}
+
+Package& Package::getPackage(string pkgn)
+{
+	if(isPackage(pkgn))
+	{
+		for(auto *pkg : packages)
+		{
+			if(pkg->getName() == pkgn)
+				return *pkg;
+		}
+	}
+	throw Exception(pkgn + " is not a Package");
+}
+
+void Package::reload()
+{
+	for(auto *c : commands)
+	{
+		Command::addCommand(c);
+	}
+	for(auto *pkg : subPackages)
+	{
+		pkg->reload();
+	}
+}
+
+void Package::addSubPackage(Package* pkg)
+{
+	//cout << "Dependance of " + getName() + " : " << pkg->getName() << endl;
+	if(pkg->super) throw Exception(pkg->getName() + " as already a child of a Package");
+	subPackages.push_back(pkg);
+	pkg->setSuper(this);
 }
 
 void Package::loadSubPackages()
@@ -94,14 +144,12 @@ void Package::unload()
 	for(auto *cmd : commands)
 	{
 		Command::eraseCommand(cmd->getName());
-		delete cmd;
+		Command::eraseCommand(name+"."+cmd->getName());
 	}
 	for(auto *pkg : subPackages)
 	{
 		pkg->unload();
 	}
-	commands.clear();
-	subPackages.clear();
 }
 
 void Package::unloadSubPackage(string pkgn)
@@ -112,7 +160,6 @@ void Package::unloadSubPackage(string pkgn)
 		if(pkg->getName() == pkgn)
 		{
 			pkg->unload();
-			subPackages.erase(subPackages.begin() + i);
 			break;
 		}
 		i++;
@@ -121,5 +168,11 @@ void Package::unloadSubPackage(string pkgn)
 
 string Package::getName() const
 {
+	if(super) return super->getName() + "." + name;
 	return name;
+}
+
+void Package::setSuper(const Package *pkg)
+{
+	super = pkg;
 }
