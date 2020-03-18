@@ -143,8 +143,10 @@ void Package::unload()
 {
 	for(auto *cmd : commands)
 	{
-		Command::eraseCommand(cmd->getName());
-		Command::eraseCommand(name+"."+cmd->getName());
+		if(Command::isCommand(cmd->getName()))
+			Command::eraseCommand(cmd->getName());
+		if(Command::isCommand(getName()+"."+cmd->getName()))
+			Command::eraseCommand(getName()+"."+cmd->getName());
 	}
 	for(auto *pkg : subPackages)
 	{

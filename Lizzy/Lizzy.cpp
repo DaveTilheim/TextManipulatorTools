@@ -18,6 +18,7 @@ _def_pre(Lizzy::LizzyPkg::load_package_0)
 
 Lizzy::LizzyPkg::LizzyPkg() : Package("Lizzy")
 {
+	CALL_ONCE
 	Lizzy::LizzyPkg::lizzyInt.setCommentarySymbol("//");
 	addSubPackage(new Lizzy::InfoPkg());
 	addSubPackage(new Lizzy::StdPkg());
