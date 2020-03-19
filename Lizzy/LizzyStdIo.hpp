@@ -1,5 +1,5 @@
-#ifndef LIZZY_IO_HPP
-#define LIZZY_IO_HPP
+#ifndef LIZZY_STD_IO_HPP
+#define LIZZY_STD_IO_HPP
 #include "../Package.hpp"
 
 namespace Lizzy

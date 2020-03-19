@@ -11,7 +11,7 @@ Exception::Exception(string message) : message(message)
 
 }
 
-Exception::Exception(const Exception& other) : message(other.what())
+Exception::Exception(const Exception& other) : message(other.getMessage())
 {
 
 }
@@ -23,7 +23,7 @@ Exception::~Exception()
 
 string Exception::what() const
 {
-	return "### " + getMessage() + " ###";
+	return "###[ERROR]### " + getMessage() + " ###[ERROR]###";
 }
 
 string Exception::getMessage() const

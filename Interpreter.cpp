@@ -112,15 +112,22 @@ vector<string>  Interpreter::launchFile(string filename)
 {
 	vector<string> results;
 	fileLoader.update(filename);
-	preinterpretation();
-	while(not fileLoader.end())
+	try
 	{
-		String line = fileLoader.getLine();
-		for(auto res : Interpreter::launch(line))
+		preinterpretation();
+		while(not fileLoader.end())
 		{
-			results.push_back(res);
+			String line = fileLoader.getLine();
+			for(auto res : Interpreter::launch(line))
+			{
+				results.push_back(res);
+			}
+			fileLoader.next();
 		}
-		fileLoader.next();
+	}
+	catch(const Exception& e)
+	{
+		throw Exception("'" + fileLoader.getLine() + "' :: instr_no(" + to_string(fileLoader.getIndex()+2) +") :: " + e.getMessage());
 	}
 	return results;
 }

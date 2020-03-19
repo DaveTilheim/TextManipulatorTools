@@ -2,7 +2,7 @@ CC = g++
 LD = g++
 STD = -std=c++2a
 EXE = exe
-LIZZY =  $(wildcard Lizzy/*.cpp)
+LIZZY =  $(wildcard Lizzy/*.cpp) $(wildcard Lizzy/Memory/*.cpp)
 SRC = $(wildcard *.cpp) $(LIZZY)
 OBJS = $(SRC:.cpp=.o)
 

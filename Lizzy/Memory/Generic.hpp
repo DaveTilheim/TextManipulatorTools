@@ -68,6 +68,8 @@ public:
 		data = new T(value);
 	}
 
+	size_t getHashType() const { return typeHash; }
+
 	Generic(const Generic& other);
 	Generic(const char *str);
 	~Generic();

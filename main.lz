@@ -1,17 +1,13 @@
 #load package Lizzy
 
+println Lizzy V version
 
-println version
+new INTEGER 5
+new FLOAT 3.14
+new BOOL true
+new STRING "Arthur Detrembleur"
+new ref BOOL
 
-println "Hello world!" 
-
-Lizzy.Std.Io.println "Hello world!"
-
-alias [Lizzy.Std.Io.println] out
-alias [out] o
-
-out version
-
-unload package Lizzy
-
-o version
+println get get ref type get ref
+set STRING 4
+println get get ref type get ref

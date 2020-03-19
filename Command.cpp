@@ -60,14 +60,14 @@ void Command::eraseCommand(string name)
 		Command *cptr = Command::commandList[name];
 		Command::commandList.erase(name);
 		vector<string> aliases;
-		cout << "erase " << name << endl;
+		//cout << "erase " << name << endl;
 		for(auto cmd : commandList)
 		{
 			if(cmd.second == cptr) aliases.push_back(cmd.first);
 		}
 		for(auto scmd : aliases)
 		{
-			cout << "erase alias: " << scmd << endl;
+			//cout << "erase alias: " << scmd << endl;
 			Command::commandList.erase(scmd);
 		}
 	}

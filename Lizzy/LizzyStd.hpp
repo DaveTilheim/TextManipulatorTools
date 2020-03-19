@@ -1,6 +1,6 @@
 #ifndef LIZZY_STD_HPP
 #define LIZZY_STD_HPP
-#include "LizzyIo.hpp"
+#include "LizzyStdIo.hpp"
 
 
 namespace Lizzy
