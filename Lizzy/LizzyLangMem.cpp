@@ -3,7 +3,8 @@
 using namespace Lizzy;
 
 
-MemoryContext MemPkg::memoryContext = MemoryContext("root");
+MemoryContext *MemPkg::_memoryContext = new MemoryContext("root");
+MemoryContext& MemPkg::memoryContext = *MemPkg::_memoryContext;
 
 _def_action(MemPkg::new_action)
 {
@@ -44,7 +45,12 @@ _def_action(MemPkg::add_action)
 
 MemPkg::MemPkg() : Package("Mem")
 {
-	
+	CALL_ONCE
+}
+
+MemPkg::~MemPkg()
+{
+	delete MemPkg::_memoryContext;
 }
 
 void MemPkg::load()

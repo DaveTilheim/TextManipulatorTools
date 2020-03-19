@@ -9,7 +9,8 @@ namespace Lizzy
 	class MemPkg : public Package
 	{
 	private:
-		static MemoryContext memoryContext;
+		static MemoryContext *_memoryContext; //to delete before static deletion
+		static MemoryContext& memoryContext;
 	protected:
 		_decl_action(new_action)
 		_decl_action(set_action)
@@ -18,6 +19,7 @@ namespace Lizzy
 		_decl_action(add_action)
 	public:
 		MemPkg();
+		~MemPkg();
 		void load() override;
 	};
 	

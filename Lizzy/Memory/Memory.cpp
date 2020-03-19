@@ -24,7 +24,7 @@ void Memory::addMemory(string id, string strGenValue)
 {
 	if(not exists(id))
 	{
-		Generic *var = new Generic(nullptr);
+		Generic *var = new Generic(0);
 		modifyGeneric(var, strGenValue);
 		(*this)[id] = var;
 	}
@@ -51,20 +51,20 @@ void Memory::modifyGeneric(Generic *gen, string strGenValue)
 	switch(type(strGenValue))
 	{
 		case INTEGER_T:
-			*gen = atol(strGenValue.c_str());
+			*gen = (long)atol(strGenValue.c_str());
 			break;
 		case FLOAT_T:
-			*gen = atof(strGenValue.c_str());
+			*gen = (double)atof(strGenValue.c_str());
 			break;
 		case VECTOR_T:
 			break;
 		case OBJECT_T:
 			break;
 		case BOOL_T:
-			*gen = strGenValue == "true";
+			*gen = (bool)(strGenValue == "true");
 			break;
 		default:
-			*gen = strGenValue;
+			*gen = (string)strGenValue;
 	}
 }
 

@@ -51,6 +51,7 @@ struct Type
 	function<void *(void *)> copy;
 	function<ostream& (ostream&, void *)> print;
 	Type(){}
+	~Type(){}
 };
 
 class Generic

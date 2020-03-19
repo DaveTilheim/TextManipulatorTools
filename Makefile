@@ -22,6 +22,7 @@ clean:
 	@rm -f *.o
 	@rm -f $(EXE)
 	@rm -f Lizzy/*.o
+	@rm -f Lizzy/Memory/*.o
 
 
 

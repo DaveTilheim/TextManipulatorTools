@@ -4,7 +4,7 @@
 
 
 
-MemoryContext::MemoryContext(string id, MemoryContext *parent) : id(id), parent(parent)
+MemoryContext::MemoryContext(string id, MemoryContext *parent) : id(id), parent(parent), child(nullptr)
 {
 	cout << "MemoryContext created: " << id <<  endl;
 }
@@ -23,7 +23,8 @@ MemoryContext& MemoryContext::push(string id)
 
 void MemoryContext::pop()
 {
-	delete child;
+	if(child)
+		delete child;
 }
 
 string MemoryContext::getFullId() const

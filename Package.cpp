@@ -25,6 +25,7 @@ Package::~Package()
 	cout << "Package destroyed: " << getName() << endl;
 }
 
+
 bool Package::isPackage(string pkgn)
 {
 	for(auto *pkg : packages)
