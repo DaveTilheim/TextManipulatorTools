@@ -45,7 +45,7 @@ Memory &MemoryContext::getMemory(string id)
 	while(mc)
 	{
 		if(mc->getMemory().exists(id)) return mc->getMemory();
-		mc = mc->parent;
+		mc = &mc->getParent();
 	}
 	throw Exception(id +  " Memory not exists");
 }
