@@ -1,13 +1,12 @@
 #load package Lizzy
 
-println Lizzy V version
 
-new INTEGER 5
-new FLOAT 3.14
-new BOOL true
-new STRING "Arthur Detrembleur"
-new ref BOOL
+news vec 5 83.5 "Hello world!"
+//new v gets vec
+news v gets:1 vec gets vec
 
-println get get ref type get ref
-set STRING 4
-println get get ref type get ref
+println Vector content => get vec
+println Vector content => get v
+
+
+println type get v 3 get v 3
