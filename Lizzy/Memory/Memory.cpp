@@ -24,7 +24,7 @@ void Memory::addMemory(string id, string strGenValue)
 {
 	if(not exists(id))
 	{
-		Generic *var = new Generic(0);
+		Generic *var = new Generic((char)0);
 		modifyGeneric(var, strGenValue);
 		(*this)[id] = var;
 	}
@@ -82,6 +82,16 @@ MemType Memory::type(string constStrGenValue)
 	if(isObject(constStrGenValue)) return OBJECT_T;
 	if(isBool(constStrGenValue)) return BOOL_T;
 	return STRING_T;
+}
+
+string Memory::inferType(string constStrGenValue)
+{
+	if(isInteger(constStrGenValue)) return "Integer";
+	if(isFloat(constStrGenValue)) return "Float";
+	if(isVector(constStrGenValue)) return "Vector";
+	if(isObject(constStrGenValue)) return "Object";
+	if(isBool(constStrGenValue)) return "Bool";
+	return "String";
 }
 
 bool Memory::isInteger(string v)

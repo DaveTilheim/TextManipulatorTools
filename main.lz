@@ -2,12 +2,4 @@
 
 println Lizzy V version
 
-new INTEGER 5
-new FLOAT 3.14
-new BOOL true
-new STRING "Arthur Detrembleur"
-new ref BOOL
-
-println get get ref type get ref
-set STRING 4
-println get get ref type get ref
+println type 2

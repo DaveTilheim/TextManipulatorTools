@@ -16,7 +16,6 @@ namespace Lizzy
 		_decl_action(set_action)
 		_decl_action(get_action)
 		_decl_action(type_action)
-		_decl_action(add_action)
 	public:
 		MemPkg();
 		~MemPkg();

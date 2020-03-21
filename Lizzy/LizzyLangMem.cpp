@@ -31,15 +31,17 @@ _def_action(MemPkg::get_action)
 
 _def_action(MemPkg::type_action)
 {
-	string id = args("id");
-	return MemPkg::memoryContext.getMemory(id).getType(id);
+	string value = args.list();
+	try
+	{
+		return MemPkg::memoryContext.getMemory(value).getType(value);
+	}
+	catch(...)
+	{
+		return Memory::inferType(value);
+	}
 }
 
-_def_action(MemPkg::add_action)
-{
-	string id = args("id");
-	return "null";
-}
 
 
 
@@ -75,7 +77,6 @@ void MemPkg::load()
 	}
 	Action typeAction(type_action);
 	{
-		typeAction.setNamed("id");
 		cmd("type").setAction(1, typeAction);
 	}
 }
