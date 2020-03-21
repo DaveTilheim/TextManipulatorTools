@@ -1,0 +1,143 @@
+#load package Lizzy
+
+import math.lz
+import io.lz readFile
+
+
+function abs n
+	if less n 0
+		return neg n
+	end if
+	return n
+end function
+
+
+
+class Test
+
+	abstract method test v1 v2
+
+end class
+
+
+final extended class Test2 Test
+
+	method test v1 v2
+		println v1 v2
+	end method
+
+end class
+
+
+
+function showfunc data
+
+	println data
+
+end function
+
+call showfunc 3.14
+
+
+method User printInfo
+
+	println this
+
+end method
+
+method info
+
+	println this
+
+end method
+
+
+class User
+
+	implicit constructor id name age email
+	implicit full constructor
+	explicit full constructor
+		set id id
+		set name name
+		set age age
+		set email email
+	end constructor
+	
+	public field const id
+	public field name
+	public field age 18
+	public field email
+	
+	public method show
+		println this
+	end method
+
+	set method info
+
+end class
+
+
+extended class Admin User
+	
+	explicit constructor password
+		if less size password 8
+			throw constructor
+		end if
+		set password password
+	end constructor
+	attr persistant String password "root"
+
+end class
+
+
+new Object User user
+set user name Arthur
+set user age 20
+set user email arthur.detrembleur@student.hepl.be
+do user show
+do user info
+
+new Object User user2 3 Arthur 20 my.email
+
+
+new Table point
+set point x 100
+set point y 50
+set point show new method
+					println this
+			   end method
+set point i ref method info
+do point i
+do point info
+
+
+
+new obj user
+new i 0
+new pi 3.14
+new const Float PI 3.14
+new const Pi 3.14
+new Reference Integer ref i
+new persistant String message "Hello world!"
+set message "test"
+
+println type PI is const PI is persistant PI
+
+new Vector vec 1 5 2.3 "Hello" id method info global id point
+
+for i 0 less i size vec
+	println get vec i
+end for
+
+
+new Pointer Integer ptr i
+
+
+new j 0
+while less j 10
+	println j
+	inc j
+end while
+
+
+
