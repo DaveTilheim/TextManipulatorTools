@@ -14,37 +14,6 @@ class LizzyClass;
 class LizzyTable;
 
 
-class LizzyDataAttr
-{
-private:
-	bool _const : 1 = false;
-	bool _persistant : 1 = false;
-public:
-	bool isConst() const
-	{
-		return _const;
-	}
-	void enableConst()
-	{
-		_const = true;
-	}
-	void disableConst()
-	{
-		_const = false;
-	}
-	bool isPersistant() const
-	{
-		return _persistant;
-	}
-	void enablePersistant()
-	{
-		_persistant = true;
-	}
-	void disablePersistant()
-	{
-		_persistant = false;
-	}
-};
 
 class LizzyData
 {

@@ -1,7 +1,9 @@
 #include "Memory.hpp"
 
+using namespace Lizzy;
 
-Memory::Memory() : map<string, Generic *>()
+
+Memory::Memory() : map<string, Data *>(), self(*this)
 {
 	cout << "Memory created" << endl;
 }
@@ -20,13 +22,41 @@ bool Memory::exists(string id)
 	return find(id) != end();
 }
 
-void Memory::addMemory(string id, string strGenValue)
+void Memory::addIntegerData(string id, string stri)
+{
+	Integer *integer = new Integer(stri);
+	self[id] = integer;
+}
+
+void Memory::addFloatData(string id, string strf)
+{
+	Float *floatd = new Float(strf);
+	self[id] = floatd;
+}
+
+void Memory::addBoolData(string id, string strb)
+{
+	Bool *boolean = new Bool(strb);
+	self[id] = boolean;
+}
+
+void Memory::addStringData(string id, string strs)
+{
+	String *stringd = new String(strs);
+	self[id] = stringd;
+}
+
+void Memory::addPrimitiveData(string id, string strGenValue)
 {
 	if(not exists(id))
 	{
-		Generic *var = new Generic((char)0);
-		modifyGeneric(var, strGenValue);
-		(*this)[id] = var;
+		switch(type(strGenValue)) //constante littérales
+		{
+			case INTEGER_T: addIntegerData(id, strGenValue); break;
+			case FLOAT_T: addFloatData(id, strGenValue); break;
+			case BOOL_T: addBoolData(id, strGenValue); break;
+			case STRING_T: addStringData(id, strGenValue); break;
+		}
 	}
 	else
 	{
@@ -34,11 +64,11 @@ void Memory::addMemory(string id, string strGenValue)
 	}
 }
 
-void Memory::setMemory(string id, string strGenValue)
+void Memory::setData(string id, string strGenValue)
 {
 	if(exists(id))
 	{
-		modifyGeneric((*this)[id], strGenValue);
+		
 	}
 	else
 	{
@@ -46,122 +76,45 @@ void Memory::setMemory(string id, string strGenValue)
 	}
 }
 
-void Memory::modifyGeneric(Generic *gen, string strGenValue)
-{
-	switch(type(strGenValue))
-	{
-		case INTEGER_T:
-			*gen = (long)atol(strGenValue.c_str());
-			break;
-		case FLOAT_T:
-			*gen = (double)atof(strGenValue.c_str());
-			break;
-		case VECTOR_T:
-			break;
-		case OBJECT_T:
-			break;
-		case BOOL_T:
-			*gen = (bool)(strGenValue == "true");
-			break;
-		default:
-			*gen = (string)strGenValue;
-	}
-}
 
-Generic& Memory::getMemory(string id)
+Data *Memory::getData(string id)
 {
-	if(exists(id)) return *(*this)[id];
+	if(exists(id)) return self[id];
 	throw Exception(id + " Memory does not exists");
 }
 
-MemType Memory::type(string constStrGenValue)
+Types Memory::type(string constStrGenValue)
 {
-	if(isInteger(constStrGenValue)) return INTEGER_T;
-	if(isFloat(constStrGenValue)) return FLOAT_T;
-	if(isVector(constStrGenValue)) return VECTOR_T;
-	if(isObject(constStrGenValue)) return OBJECT_T;
-	if(isBool(constStrGenValue)) return BOOL_T;
+	if(Integer::is(constStrGenValue)) return INTEGER_T;
+	if(Float::is(constStrGenValue)) return FLOAT_T;
+	if(Bool::is(constStrGenValue)) return BOOL_T;
 	return STRING_T;
 }
 
 string Memory::inferType(string constStrGenValue)
 {
-	if(isInteger(constStrGenValue)) return "Integer";
-	if(isFloat(constStrGenValue)) return "Float";
-	if(isVector(constStrGenValue)) return "Vector";
-	if(isObject(constStrGenValue)) return "Object";
-	if(isBool(constStrGenValue)) return "Bool";
+	if(Integer::is(constStrGenValue)) return "Integer";
+	if(Float::is(constStrGenValue)) return "Float";
+	if(Bool::is(constStrGenValue)) return "Bool";
 	return "String";
 }
 
-bool Memory::isInteger(string v)
-{
-	auto len = v.size();
-	for(int i = 0; i < len; i++)
-	{
-		if(not i and v[i] == '-') continue;
-		if(not isdigit(v[i])) return false;
-	}
-	return true;
-}
-
-bool Memory::isFloat(string v)
-{
-	auto len = v.size();
-	int ptCounter = 0;
-	for(int i = 0; i < len; i++)
-	{
-		if(not i and v[i] == '-') continue;
-		if(not isdigit(v[i]))
-		{
-			if(i != 0 and i != len -1 and ptCounter == 0 and v[i] == '.')
-			{
-				ptCounter++;
-			}
-			else
-			{
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
-bool Memory::isVector(string v)
-{
-	return false;
-}
-
-bool Memory::isObject(string v)
-{
-	return false;
-}
-
-bool Memory::isBool(string v)
-{
-	return v == "true" or v == "false";
-}
 
 string Memory::toString(string id)
 {
-	Generic &gen = getMemory(id);
-	auto hash = gen.getHashType();
-	if(hash == typeid(double).hash_code()) return to_string(gen.ref<double>());
-	if(hash == typeid(long).hash_code()) return to_string(gen.ref<long>());
-	//Vector
-	//Object
-	if(hash == typeid(bool).hash_code()) return gen.ref<bool>() ? "true" : "false";
-	return gen.ref<string>();
+	Data *data = getData(id);
+	return data->toString();
 }
 
 string Memory::getType(string id)
 {
-	Generic &gen = getMemory(id);
-	auto hash = gen.getHashType();
-	if(hash == typeid(double).hash_code()) return "Float";
-	if(hash == typeid(long).hash_code()) return "Integer";
-	//Vector
-	//Object
-	if(hash == typeid(bool).hash_code()) return "Bool";
-	return "String";
+	Data *data = getData(id);
+	return data->type();
+}
+
+
+string Memory::new_primitive(string id, string value)
+{
+	addPrimitiveData(id, value);
+	return "null";
 }

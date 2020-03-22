@@ -2,7 +2,7 @@ CC = g++
 LD = g++
 STD = -std=c++2a
 EXE = exe
-LIZZY =  $(wildcard Lizzy/*.cpp) $(wildcard Lizzy/Memory/*.cpp)
+LIZZY =  $(wildcard Lizzy/*.cpp) $(wildcard Lizzy/Memory/*.cpp) $(wildcard Lizzy/Memory/DataTypes/*.cpp)
 SRC = $(wildcard *.cpp) $(LIZZY)
 OBJS = $(SRC:.cpp=.o)
 
@@ -23,6 +23,7 @@ clean:
 	@rm -f $(EXE)
 	@rm -f Lizzy/*.o
 	@rm -f Lizzy/Memory/*.o
+	@rm -f Lizzy/Memory/DataTypes/*.o
 
 
 

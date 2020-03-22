@@ -10,8 +10,7 @@ _def_action(MemPkg::new_action)
 {
 	string id = args("id");
 	string value = args("value", 1); 
-	MemPkg::memoryContext.getMemory().addMemory(id, value);
-	return id;
+	return MemPkg::memoryContext.new_primitive(id, value);
 }
 
 
@@ -19,7 +18,7 @@ _def_action(MemPkg::set_action)
 {
 	string id = args("id");
 	string value = args("value", 1);
-	MemPkg::memoryContext.getMemory(id).setMemory(id, value);
+	//MemPkg::memoryContext.getMemory(id).setMemory(id, value);
 	return id;
 }
 

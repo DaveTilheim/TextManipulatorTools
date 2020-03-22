@@ -2,4 +2,9 @@
 
 println Lizzy V version
 
-println type 2
+
+new var -3
+
+println get var
+
+println type var

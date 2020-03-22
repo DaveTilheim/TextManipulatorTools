@@ -1,7 +1,7 @@
 #include "MemoryContext.hpp"
 
 
-
+using namespace Lizzy;
 
 
 MemoryContext::MemoryContext(string id, MemoryContext *parent) : id(id), parent(parent), child(nullptr)
@@ -41,7 +41,7 @@ Memory &MemoryContext::getMemory()
 
 Memory &MemoryContext::getMemory(string id)
 {
-	MemoryContext *mc = &getMemoryContext();
+	MemoryContext *mc = &getContext();
 	while(mc)
 	{
 		if(mc->getMemory().exists(id)) return mc->getMemory();
@@ -50,9 +50,9 @@ Memory &MemoryContext::getMemory(string id)
 	throw Exception(id +  " Memory not exists");
 }
 
-MemoryContext &MemoryContext::getMemoryContext()
+MemoryContext &MemoryContext::getContext()
 {
-	if(child) return child->getMemoryContext();
+	if(child) return child->getContext();
 	return *this;
 }
 
@@ -66,4 +66,11 @@ MemoryContext &MemoryContext::getParent()
 {
 	if(parent) return *parent;
 	throw Exception(id +  " MemoryContext has no parent");
+}
+
+
+string MemoryContext::new_primitive(string id, string value)
+{
+	MemoryContext& context = getContext();
+	return context.getMemory().new_primitive(id, value);
 }
