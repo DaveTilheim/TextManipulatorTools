@@ -12,6 +12,7 @@ Memory::~Memory()
 {
 	for(auto it : *this)
 	{
+		cout << it.second->type() << " deleted" << endl;
 		delete it.second;
 	}
 	cout << "Memory deleted" << endl;
@@ -46,16 +47,33 @@ void Memory::addStringData(string id, string strs)
 	self[id] = stringd;
 }
 
+Data *Memory::generateCopyOf(string id)
+{
+	return getData(id)->dup();
+}
+
+void Memory::addCopyData(string id, string cpId)
+{
+	self[id] = generateCopyOf(cpId);
+}
+
 void Memory::addPrimitiveData(string id, string strGenValue)
 {
 	if(not exists(id))
 	{
-		switch(type(strGenValue)) //constante littérales
+		if(exists(strGenValue))
 		{
-			case INTEGER_T: addIntegerData(id, strGenValue); break;
-			case FLOAT_T: addFloatData(id, strGenValue); break;
-			case BOOL_T: addBoolData(id, strGenValue); break;
-			case STRING_T: addStringData(id, strGenValue); break;
+			addCopyData(id, strGenValue);
+		}
+		else
+		{
+			switch(type(strGenValue)) //constante littérales
+			{
+				case INTEGER_T: addIntegerData(id, strGenValue); break;
+				case FLOAT_T: addFloatData(id, strGenValue); break;
+				case BOOL_T: addBoolData(id, strGenValue); break;
+				case STRING_T: addStringData(id, strGenValue); break;
+			}
 		}
 	}
 	else

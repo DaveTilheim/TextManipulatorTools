@@ -25,6 +25,8 @@ namespace Lizzy
 		void addBoolData(string id, string strb);
 		void addStringData(string id, string strs);
 		void addPrimitiveData(string id, string strGenValue);
+		void addCopyData(string id, string cpId);
+		Data *generateCopyOf(string id);
 		void setData(string id, string strGenValue);
 		Data *getData(string id);
 		string getType(string id);
