@@ -9,7 +9,7 @@ class Interpreter
 private:
 	static FileLoader *mainFileLoader;
 	FileLoader fileLoader;
-	map<string, IndependantCommand *> preIntCommands;
+	unordered_map<string, IndependantCommand *> preIntCommands;
 	vector<string> commentarySymbols;
 	vector<const Command *> attributedCommands;
 	void preinterpretation();

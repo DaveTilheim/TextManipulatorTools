@@ -1,14 +1,14 @@
 #ifndef ACTION_HPP
 #define ACTION_HPP
 #include "Tokens.hpp"
-#include <map>
+#include <unordered_map>
 #include <functional>
 
 struct Args_t
 {
 	Tokens argList;
-	map<string, string> namedArgList;
-	Args_t(Tokens& argList, const map<string, string>& namedArgList) : argList(argList), namedArgList(namedArgList) {}
+	unordered_map<string, string> namedArgList;
+	Args_t(Tokens& argList, const unordered_map<string, string>& namedArgList) : argList(argList), namedArgList(namedArgList) {}
 	string operator[](string name)
 	{
 		if(namedArgList.find(name) == namedArgList.end()) return "null";

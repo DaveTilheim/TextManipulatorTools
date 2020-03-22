@@ -3,7 +3,7 @@
 using namespace Lizzy;
 
 
-Memory::Memory() : map<string, Data *>(), self(*this)
+Memory::Memory() : unordered_map<string, Data *>(), self(*this)
 {
 	cout << "Memory created" << endl;
 }

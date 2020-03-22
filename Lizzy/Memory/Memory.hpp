@@ -6,13 +6,13 @@
 #include "DataTypes/String.hpp"
 #include "DataTypes/Vector.hpp"
 #include <ctype.h>
-#include <map>
+#include <unordered_map>
 
 using namespace std;
 
 namespace Lizzy
 {
-	class Memory : private map<string, Data *>
+	class Memory : private unordered_map<string, Data *>
 	{
 	private:
 		Memory& self;

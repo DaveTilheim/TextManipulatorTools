@@ -2,7 +2,7 @@
 #define COMMAND_HPP
 #include "Action.hpp"
 #include "Exception.hpp"
-#include <map>
+#include <unordered_map>
 #include <cstdlib>
 
 struct Attributes
@@ -16,10 +16,10 @@ struct Attributes
 class Command
 {
 protected:
-	static map<string, Command *> commandList;
+	static unordered_map<string, Command *> commandList;
 	string name;
 	const Command *super;
-	map<int, Action *> actions;
+	unordered_map<int, Action *> actions;
 	vector<Command *> childs;
 	bool isAlias = false;
 public:
@@ -38,7 +38,7 @@ public:
 	string getName() const;
 	virtual string getFullName() const;
 	const Command& getSuper() const;
-	const map<int, Action *>& getActions() const;
+	const unordered_map<int, Action *>& getActions() const;
 	const vector<Command *>& getChilds() const;
 	Command& getChild(string name);
 	int getMaximumNargs() const;

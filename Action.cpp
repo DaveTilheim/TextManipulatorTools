@@ -52,7 +52,7 @@ bool Action::nameExists(string name) const
 
 string Action::run(Tokens args)
 {
-	map<string, string> namedContent;
+	unordered_map<string, string> namedContent;
 	Tokens sequArgs;
 	for(auto n : namedArgs)
 	{

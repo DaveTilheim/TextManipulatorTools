@@ -1,7 +1,7 @@
 #include "Command.hpp"
 
 
-map<string, Command *> Command::commandList = map<string, Command *>();
+unordered_map<string, Command *> Command::commandList = unordered_map<string, Command *>();
 
 
 Command::Command(const Command& other)
@@ -113,7 +113,7 @@ const Command& Command::getSuper() const
 	return *super;
 }
 
-const map<int, Action *>& Command::getActions() const
+const unordered_map<int, Action *>& Command::getActions() const
 {
 	return actions;
 }
