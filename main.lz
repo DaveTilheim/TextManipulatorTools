@@ -6,4 +6,4 @@ println Lizzy V version
 new var1 666
 new var2 var1
 
-println var1
+println get var1 type var1

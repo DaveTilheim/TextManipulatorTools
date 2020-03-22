@@ -73,6 +73,7 @@ void Memory::addPrimitiveData(string id, string strGenValue)
 				case FLOAT_T: addFloatData(id, strGenValue); break;
 				case BOOL_T: addBoolData(id, strGenValue); break;
 				case STRING_T: addStringData(id, strGenValue); break;
+				default: throw Exception("Uknown type has been occured");
 			}
 		}
 	}
