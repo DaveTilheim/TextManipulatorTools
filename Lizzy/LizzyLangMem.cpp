@@ -18,27 +18,25 @@ _def_action(MemPkg::set_action)
 {
 	string id = args("id");
 	string value = args("value", 1);
-	//MemPkg::memoryContext.getMemory(id).setMemory(id, value);
-	return id;
+	return MemPkg::memoryContext.set_memory(id, value);
 }
 
 _def_action(MemPkg::get_action)
 {
 	string id = args("id");
-	return MemPkg::memoryContext.getMemory(id).toString(id);
+	return MemPkg::memoryContext.get_memory(id);
 }
 
 _def_action(MemPkg::type_action)
 {
 	string value = args.list();
-	try
-	{
-		return MemPkg::memoryContext.getMemory(value).getType(value);
-	}
-	catch(...)
-	{
-		return Memory::inferType(value);
-	}
+	return MemPkg::memoryContext.type_memory(value);
+}
+
+_def_action(MemPkg::exists_action)
+{
+	string value = args("id");
+	return MemPkg::memoryContext.exists_memory(value);
 }
 
 
@@ -77,5 +75,10 @@ void MemPkg::load()
 	Action typeAction(type_action);
 	{
 		cmd("type").setAction(1, typeAction);
+	}
+	Action existsAction(exists_action);
+	{
+		existsAction.setNamed("id");
+		cmd("exists").setAction(1, existsAction);
 	}
 }

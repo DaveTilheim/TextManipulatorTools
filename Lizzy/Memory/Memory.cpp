@@ -83,11 +83,98 @@ void Memory::addPrimitiveData(string id, string strGenValue)
 	}
 }
 
-void Memory::setData(string id, string strGenValue)
+void Memory::setIntegerData(string id, string stri)
+{
+	if(self[id]->typeId() == INTEGER_T)
+	{
+		((Integer *)self[id])->set(atoi(stri.c_str()));
+	}
+	else
+	{
+		delete self[id];
+		addIntegerData(id, stri);
+	}
+}
+
+void Memory::setFloatData(string id, string strf)
+{
+	if(self[id]->typeId() == FLOAT_T)
+	{
+		((Float *)self[id])->set(atof(strf.c_str()));
+	}
+	else
+	{
+		delete self[id];
+		addFloatData(id, strf);
+	}
+}
+
+void Memory::setBoolData(string id, string strb)
+{
+	if(self[id]->typeId() == BOOL_T)
+	{
+		((Bool *)self[id])->set(strb == "true");
+	}
+	else
+	{
+		delete self[id];
+		addBoolData(id, strb);
+	}
+}
+
+void Memory::setStringData(string id, string strs)
+{
+	if(self[id]->typeId() == STRING_T)
+	{
+		((String *)self[id])->set(strs);
+	}
+	else
+	{
+		delete self[id];
+		addStringData(id, strs);
+	}
+}
+
+void Memory::setCopyData(string id, string cpId)
+{
+	if(self[id]->typeId() == self[cpId]->typeId())
+	{
+		switch(self[id]->typeId())
+		{
+			case INTEGER_T: *(Integer *)self[id] = *(Integer *)self[cpId]; break;
+			case FLOAT_T: *(Float *)self[id] = *(Float *)self[cpId]; break;
+			case BOOL_T: *(Bool *)self[id] = *(Bool *)self[cpId]; break;
+			case STRING_T: *(String *)self[id] = *(String *)self[cpId]; break;
+			default: throw Exception("Uknown type has been occured");
+		}
+	}
+	else
+	{
+		delete self[id];
+		addCopyData(id, cpId);
+	}
+}
+
+
+void Memory::setData(string id, string value)
 {
 	if(exists(id))
 	{
-		
+		if(exists(value))
+		{
+			setCopyData(id, value);
+		}
+		else
+		{
+			switch(type(value)) //constante littérales
+			{
+				case INTEGER_T: setIntegerData(id, value); break;
+				case FLOAT_T: setFloatData(id, value); break;
+				case BOOL_T: setBoolData(id, value); break;
+				case STRING_T: setStringData(id, value); break;
+				default: throw Exception("Uknown type has been occured");
+			}
+		}
 	}
 	else
 	{
@@ -135,5 +222,28 @@ string Memory::getType(string id)
 string Memory::new_primitive(string id, string value)
 {
 	addPrimitiveData(id, value);
-	return "null";
+	return id;
 }
+
+string Memory::set_memory(string id, string value)
+{
+	setData(id, value);
+	return id;
+}
+
+string Memory::get_memory(string id)
+{
+	return toString(id);
+}
+
+string Memory::value_type_memory(string value)
+{
+	return Memory::inferType(value);
+}
+
+
+string Memory::data_type_memory(string id)
+{
+	return getData(id)->type();
+}
+

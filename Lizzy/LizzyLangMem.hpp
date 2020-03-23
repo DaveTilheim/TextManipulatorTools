@@ -8,7 +8,7 @@ namespace Lizzy
 {
 	class MemPkg : public Package
 	{
-	private:
+	public:
 		static MemoryContext *_memoryContext; //to delete before static deletion
 		static MemoryContext& memoryContext;
 	protected:
@@ -16,6 +16,7 @@ namespace Lizzy
 		_decl_action(set_action)
 		_decl_action(get_action)
 		_decl_action(type_action)
+		_decl_action(exists_action)
 	public:
 		MemPkg();
 		~MemPkg();

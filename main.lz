@@ -3,7 +3,6 @@
 println Lizzy V version
 
 
-new var1 666
-new var2 var1
+new var 666
 
-println get var1 type var1
+printmln "var = "var

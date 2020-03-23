@@ -68,9 +68,47 @@ MemoryContext &MemoryContext::getParent()
 	throw Exception(id +  " MemoryContext has no parent");
 }
 
+bool MemoryContext::exists(string id)
+{
+	MemoryContext *mc = this;
+	while(mc)
+	{
+		if(mc->getMemory().exists(id)) return true;
+		mc = mc->child;
+	}
+	return false;
+}
 
 string MemoryContext::new_primitive(string id, string value)
 {
 	MemoryContext& context = getContext();
 	return context.getMemory().new_primitive(id, value);
+}
+
+
+string MemoryContext::set_memory(string id, string value)
+{
+	return getMemory(id).set_memory(id, value);
+}
+
+string MemoryContext::get_memory(string id)
+{
+	return getMemory(id).get_memory(id);
+}
+
+string MemoryContext::type_memory(string idvalue)
+{
+	try
+	{
+		return getMemory(idvalue).data_type_memory(idvalue);
+	}
+	catch(...)
+	{
+		return Memory::value_type_memory(idvalue);
+	}
+}
+
+string MemoryContext::exists_memory(string id)
+{
+	return exists(id) ? "true" : "false";
 }
