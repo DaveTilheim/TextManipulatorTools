@@ -4,5 +4,22 @@ println Lizzy V version
 
 
 new var 666
+new var1 var
 
-printmln "var = "var
+printmln var var1
+
+set var 5
+
+printmln var var1
+
+set var var1
+
+printmln var var1
+
+set var 5.5
+
+printmln var var1
+
+set var1 "hello world"
+
+printmln var var1 type var type var1

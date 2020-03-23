@@ -23,58 +23,34 @@ bool Memory::exists(string id)
 	return find(id) != end();
 }
 
-void Memory::addIntegerData(string id, string stri)
+Data *Memory::generateDataFromValue(string value)
 {
-	Integer *integer = new Integer(stri);
-	self[id] = integer;
+	switch(type(value)) //constante littérales
+	{
+		case INTEGER_T: return new Integer(value);
+		case FLOAT_T: return new Float(value);
+		case BOOL_T: return new Bool(value);
+		case STRING_T: return new String(value);
+		default: throw Exception("Uknown type has been occured");
+	}
 }
 
-void Memory::addFloatData(string id, string strf)
-{
-	Float *floatd = new Float(strf);
-	self[id] = floatd;
-}
-
-void Memory::addBoolData(string id, string strb)
-{
-	Bool *boolean = new Bool(strb);
-	self[id] = boolean;
-}
-
-void Memory::addStringData(string id, string strs)
-{
-	String *stringd = new String(strs);
-	self[id] = stringd;
-}
-
-Data *Memory::generateCopyOf(string id)
+Data *Memory::generateDataFromId(string id)
 {
 	return getData(id)->dup();
 }
 
-void Memory::addCopyData(string id, string cpId)
-{
-	self[id] = generateCopyOf(cpId);
-}
-
-void Memory::addPrimitiveData(string id, string strGenValue)
+void Memory::addPrimitiveData(string id, string value)
 {
 	if(not exists(id))
 	{
-		if(exists(strGenValue))
+		if(exists(value))
 		{
-			addCopyData(id, strGenValue);
+			self[id] = generateDataFromId(value);
 		}
 		else
 		{
-			switch(type(strGenValue)) //constante littérales
-			{
-				case INTEGER_T: addIntegerData(id, strGenValue); break;
-				case FLOAT_T: addFloatData(id, strGenValue); break;
-				case BOOL_T: addBoolData(id, strGenValue); break;
-				case STRING_T: addStringData(id, strGenValue); break;
-				default: throw Exception("Uknown type has been occured");
-			}
+			self[id] = generateDataFromValue(value);
 		}
 	}
 	else
@@ -83,59 +59,28 @@ void Memory::addPrimitiveData(string id, string strGenValue)
 	}
 }
 
-void Memory::setIntegerData(string id, string stri)
+void Memory::setDataFromValue(string id, string value)
 {
-	if(self[id]->typeId() == INTEGER_T)
+	auto tv = type(value);
+	if(self[id]->typeId() == tv)
 	{
-		((Integer *)self[id])->set(atoi(stri.c_str()));
+		switch(tv) //constante littérale
+		{
+			case INTEGER_T: ((Integer *)self[id])->set(atoi(value.c_str())); break;
+			case FLOAT_T: return ((Float *)self[id])->set(atof(value.c_str())); break;
+			case BOOL_T: return ((Bool *)self[id])->set(value == "true"); break;
+			case STRING_T: return ((String *)self[id])->set(value); break;
+			default: throw Exception("Uknown type has been occured");
+		}
 	}
 	else
 	{
 		delete self[id];
-		addIntegerData(id, stri);
+		self[id] = generateDataFromValue(value);
 	}
 }
 
-void Memory::setFloatData(string id, string strf)
-{
-	if(self[id]->typeId() == FLOAT_T)
-	{
-		((Float *)self[id])->set(atof(strf.c_str()));
-	}
-	else
-	{
-		delete self[id];
-		addFloatData(id, strf);
-	}
-}
-
-void Memory::setBoolData(string id, string strb)
-{
-	if(self[id]->typeId() == BOOL_T)
-	{
-		((Bool *)self[id])->set(strb == "true");
-	}
-	else
-	{
-		delete self[id];
-		addBoolData(id, strb);
-	}
-}
-
-void Memory::setStringData(string id, string strs)
-{
-	if(self[id]->typeId() == STRING_T)
-	{
-		((String *)self[id])->set(strs);
-	}
-	else
-	{
-		delete self[id];
-		addStringData(id, strs);
-	}
-}
-
-void Memory::setCopyData(string id, string cpId)
+void Memory::setDataFromId(string id, string cpId)
 {
 	if(self[id]->typeId() == self[cpId]->typeId())
 	{
@@ -151,10 +96,9 @@ void Memory::setCopyData(string id, string cpId)
 	else
 	{
 		delete self[id];
-		addCopyData(id, cpId);
+		self[id] = generateDataFromId(cpId);
 	}
 }
-
 
 void Memory::setData(string id, string value)
 {
@@ -162,18 +106,11 @@ void Memory::setData(string id, string value)
 	{
 		if(exists(value))
 		{
-			setCopyData(id, value);
+			setDataFromId(id, value);
 		}
 		else
 		{
-			switch(type(value)) //constante littérales
-			{
-				case INTEGER_T: setIntegerData(id, value); break;
-				case FLOAT_T: setFloatData(id, value); break;
-				case BOOL_T: setBoolData(id, value); break;
-				case STRING_T: setStringData(id, value); break;
-				default: throw Exception("Uknown type has been occured");
-			}
+			setDataFromValue(id, value);
 		}
 	}
 	else

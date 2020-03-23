@@ -14,13 +14,17 @@ namespace Lizzy
 	public:
 		MemoryContext(string id, MemoryContext *parent=nullptr);
 		~MemoryContext();
-	
 		MemoryContext& push(string id);
 		void pop();
+		string getId() const;
 		string getFullId() const;
-		Memory &getMemory(); //get last child memoryMap
-		Memory &getMemory(string id); //get last child memoryMap that contains id Memory
-		MemoryContext &getContext(); //get last child
+		Memory &getMemory();
+		Memory &getDownMemory(); //get last child memoryMap
+		Memory &getUpMemory(); //get first child memoryMap
+		Memory &getMemoryWhereIs_BeginDown(string id); //get last child memoryMap that contains id Memory
+		Memory &getMemoryWhereIs_BeginUp(string id); //get last child memoryMap that contains id Memory
+		MemoryContext &getDownContext(); //get last child
+		MemoryContext &getUpContext(); //get last child
 		MemoryContext &getChild();
 		MemoryContext &getParent();
 		bool exists(string id);

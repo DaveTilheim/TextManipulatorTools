@@ -18,6 +18,7 @@ _def_action(IoPkg::println_action)
 
 _def_action(IoPkg::printm_action)
 {
+	auto len = args.list().size();
 	while(not args.list().oob())
 	{
 		string elem = args.list();
@@ -29,6 +30,7 @@ _def_action(IoPkg::printm_action)
 		{
 			cout << elem;
 		}
+		if(args.list().getIndex() != len) cout << " ";
 	}
 	return to_string(args.list().size());
 }

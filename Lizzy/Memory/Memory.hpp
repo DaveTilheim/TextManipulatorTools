@@ -12,6 +12,14 @@ using namespace std;
 
 namespace Lizzy
 {
+	enum Operations
+	{
+		ADD_O,
+		SUB_O,
+		MUL_O,
+		DIV_O
+	};
+
 	class Memory : private unordered_map<string, Data *>
 	{
 	private:
@@ -20,19 +28,11 @@ namespace Lizzy
 		Memory();
 		~Memory();
 		bool exists(string id);
-		void addIntegerData(string id, string stri);
-		void addFloatData(string id, string strf);
-		void addBoolData(string id, string strb);
-		void addStringData(string id, string strs);
 		void addPrimitiveData(string id, string strGenValue);
-		void addCopyData(string id, string cpId);
-		void setIntegerData(string id, string stri);
-		void setFloatData(string id, string strf);
-		void setBoolData(string id, string strb);
-		void setStringData(string id, string strs);
-		void setPrimitiveData(string id, string strGenValue);
-		void setCopyData(string id, string cpId);
-		Data *generateCopyOf(string id);
+		Data *generateDataFromValue(string value);
+		Data *generateDataFromId(string id);
+		void setDataFromValue(string id, string value);
+		void setDataFromId(string id, string idcp);
 		void setData(string id, string value);
 		Data *getData(string id);
 		string getType(string id);

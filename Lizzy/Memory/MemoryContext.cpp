@@ -27,21 +27,35 @@ void MemoryContext::pop()
 		delete child;
 }
 
+string MemoryContext::getId() const
+{
+	return id;
+}
+
 string MemoryContext::getFullId() const
 {
-	if(parent) return parent->getFullId() + "." + id;
-	return id;
+	if(parent) return parent->getFullId() + "." + getId();
+	return getId();
 }
 
 Memory &MemoryContext::getMemory()
 {
-	if(child) return child->getMemory();
 	return memory;
 }
 
-Memory &MemoryContext::getMemory(string id)
+Memory &MemoryContext::getUpMemory()
 {
-	MemoryContext *mc = &getContext();
+	return getUpContext().getMemory();
+}
+
+Memory &MemoryContext::getDownMemory()
+{
+	return getDownContext().getMemory();
+}
+
+Memory &MemoryContext::getMemoryWhereIs_BeginDown(string id)
+{
+	MemoryContext *mc = &getDownContext();
 	while(mc)
 	{
 		if(mc->getMemory().exists(id)) return mc->getMemory();
@@ -50,10 +64,35 @@ Memory &MemoryContext::getMemory(string id)
 	throw Exception(id +  " Memory not exists");
 }
 
-MemoryContext &MemoryContext::getContext()
+Memory &MemoryContext::getMemoryWhereIs_BeginUp(string id)
 {
-	if(child) return child->getContext();
-	return *this;
+	MemoryContext *mc = &getUpContext();
+	while(mc)
+	{
+		if(mc->getMemory().exists(id)) return mc->getMemory();
+		mc = mc->child;
+	}
+	throw Exception(id +  " Memory not exists");
+}
+
+MemoryContext &MemoryContext::getDownContext()
+{
+	MemoryContext *context = this;
+	while(context->child)
+	{
+		context = context->child;
+	}
+	return *context;
+}
+
+MemoryContext &MemoryContext::getUpContext()
+{
+	MemoryContext *context = this;
+	while(context->parent)
+	{
+		context = context->parent;
+	}
+	return *context;
 }
 
 MemoryContext &MemoryContext::getChild()
@@ -81,26 +120,26 @@ bool MemoryContext::exists(string id)
 
 string MemoryContext::new_primitive(string id, string value)
 {
-	MemoryContext& context = getContext();
-	return context.getMemory().new_primitive(id, value);
+	MemoryContext& context = getDownContext();
+	return context.getDownMemory().new_primitive(id, value);
 }
 
 
 string MemoryContext::set_memory(string id, string value)
 {
-	return getMemory(id).set_memory(id, value);
+	return getMemoryWhereIs_BeginDown(id).set_memory(id, value);
 }
 
 string MemoryContext::get_memory(string id)
 {
-	return getMemory(id).get_memory(id);
+	return getMemoryWhereIs_BeginDown(id).get_memory(id);
 }
 
 string MemoryContext::type_memory(string idvalue)
 {
 	try
 	{
-		return getMemory(idvalue).data_type_memory(idvalue);
+		return getMemoryWhereIs_BeginDown(idvalue).data_type_memory(idvalue);
 	}
 	catch(...)
 	{
