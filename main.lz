@@ -2,8 +2,14 @@
 
 println Lizzy V version
 
-new var 0.0
-new Bool bool var
+var valeur 5
+new value 6
+new Integer int 7
+new const i 8
+new const Integer eee 9
+const integer 10
+const Integer ezez 11
 
-println type var get var
-println type bool get bool
+Lizzy.Lang.Mem.Integer ceciEstUnEntier 666
+
+printmln ceciEstUnEntier

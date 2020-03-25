@@ -23,6 +23,11 @@ bool Memory::exists(string id)
 	return find(id) != end();
 }
 
+void Memory::setAttr(string id, const DataAttributes& attr)
+{
+	getData(id)->setAttr(attr);
+}
+
 Data *Memory::generateDataFromValue(string value)
 {
 	switch(type(value)) //constante littérales
@@ -63,11 +68,29 @@ Integer *Memory::generateInteger(string value)
 {
 	if(exists(value))
 	{
-		value = self[value]->toString();
+		switch(self[value]->typeId())
+		{
+			case BOOL_T:
+				return new Integer(((Bool *)self[value])->get());
+				break;
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Integer)");
+			default:
+				return new Integer(self[value]->toString());
+		}
 	}
-	switch(type(value))
+	else
 	{
-
+		switch(type(value))
+		{
+			case BOOL_T:
+				return new Integer(value == "true");
+				break;
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Integer)");
+			default:
+				return new Integer(value);
+		}
 	}
 }
 
@@ -75,11 +98,29 @@ Float *Memory::generateFloat(string value)
 {
 	if(exists(value))
 	{
-		value = self[value]->toString();
+		switch(self[value]->typeId())
+		{
+			case BOOL_T:
+				return new Float(((Bool *)self[value])->get());
+				break;
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Float)");
+			default:
+				return new Float(self[value]->toString());
+		}
 	}
-	switch(type(value))
+	else
 	{
-		
+		switch(type(value))
+		{
+			case BOOL_T:
+				return new Float(value == "true");
+				break;
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Float)");
+			default:
+				return new Float(value);
+		}
 	}
 }
 
@@ -87,11 +128,35 @@ Bool *Memory::generateBool(string value)
 {
 	if(exists(value))
 	{
-		value = self[value]->toString();
+		switch(self[value]->typeId())
+		{
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Bool)");
+			case INTEGER_T:
+				return new Bool(((Integer *)self[value])->get());
+				break;
+			case FLOAT_T:
+				return new Bool(((Float *)self[value])->get());
+				break;
+			default:
+				return new Bool(self[value]->toString());
+		}
 	}
-	switch(type(value))
+	else
 	{
-		
+		switch(type(value))
+		{
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Bool)");
+			case INTEGER_T:
+				return new Bool(atoi(value.c_str()));
+				break;
+			case FLOAT_T:
+				return new Bool(atof(value.c_str()));
+				break;
+			default:
+				return new Bool(value);
+		}
 	}
 }
 
@@ -99,11 +164,11 @@ String *Memory::generateString(string value)
 {
 	if(exists(value))
 	{
-		value = self[value]->toString();
+		return new String(self[value]->toString());
 	}
-	switch(type(value))
+	else
 	{
-		
+		return new String(value);
 	}
 }
 
@@ -111,32 +176,7 @@ void Memory::addInteger(string id, string value)
 {
 	if(not exists(id))
 	{
-		if(exists(value))
-		{
-			switch(self[value]->typeId())
-			{
-				case BOOL_T:
-					self[id] = new Integer(((Bool *)self[value])->get());
-					break;
-				case STRING_T:
-					throw Exception(value + " is String (can not convert String as Integer)");
-				default:
-					self[id] = new Integer(self[value]->toString());
-			}
-		}
-		else
-		{
-			switch(type(value))
-			{
-				case BOOL_T:
-					self[id] = new Integer(value == "true");
-					break;
-				case STRING_T:
-					throw Exception(value + " is String (can not convert String as Integer)");
-				default:
-					self[id] = new Integer(value);
-			}
-		}
+		self[id] = generateInteger(value);
 	}
 	else
 	{
@@ -148,32 +188,7 @@ void Memory::addFloat(string id, string value)
 {
 	if(not exists(id))
 	{
-		if(exists(value))
-		{
-			switch(self[value]->typeId())
-			{
-				case BOOL_T:
-					self[id] = new Float(((Bool *)self[value])->get());
-					break;
-				case STRING_T:
-					throw Exception(value + " is String (can not convert String as Float)");
-				default:
-					self[id] = new Float(self[value]->toString());
-			}
-		}
-		else
-		{
-			switch(type(value))
-			{
-				case BOOL_T:
-					self[id] = new Float(value == "true");
-					break;
-				case STRING_T:
-					throw Exception(value + " is String (can not convert String as Float)");
-				default:
-					self[id] = new Float(value);
-			}
-		}
+		self[id] = generateFloat(value);
 	}
 	else
 	{
@@ -185,38 +200,7 @@ void Memory::addBool(string id, string value)
 {
 	if(not exists(id))
 	{
-		if(exists(value))
-		{
-			switch(self[value]->typeId())
-			{
-				case STRING_T:
-					throw Exception(value + " is String (can not convert String as Bool)");
-				case INTEGER_T:
-					self[id] = new Bool(((Integer *)self[value])->get());
-					break;
-				case FLOAT_T:
-					self[id] = new Bool(((Float *)self[value])->get());
-					break;
-				default:
-					self[id] = new Bool(self[value]->toString());
-			}
-		}
-		else
-		{
-			switch(type(value))
-			{
-				case STRING_T:
-					throw Exception(value + " is String (can not convert String as Bool)");
-				case INTEGER_T:
-					self[id] = new Bool(atoi(value.c_str()));
-					break;
-				case FLOAT_T:
-					self[id] = new Bool(atof(value.c_str()));
-					break;
-				default:
-					self[id] = new Bool(value);
-			}
-		}
+		self[id] = generateBool(value);
 	}
 	else
 	{
@@ -228,21 +212,13 @@ void Memory::addString(string id, string value)
 {
 	if(not exists(id))
 	{
-		if(exists(value))
-		{
-			self[id] = new String(self[id]->toString());
-		}
-		else
-		{
-			self[id] = new String(value);
-		}
+		self[id] = generateString(value);
 	}
 	else
 	{
 		throw Exception(id + " Memory already exists");
 	}
 }
-
 
 
 void Memory::setDataFromValue(string id, string value)
@@ -372,10 +348,51 @@ string Memory::new_String(string id, string value)
 	return id;
 }
 
+string Memory::new_primitive(string id, string value, const DataAttributes& attr)
+{
+	addPrimitiveData(id, value);
+	setAttr(id, attr);
+	return id;
+}
+
+string Memory::new_Integer(string id, string value, const DataAttributes& attr)
+{
+	addInteger(id, value);
+	setAttr(id, attr);
+	return id;
+}
+
+string Memory::new_Float(string id, string value, const DataAttributes& attr)
+{
+	addFloat(id, value);
+	setAttr(id, attr);
+	return id;
+}
+
+string Memory::new_Bool(string id, string value, const DataAttributes& attr)
+{
+	addBool(id, value);
+	setAttr(id, attr);
+	return id;
+}
+
+string Memory::new_String(string id, string value, const DataAttributes& attr)
+{
+	addString(id, value);
+	setAttr(id, attr);
+	return id;
+}
+
 
 
 string Memory::set_memory(string id, string value)
 {
+	/*
+	
+	AMELIORER!!!
+
+	*/
+	WR_CONTROL(id);
 	setData(id, value);
 	return id;
 }
@@ -394,5 +411,26 @@ string Memory::value_type_memory(string value)
 string Memory::data_type_memory(string id)
 {
 	return getData(id)->type();
+}
+
+
+
+void Memory::WR_CONTROL(string id)
+{
+	if(exists(id))
+	{
+		Data *data = self[id];
+		if(data->getAttr()._const) throw Exception(id + " is marked const, it can not be modified");
+	}
+}
+
+Data *&Memory::RD(const string& key)
+{
+	return self[key];
+}
+
+Data *&Memory::WR(const string& key)
+{
+	return self[key];
 }
 

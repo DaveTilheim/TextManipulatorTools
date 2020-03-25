@@ -39,6 +39,8 @@ public:
 	Command& getCommand(string name);
 	Command& addCommand(string name, bool global=true, bool local=true);
 	Command& cmd(string name, bool global=true, bool local=true);
+	Command& cmdAlias(Command& cmd, string aliasName, bool global=true, bool local=true);
+	Command& cmdCpy(Command& cmd, string aliasName, bool global=true, bool local=true);
 };
 
 

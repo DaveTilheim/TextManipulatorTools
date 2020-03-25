@@ -12,6 +12,11 @@ DataAttributes& Data::getAttr()
 	return attr;
 }
 
+void Data::setAttr(const DataAttributes& dattr)
+{
+	attr = dattr;
+}
+
 string Data::type()
 {
 	return "undefined";

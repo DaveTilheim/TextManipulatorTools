@@ -38,6 +38,7 @@ namespace Lizzy
 		virtual ~Data();
 		virtual string toString() = 0;
 		DataAttributes& getAttr();
+		void setAttr(const DataAttributes& attr);
 		virtual string type();
 		virtual Types typeId();
 		virtual Data *dup();

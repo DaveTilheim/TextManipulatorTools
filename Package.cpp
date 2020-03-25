@@ -179,3 +179,27 @@ void Package::setSuper(const Package *pkg)
 {
 	super = pkg;
 }
+
+Command& Package::cmdAlias(Command& c, string aliasName, bool global, bool local)
+{
+	if(global)
+		c.alias(aliasName);
+	if(local)
+		c.alias(getName() + "." + aliasName);
+	return c;
+}
+
+Command& Package::cmdCpy(Command& c, string aliasName, bool global, bool local)
+{
+	if(local)
+	{
+		Command &cc = addCommand(getName() + "." + aliasName);
+		cc.alias(c);
+		if(global)
+		{
+			cc.alias(aliasName);
+		}
+		return cc;
+	}
+	throw Exception("A Command must be global and/or local");
+}

@@ -28,15 +28,16 @@ namespace Lizzy
 		Memory();
 		~Memory();
 		bool exists(string id);
+		void setAttr(string id, const DataAttributes& attr);
 		//Generic primitive
 		void addPrimitiveData(string id, string strGenValue);
 		Data *generateDataFromValue(string value);
 		Data *generateDataFromId(string id);
 		//Specific Data
 		Integer *generateInteger(string value);
-		Integer *generateFloat(string value);
-		Integer *generateBool(string value);
-		Integer *generateString(string value);
+		Float *generateFloat(string value);
+		Bool *generateBool(string value);
+		String *generateString(string value);
 		void addInteger(string id, string value);
 		void addFloat(string id, string value);
 		void addBool(string id, string value);
@@ -50,12 +51,21 @@ namespace Lizzy
 		string toString(string id);
 		static Types type(string constStrGenValue);
 		static string inferType(string constStrGenValue);
+		//Memory controls
+		void WR_CONTROL(string id);
+		Data *&RD(const string& key); //access and not modified
+		Data *&WR(const string& key); //access and modified
 	public: //command bridge
 		string new_primitive(string id, string value);
 		string new_Integer(string id, string value);
 		string new_Float(string id, string value);
 		string new_Bool(string id, string value);
 		string new_String(string id, string value);
+		string new_primitive(string id, string value, const DataAttributes& attr);
+		string new_Integer(string id, string value, const DataAttributes& attr);
+		string new_Float(string id, string value, const DataAttributes& attr);
+		string new_Bool(string id, string value, const DataAttributes& attr);
+		string new_String(string id, string value, const DataAttributes& attr);
 		template <class T> string new_specific(string id, string value);
 		string set_memory(string id, string value);
 		string get_memory(string id);

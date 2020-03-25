@@ -34,6 +34,11 @@ namespace Lizzy
 		string new_Float(string id, string value);
 		string new_Bool(string id, string value);
 		string new_String(string id, string value);
+		string new_primitive(string id, string value, const DataAttributes& attr);
+		string new_Integer(string id, string value, const DataAttributes& attr);
+		string new_Float(string id, string value, const DataAttributes& attr);
+		string new_Bool(string id, string value, const DataAttributes& attr);
+		string new_String(string id, string value, const DataAttributes& attr);
 		string set_memory(string id, string value);
 		string get_memory(string id);
 		string type_memory(string id);
