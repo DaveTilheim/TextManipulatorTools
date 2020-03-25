@@ -13,6 +13,34 @@ _def_action(MemPkg::new_action)
 	return MemPkg::memoryContext.new_primitive(id, value);
 }
 
+_def_action(MemPkg::new_Integer_action)
+{
+	string id = args("id");
+	string value = args("value", 1); 
+	return MemPkg::memoryContext.new_Integer(id, value);
+}
+
+_def_action(MemPkg::new_Float_action)
+{
+	string id = args("id");
+	string value = args("value", 1); 
+	return MemPkg::memoryContext.new_Float(id, value);
+}
+
+_def_action(MemPkg::new_Bool_action)
+{
+	string id = args("id");
+	string value = args("value", 1); 
+	return MemPkg::memoryContext.new_Bool(id, value);
+}
+
+_def_action(MemPkg::new_String_action)
+{
+	string id = args("id");
+	string value = args("value", 1); 
+	return MemPkg::memoryContext.new_String(id, value);
+}
+
 
 _def_action(MemPkg::set_action)
 {
@@ -61,6 +89,23 @@ void MemPkg::load()
 		newAction.setNamed("value");
 		cmd("new").setAction(2, newAction);
 	}
+	Action newIntegerAction(new_Integer_action);
+	newIntegerAction.setNamed("id");
+	newIntegerAction.setNamed("value");
+	Action newFloatAction(new_Float_action);
+	newFloatAction.setNamed("id");
+	newFloatAction.setNamed("value");
+	Action newBoolAction(new_Bool_action);
+	newBoolAction.setNamed("id");
+	newBoolAction.setNamed("value");
+	Action newStringAction(new_String_action);
+	newStringAction.setNamed("id");
+	newStringAction.setNamed("value");
+	cmd("new").child("Integer").setAction(2, newIntegerAction);
+	cmd("new").child("Float").setAction(2, newFloatAction);
+	cmd("new").child("Bool").setAction(2, newBoolAction);
+	cmd("new").child("String").setAction(2, newStringAction);
+
 	Action setAction(set_action);
 	{
 		setAction.setNamed("id");

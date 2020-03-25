@@ -13,6 +13,10 @@ namespace Lizzy
 		static MemoryContext& memoryContext;
 	protected:
 		_decl_action(new_action)
+		_decl_action(new_Integer_action)
+		_decl_action(new_Float_action)
+		_decl_action(new_Bool_action)
+		_decl_action(new_String_action)
 		_decl_action(set_action)
 		_decl_action(get_action)
 		_decl_action(type_action)

@@ -124,6 +124,29 @@ string MemoryContext::new_primitive(string id, string value)
 	return context.getDownMemory().new_primitive(id, value);
 }
 
+string MemoryContext::new_Integer(string id, string value)
+{
+	MemoryContext& context = getDownContext();
+	return context.getDownMemory().new_Integer(id, value);
+}
+
+string MemoryContext::new_Float(string id, string value)
+{
+	MemoryContext& context = getDownContext();
+	return context.getDownMemory().new_Float(id, value);
+}
+
+string MemoryContext::new_Bool(string id, string value)
+{
+	MemoryContext& context = getDownContext();
+	return context.getDownMemory().new_Bool(id, value);
+}
+
+string MemoryContext::new_String(string id, string value)
+{
+	MemoryContext& context = getDownContext();
+	return context.getDownMemory().new_String(id, value);
+}
 
 string MemoryContext::set_memory(string id, string value)
 {

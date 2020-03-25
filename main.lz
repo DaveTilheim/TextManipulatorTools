@@ -2,24 +2,8 @@
 
 println Lizzy V version
 
+new var 0.0
+new Bool bool var
 
-new var 666
-new var1 var
-
-printmln var var1
-
-set var 5
-
-printmln var var1
-
-set var var1
-
-printmln var var1
-
-set var 5.5
-
-printmln var var1
-
-set var1 "hello world"
-
-printmln var var1 type var type var1
+println type var get var
+println type bool get bool

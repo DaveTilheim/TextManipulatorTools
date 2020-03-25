@@ -58,6 +58,192 @@ void Memory::addPrimitiveData(string id, string value)
 		throw Exception(id + " Memory already exists");
 	}
 }
+ /* TO FINISH */
+Integer *Memory::generateInteger(string value)
+{
+	if(exists(value))
+	{
+		value = self[value]->toString();
+	}
+	switch(type(value))
+	{
+
+	}
+}
+
+Float *Memory::generateFloat(string value)
+{
+	if(exists(value))
+	{
+		value = self[value]->toString();
+	}
+	switch(type(value))
+	{
+		
+	}
+}
+
+Bool *Memory::generateBool(string value)
+{
+	if(exists(value))
+	{
+		value = self[value]->toString();
+	}
+	switch(type(value))
+	{
+		
+	}
+}
+
+String *Memory::generateString(string value)
+{
+	if(exists(value))
+	{
+		value = self[value]->toString();
+	}
+	switch(type(value))
+	{
+		
+	}
+}
+
+void Memory::addInteger(string id, string value)
+{
+	if(not exists(id))
+	{
+		if(exists(value))
+		{
+			switch(self[value]->typeId())
+			{
+				case BOOL_T:
+					self[id] = new Integer(((Bool *)self[value])->get());
+					break;
+				case STRING_T:
+					throw Exception(value + " is String (can not convert String as Integer)");
+				default:
+					self[id] = new Integer(self[value]->toString());
+			}
+		}
+		else
+		{
+			switch(type(value))
+			{
+				case BOOL_T:
+					self[id] = new Integer(value == "true");
+					break;
+				case STRING_T:
+					throw Exception(value + " is String (can not convert String as Integer)");
+				default:
+					self[id] = new Integer(value);
+			}
+		}
+	}
+	else
+	{
+		throw Exception(id + " Memory already exists");
+	}
+}
+
+void Memory::addFloat(string id, string value)
+{
+	if(not exists(id))
+	{
+		if(exists(value))
+		{
+			switch(self[value]->typeId())
+			{
+				case BOOL_T:
+					self[id] = new Float(((Bool *)self[value])->get());
+					break;
+				case STRING_T:
+					throw Exception(value + " is String (can not convert String as Float)");
+				default:
+					self[id] = new Float(self[value]->toString());
+			}
+		}
+		else
+		{
+			switch(type(value))
+			{
+				case BOOL_T:
+					self[id] = new Float(value == "true");
+					break;
+				case STRING_T:
+					throw Exception(value + " is String (can not convert String as Float)");
+				default:
+					self[id] = new Float(value);
+			}
+		}
+	}
+	else
+	{
+		throw Exception(id + " Memory already exists");
+	}
+}
+
+void Memory::addBool(string id, string value)
+{
+	if(not exists(id))
+	{
+		if(exists(value))
+		{
+			switch(self[value]->typeId())
+			{
+				case STRING_T:
+					throw Exception(value + " is String (can not convert String as Bool)");
+				case INTEGER_T:
+					self[id] = new Bool(((Integer *)self[value])->get());
+					break;
+				case FLOAT_T:
+					self[id] = new Bool(((Float *)self[value])->get());
+					break;
+				default:
+					self[id] = new Bool(self[value]->toString());
+			}
+		}
+		else
+		{
+			switch(type(value))
+			{
+				case STRING_T:
+					throw Exception(value + " is String (can not convert String as Bool)");
+				case INTEGER_T:
+					self[id] = new Bool(atoi(value.c_str()));
+					break;
+				case FLOAT_T:
+					self[id] = new Bool(atof(value.c_str()));
+					break;
+				default:
+					self[id] = new Bool(value);
+			}
+		}
+	}
+	else
+	{
+		throw Exception(id + " Memory already exists");
+	}
+}
+
+void Memory::addString(string id, string value)
+{
+	if(not exists(id))
+	{
+		if(exists(value))
+		{
+			self[id] = new String(self[id]->toString());
+		}
+		else
+		{
+			self[id] = new String(value);
+		}
+	}
+	else
+	{
+		throw Exception(id + " Memory already exists");
+	}
+}
+
+
 
 void Memory::setDataFromValue(string id, string value)
 {
@@ -161,6 +347,32 @@ string Memory::new_primitive(string id, string value)
 	addPrimitiveData(id, value);
 	return id;
 }
+
+string Memory::new_Integer(string id, string value)
+{
+	addInteger(id, value);
+	return id;
+}
+
+string Memory::new_Float(string id, string value)
+{
+	addFloat(id, value);
+	return id;
+}
+
+string Memory::new_Bool(string id, string value)
+{
+	addBool(id, value);
+	return id;
+}
+
+string Memory::new_String(string id, string value)
+{
+	addString(id, value);
+	return id;
+}
+
+
 
 string Memory::set_memory(string id, string value)
 {
