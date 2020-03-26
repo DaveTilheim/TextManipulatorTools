@@ -239,8 +239,8 @@ void Memory::castInInteger(Integer *data, string value)
 			case FLOAT_T:
 				data->set(((Float *)self[value])->get());
 				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Integer)");
+			default:
+				throw Exception(value + " is String (can not convert " + self[value]->type() + " as Integer)");
 		}
 	}
 	else
@@ -254,8 +254,8 @@ void Memory::castInInteger(Integer *data, string value)
 			case FLOAT_T:
 				data->set(atoi(value.c_str()));
 				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Integer)");
+			default:
+				throw Exception(value + " is String (can not convert " + inferType(value) + " as Integer)");
 		}
 	}
 }
@@ -275,8 +275,8 @@ void Memory::castInFloat(Float *data, string value)
 			case FLOAT_T:
 				data->set(((Float *)self[value])->get());
 				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Integer)");
+			default:
+				throw Exception(value + " is String (can not convert " + self[value]->type() + " as Integer)");
 		}
 	}
 	else
@@ -290,8 +290,8 @@ void Memory::castInFloat(Float *data, string value)
 			case FLOAT_T:
 				data->set(atof(value.c_str()));
 				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Integer)");
+			default:
+				throw Exception(value + " is String (can not convert " + inferType(value) + " as Integer)");
 		}
 	}
 }
@@ -311,8 +311,8 @@ void Memory::castInBool(Bool *data, string value)
 			case FLOAT_T:
 				data->set(((Float *)self[value])->get());
 				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Integer)");
+			default:
+				throw Exception(value + " is String (can not convert " + self[value]->type() + " as Integer)");
 		}
 	}
 	else
@@ -326,8 +326,8 @@ void Memory::castInBool(Bool *data, string value)
 			case FLOAT_T:
 				data->set(atof(value.c_str()));
 				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Integer)");
+			default:
+				throw Exception(value + " is String (can not convert " + inferType(value) + " as Integer)");
 		}
 	}
 }
@@ -353,6 +353,8 @@ void Memory::castIn(Data *data, string value)
 		case FLOAT_T: castInFloat((Float *)data, value); break;
 		case BOOL_T: castInBool((Bool *)data, value); break;
 		case STRING_T: castInString((String *)data, value); break;
+		default:
+				throw Exception("Unknown type: " + data->type());
 	}
 }
 
