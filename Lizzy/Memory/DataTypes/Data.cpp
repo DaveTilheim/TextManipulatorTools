@@ -2,17 +2,30 @@
 
 using namespace Lizzy;
 
+
+
+string Lizzy::getAttrAsString(int attr)
+{
+	switch(attr)
+	{
+		case CONST_A: return "const";
+		case FINAL_A: return "final";
+		default: return "unknown attribute";
+	}
+}
+
+
 Data::~Data()
 {
 
 }
 
-DataAttributes& Data::getAttr()
+int Data::getAttr()
 {
 	return attr;
 }
 
-void Data::setAttr(const DataAttributes& dattr)
+void Data::setAttr(int dattr)
 {
 	attr = dattr;
 }

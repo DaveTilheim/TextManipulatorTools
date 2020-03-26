@@ -24,21 +24,23 @@ namespace Lizzy
 		OBJECT_T
 	};
 
-	struct DataAttributes
+	enum DataAttributes
 	{
-		bool _const : 1 = false;
-		bool _strict : 1 = false;
+		CONST_A = 0x0001,
+		FINAL_A = 0x0002
 	};
+
+	string getAttrAsString(int attr);
 
 	class Data
 	{
 	private:
-		DataAttributes attr;
+		int attr = 0;
 	public:
 		virtual ~Data();
 		virtual string toString() = 0;
-		DataAttributes& getAttr();
-		void setAttr(const DataAttributes& attr);
+		int getAttr();
+		void setAttr(int attr);
 		virtual string type();
 		virtual Types typeId();
 		virtual Data *dup();

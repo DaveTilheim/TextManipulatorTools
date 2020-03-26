@@ -12,12 +12,11 @@ using namespace std;
 
 namespace Lizzy
 {
-	enum Operations
+	enum SetModes
 	{
-		ADD_O,
-		SUB_O,
-		MUL_O,
-		DIV_O
+		FORB,
+		CAST,
+		FULL
 	};
 
 	class Memory : private unordered_map<string, Data *>
@@ -28,7 +27,7 @@ namespace Lizzy
 		Memory();
 		~Memory();
 		bool exists(string id);
-		void setAttr(string id, const DataAttributes& attr);
+		void setAttr(string id, int attr);
 		//Generic primitive
 		void addPrimitiveData(string id, string strGenValue);
 		Data *generateDataFromValue(string value);
@@ -44,31 +43,35 @@ namespace Lizzy
 		void addString(string id, string value);
 		//set primitive
 		void setDataFromValue(string id, string value);
-		void setDataFromId(string id, string idcp);
 		void setData(string id, string value);
 		Data *getData(string id);
 		string getType(string id);
 		string toString(string id);
 		static Types type(string constStrGenValue);
 		static string inferType(string constStrGenValue);
+		//casting
+		void castIn(Data *data, string value);
+		void castInInteger(Integer *data, string value);
+		void castInFloat(Float *data, string value);
+		void castInBool(Bool *data, string value);
+		void castInString(String *data, string value);
+		static bool isAllowedTypeFrom(Types t1, Types t2);
+		static bool isAllowedNumberFrom(Types otherType);
+		static bool isAllowedStringFrom(Types otherType);
 		//Memory controls
-		void WR_CONTROL(string id);
-		Data *&RD(const string& key); //access and not modified
-		Data *&WR(const string& key); //access and modified
+		void attr_const_control(string id);
+		SetModes attr_final_control(Data *data, Types otherType);
+		void attr_set_control(Data *data, int attr);
+		void addAttr(Data *data, int attr);
 	public: //command bridge
 		string new_primitive(string id, string value);
 		string new_Integer(string id, string value);
 		string new_Float(string id, string value);
 		string new_Bool(string id, string value);
 		string new_String(string id, string value);
-		string new_primitive(string id, string value, const DataAttributes& attr);
-		string new_Integer(string id, string value, const DataAttributes& attr);
-		string new_Float(string id, string value, const DataAttributes& attr);
-		string new_Bool(string id, string value, const DataAttributes& attr);
-		string new_String(string id, string value, const DataAttributes& attr);
-		template <class T> string new_specific(string id, string value);
 		string set_memory(string id, string value);
 		string get_memory(string id);
+		string add_attribute(string id, int attr);
 		static string value_type_memory(string value);
 		string data_type_memory(string id);
 	};

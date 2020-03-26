@@ -148,6 +148,7 @@ Action& Command::getAction(Tokens& args)
 int Command::getMaximumNargs() const
 {
 	int maxi = -2;
+	if(actions.find(-1) != actions.end()) return -1;
 	for(auto it : actions)
 	{
 		maxi = it.first;

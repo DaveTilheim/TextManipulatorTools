@@ -23,7 +23,7 @@ bool Memory::exists(string id)
 	return find(id) != end();
 }
 
-void Memory::setAttr(string id, const DataAttributes& attr)
+void Memory::setAttr(string id, int attr)
 {
 	getData(id)->setAttr(attr);
 }
@@ -63,7 +63,7 @@ void Memory::addPrimitiveData(string id, string value)
 		throw Exception(id + " Memory already exists");
 	}
 }
- /* TO FINISH */
+
 Integer *Memory::generateInteger(string value)
 {
 	if(exists(value))
@@ -221,44 +221,154 @@ void Memory::addString(string id, string value)
 }
 
 
-void Memory::setDataFromValue(string id, string value)
+
+
+
+void Memory::castInInteger(Integer *data, string value)
 {
-	auto tv = type(value);
-	if(self[id]->typeId() == tv)
+	if(exists(value))
 	{
-		switch(tv) //constante littérale
+		switch(self[value]->typeId())
 		{
-			case INTEGER_T: ((Integer *)self[id])->set(atoi(value.c_str())); break;
-			case FLOAT_T: return ((Float *)self[id])->set(atof(value.c_str())); break;
-			case BOOL_T: return ((Bool *)self[id])->set(value == "true"); break;
-			case STRING_T: return ((String *)self[id])->set(value); break;
-			default: throw Exception("Uknown type has been occured");
+			case BOOL_T:
+				data->set(((Bool *)self[value])->get());
+				break;
+			case INTEGER_T:
+				data->set(((Integer *)self[value])->get());
+				break;
+			case FLOAT_T:
+				data->set(((Float *)self[value])->get());
+				break;
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Integer)");
 		}
 	}
 	else
 	{
-		delete self[id];
-		self[id] = generateDataFromValue(value);
+		switch(type(value))
+		{
+			case BOOL_T:
+				data->set(value == "true");
+				break;
+			case INTEGER_T:
+			case FLOAT_T:
+				data->set(atoi(value.c_str()));
+				break;
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Integer)");
+		}
 	}
 }
 
-void Memory::setDataFromId(string id, string cpId)
+void Memory::castInFloat(Float *data, string value)
 {
-	if(self[id]->typeId() == self[cpId]->typeId())
+	if(exists(value))
 	{
-		switch(self[id]->typeId())
+		switch(self[value]->typeId())
 		{
-			case INTEGER_T: *(Integer *)self[id] = *(Integer *)self[cpId]; break;
-			case FLOAT_T: *(Float *)self[id] = *(Float *)self[cpId]; break;
-			case BOOL_T: *(Bool *)self[id] = *(Bool *)self[cpId]; break;
-			case STRING_T: *(String *)self[id] = *(String *)self[cpId]; break;
-			default: throw Exception("Uknown type has been occured");
+			case BOOL_T:
+				data->set(((Bool *)self[value])->get());
+				break;
+			case INTEGER_T:
+				data->set(((Integer *)self[value])->get());
+				break;
+			case FLOAT_T:
+				data->set(((Float *)self[value])->get());
+				break;
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Integer)");
 		}
 	}
 	else
 	{
-		delete self[id];
-		self[id] = generateDataFromId(cpId);
+		switch(type(value))
+		{
+			case BOOL_T:
+				data->set(value == "true");
+				break;
+			case INTEGER_T:
+			case FLOAT_T:
+				data->set(atof(value.c_str()));
+				break;
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Integer)");
+		}
+	}
+}
+
+void Memory::castInBool(Bool *data, string value)
+{
+	if(exists(value))
+	{
+		switch(self[value]->typeId())
+		{
+			case BOOL_T:
+				data->set(((Bool *)self[value])->get());
+				break;
+			case INTEGER_T:
+				data->set(((Integer *)self[value])->get());
+				break;
+			case FLOAT_T:
+				data->set(((Float *)self[value])->get());
+				break;
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Integer)");
+		}
+	}
+	else
+	{
+		switch(type(value))
+		{
+			case BOOL_T:
+				data->set(value == "true");
+				break;
+			case INTEGER_T:
+			case FLOAT_T:
+				data->set(atof(value.c_str()));
+				break;
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Integer)");
+		}
+	}
+}
+
+
+void Memory::castInString(String *data, string value)
+{
+	if(exists(value))
+	{
+		data->set(self[value]->toString());
+	}
+	else
+	{
+		data->set(value);
+	}
+}
+
+void Memory::castIn(Data *data, string value)
+{
+	switch(data->typeId())
+	{
+		case INTEGER_T: castInInteger((Integer *)data, value); break;
+		case FLOAT_T: castInFloat((Float *)data, value); break;
+		case BOOL_T: castInBool((Bool *)data, value); break;
+		case STRING_T: castInString((String *)data, value); break;
+	}
+}
+
+void Memory::setDataFromValue(string id, string value)
+{
+	Types tv = type(value);
+	switch(attr_final_control(self[id], tv))
+	{
+		case FORB:
+			throw Exception(id + " is marked final, can not change his type (" + self[id]->type() + " into " + inferType(value) + ")");
+		case CAST:
+			castIn(self[id], value);
+			break;
+		case FULL:
+			delete self[id];
+			self[id] = generateDataFromValue(value);
 	}
 }
 
@@ -266,14 +376,7 @@ void Memory::setData(string id, string value)
 {
 	if(exists(id))
 	{
-		if(exists(value))
-		{
-			setDataFromId(id, value);
-		}
-		else
-		{
-			setDataFromValue(id, value);
-		}
+		setDataFromValue(id, value);
 	}
 	else
 	{
@@ -348,51 +451,9 @@ string Memory::new_String(string id, string value)
 	return id;
 }
 
-string Memory::new_primitive(string id, string value, const DataAttributes& attr)
-{
-	addPrimitiveData(id, value);
-	setAttr(id, attr);
-	return id;
-}
-
-string Memory::new_Integer(string id, string value, const DataAttributes& attr)
-{
-	addInteger(id, value);
-	setAttr(id, attr);
-	return id;
-}
-
-string Memory::new_Float(string id, string value, const DataAttributes& attr)
-{
-	addFloat(id, value);
-	setAttr(id, attr);
-	return id;
-}
-
-string Memory::new_Bool(string id, string value, const DataAttributes& attr)
-{
-	addBool(id, value);
-	setAttr(id, attr);
-	return id;
-}
-
-string Memory::new_String(string id, string value, const DataAttributes& attr)
-{
-	addString(id, value);
-	setAttr(id, attr);
-	return id;
-}
-
-
-
 string Memory::set_memory(string id, string value)
 {
-	/*
-	
-	AMELIORER!!!
-
-	*/
-	WR_CONTROL(id);
+	attr_const_control(id);
 	setData(id, value);
 	return id;
 }
@@ -415,22 +476,58 @@ string Memory::data_type_memory(string id)
 
 
 
-void Memory::WR_CONTROL(string id)
+void Memory::attr_const_control(string id)
 {
 	if(exists(id))
 	{
 		Data *data = self[id];
-		if(data->getAttr()._const) throw Exception(id + " is marked const, it can not be modified");
+		if(data->getAttr() & CONST_A) throw Exception(id + " is marked const, it can not be modified");
 	}
 }
 
-Data *&Memory::RD(const string& key)
+string Memory::add_attribute(string id, int attr)
 {
-	return self[key];
+	addAttr(getData(id), attr);
+	return id;
 }
 
-Data *&Memory::WR(const string& key)
+void Memory::attr_set_control(Data *data, int attr)
 {
-	return self[key];
+	if(data->getAttr() & attr) throw Exception(getAttrAsString(attr) + " attribute is already set");
 }
 
+void Memory::addAttr(Data *data, int attr)
+{
+	attr_set_control(data, attr);
+	data->setAttr(data->getAttr() | attr);
+}
+
+bool Memory::isAllowedNumberFrom(Types otherType)
+{
+	return otherType == INTEGER_T or otherType == FLOAT_T or otherType == BOOL_T;
+}
+
+bool Memory::isAllowedStringFrom(Types otherType)
+{
+	return otherType == INTEGER_T or otherType == FLOAT_T or otherType == BOOL_T or otherType == STRING_T;
+}
+
+bool Memory::isAllowedTypeFrom(Types t1, Types t2)
+{
+	switch(t1)
+	{
+		case INTEGER_T: case FLOAT_T: case BOOL_T: return isAllowedNumberFrom(t2);
+		case STRING_T: default: return isAllowedStringFrom(t2);
+	}
+}
+
+
+SetModes Memory::attr_final_control(Data *data, Types otherType)
+{
+	if(data->getAttr() & FINAL_A)
+	{
+		if(isAllowedTypeFrom(data->typeId(), otherType)) return CAST;
+		return FORB;
+	}
+	return FULL;
+}

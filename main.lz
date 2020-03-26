@@ -2,18 +2,11 @@
 
 println Lizzy V version
 
-alias [const] final
 
-final Float PI 3.14
+//créer un entier sur base d'un flottant
+Lizzy.Lang.Mem.const Lizzy.Lang.Mem.new Integer intPI Lizzy.Lang.Mem.const Lizzy.Lang.Mem.new Float PI 3.4
 
-var valeur 5
-new value 6
-new Integer int 7
-new const i 8
-new const Integer eee 9
-const integer 10
-const Integer ezez 11
 
-Lizzy.Lang.Mem.Integer ceciEstUnEntier 666
+var tes input
 
-printmln pi [=] PI //!!!
+println get tes type tes

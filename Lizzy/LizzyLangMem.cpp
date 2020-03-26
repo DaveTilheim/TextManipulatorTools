@@ -16,7 +16,7 @@ _def_action(MemPkg::new_action)
 _def_action(MemPkg::new_Integer_action)
 {
 	string id = args("id");
-	string value = args("value", 1); 
+	string value = args("value", 1);
 	return MemPkg::memoryContext.new_Integer(id, value);
 }
 
@@ -42,55 +42,44 @@ _def_action(MemPkg::new_String_action)
 }
 
 
-
-_def_action(MemPkg::new_const_action)
+_def_action(MemPkg::new_Integer_action_1)
 {
 	string id = args("id");
-	string value = args("value", 1);
-	DataAttributes attr;
-	attr._const = true;
-	return MemPkg::memoryContext.new_primitive(id, value, attr);
+	return MemPkg::memoryContext.new_Integer(id, "0");
 }
 
-_def_action(MemPkg::new_const_Integer_action)
+_def_action(MemPkg::new_Float_action_1)
 {
 	string id = args("id");
-	string value = args("value", 1); 
-	DataAttributes attr;
-	attr._const = true;
-	return MemPkg::memoryContext.new_Integer(id, value, attr);
+	return MemPkg::memoryContext.new_Float(id, "0.0");
 }
 
-_def_action(MemPkg::new_const_Float_action)
+_def_action(MemPkg::new_Bool_action_1)
 {
 	string id = args("id");
-	string value = args("value", 1); 
-	DataAttributes attr;
-	attr._const = true;
-	return MemPkg::memoryContext.new_Float(id, value, attr);
+	return MemPkg::memoryContext.new_Bool(id, "false");
 }
 
-_def_action(MemPkg::new_const_Bool_action)
+_def_action(MemPkg::new_String_action_1)
 {
 	string id = args("id");
-	string value = args("value", 1);
-	DataAttributes attr;
-	attr._const = true; 
-	return MemPkg::memoryContext.new_Bool(id, value, attr);
-}
-
-_def_action(MemPkg::new_const_String_action)
-{
-	string id = args("id");
-	string value = args("value", 1);
-	DataAttributes attr;
-	attr._const = true;
-	return MemPkg::memoryContext.new_String(id, value, attr);
+	return MemPkg::memoryContext.new_String(id, "");
 }
 
 
 
 
+_def_action(MemPkg::const_action)
+{
+	string id = args("id");
+	return MemPkg::memoryContext.add_attribute(id, CONST_A);
+}
+
+_def_action(MemPkg::final_action)
+{
+	string id = args("id");
+	return MemPkg::memoryContext.add_attribute(id, FINAL_A);
+}
 
 
 
@@ -152,39 +141,40 @@ void MemPkg::load()
 	Action newStringAction(new_String_action);
 	newStringAction.setNamed("id");
 	newStringAction.setNamed("value");
+	Action newIntegerAction1(new_Integer_action_1);
+	newIntegerAction1.setNamed("id");
+	Action newFloatAction1(new_Float_action_1);
+	newFloatAction1.setNamed("id");
+	Action newBoolAction1(new_Bool_action_1);
+	newBoolAction1.setNamed("id");
+	Action newStringAction1(new_String_action_1);
+	newStringAction1.setNamed("id");
 	cmd("new").child("Integer").setAction(2, newIntegerAction);
+	cmd("new").child("Integer").setAction(1, newIntegerAction1);
 	cmd("new").child("Float").setAction(2, newFloatAction);
+	cmd("new").child("Float").setAction(1, newFloatAction1);
 	cmd("new").child("Bool").setAction(2, newBoolAction);
+	cmd("new").child("Bool").setAction(1, newBoolAction1);
 	cmd("new").child("String").setAction(2, newStringAction);
+	cmd("new").child("String").setAction(1, newStringAction1);
 
-	Action newConstAction(new_const_action);
-	newConstAction.setNamed("id");
-	newConstAction.setNamed("value");
-	cmd("new").child("const").setAction(2, newConstAction);
 
-	Action newConstIntegerAction(new_const_Integer_action);
-	newConstIntegerAction.setNamed("id");
-	newConstIntegerAction.setNamed("value");
-	Action newConstFloatAction(new_const_Float_action);
-	newConstFloatAction.setNamed("id");
-	newConstFloatAction.setNamed("value");
-	Action newConstBoolAction(new_const_Bool_action);
-	newConstBoolAction.setNamed("id");
-	newConstBoolAction.setNamed("value");
-	Action newConstStringAction(new_const_String_action);
-	newConstStringAction.setNamed("id");
-	newConstStringAction.setNamed("value");
-	cmd("new").child("const").child("Integer").setAction(2, newConstIntegerAction);
-	cmd("new").child("const").child("Float").setAction(2, newConstFloatAction);
-	cmd("new").child("const").child("Bool").setAction(2, newConstBoolAction);
-	cmd("new").child("const").child("String").setAction(2, newConstStringAction);
+
+
 
 	cmd("var").setAction(2, newAction);
-	cmdAlias(cmd("new").child("const"), "const");
 	cmdAlias(cmd("new").child("Integer"), "Integer");
 	cmdAlias(cmd("new").child("Float"), "Float");
 	cmdAlias(cmd("new").child("Bool"), "Bool");
 	cmdAlias(cmd("new").child("String"), "String");
+
+	Action constAction(const_action);
+	constAction.setNamed("id");
+	cmd("const").setAction(1, constAction);
+
+	Action finalAction(final_action);
+	finalAction.setNamed("id");
+	cmd("final").setAction(1, finalAction);
 	
 
 

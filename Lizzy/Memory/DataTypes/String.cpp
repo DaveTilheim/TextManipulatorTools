@@ -23,7 +23,7 @@ String::~String()
 
 string String::toString()
 {
-	return value;
+	return value.size() ? value : " ";
 }
 
 string String::type()

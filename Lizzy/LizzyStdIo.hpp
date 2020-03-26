@@ -12,6 +12,8 @@ namespace Lizzy
 		_decl_action(println_action)
 		_decl_action(printm_action)
 		_decl_action(printmln_action)
+		_decl_action(input_action)
+		_decl_action(input_action_U)
 	public:
 		IoPkg();
 		void load() override;
