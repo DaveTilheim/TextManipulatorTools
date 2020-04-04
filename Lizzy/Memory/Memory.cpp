@@ -294,6 +294,7 @@ void Memory::castInInteger(Integer *data, Data *reference)
 			break;
 		case STRING_T:
 			throw Exception(getId(reference) + " is String (can not convert String as Integer)");
+		default:;
 	}		
 }
 
@@ -316,6 +317,7 @@ void Memory::castInInteger(Integer *data, string value)
 				break;
 			case STRING_T:
 				throw Exception(value + " is String (can not convert String as Integer)");
+			default:;
 		}
 	}
 }
@@ -338,6 +340,7 @@ void Memory::castInFloat(Float *data, Data *reference)
 			break;
 		case STRING_T:
 			throw Exception(getId(reference) + " is String (can not convert String as Float)");
+		default:;
 	}	
 }
 
@@ -360,6 +363,7 @@ void Memory::castInFloat(Float *data, string value)
 				break;
 			case STRING_T:
 				throw Exception(value + " is String (can not convert String as Float)");
+			default:;
 		}
 	}
 }
@@ -382,6 +386,7 @@ void Memory::castInBool(Bool *data, Data *reference)
 			break;
 		case STRING_T:
 			throw Exception(getId(reference) + " is String (can not convert String as Bool)");
+		default:;
 	}	
 }
 
@@ -405,6 +410,7 @@ void Memory::castInBool(Bool *data, string value)
 				break;
 			case STRING_T:
 				throw Exception(value + " is String (can not convert String as Bool)");
+			default:;
 		}
 	}
 }
@@ -436,6 +442,7 @@ void Memory::castIn(Data *data, string value)
 		case BOOL_T: castInBool((Bool *)data, value); break;
 		case STRING_T: castInString((String *)data, value); break;
 		case REFERENCE_T: castInReference((Reference *)data, value); break;
+		default:;
 	}
 }
 
