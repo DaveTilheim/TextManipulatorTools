@@ -41,6 +41,13 @@ _def_action(MemPkg::new_String_action)
 	return MemPkg::memoryContext.new_String(id, value);
 }
 
+_def_action(MemPkg::new_Reference_action)
+{
+	string id = args("id");
+	string value = args("value", 1); 
+	return MemPkg::memoryContext.new_Reference(id, value);
+}
+
 
 _def_action(MemPkg::new_Integer_action_1)
 {
@@ -64,6 +71,12 @@ _def_action(MemPkg::new_String_action_1)
 {
 	string id = args("id");
 	return MemPkg::memoryContext.new_String(id, "");
+}
+
+_def_action(MemPkg::new_Reference_action_1)
+{
+	string id = args("id");
+	return MemPkg::memoryContext.new_Reference(id, "");
 }
 
 
@@ -109,7 +122,12 @@ _def_action(MemPkg::exists_action)
 	return MemPkg::memoryContext.exists_memory(value);
 }
 
-
+_def_action(MemPkg::set_reference_action)
+{
+	string id = args("id");
+	string value = args("value", 1);
+	return MemPkg::memoryContext.set_reference(id, value);
+}
 
 
 MemPkg::MemPkg() : Package("Mem")
@@ -141,6 +159,9 @@ void MemPkg::load()
 	Action newStringAction(new_String_action);
 	newStringAction.setNamed("id");
 	newStringAction.setNamed("value");
+	Action newReferenceAction(new_Reference_action);
+	newReferenceAction.setNamed("id");
+	newReferenceAction.setNamed("value");
 	Action newIntegerAction1(new_Integer_action_1);
 	newIntegerAction1.setNamed("id");
 	Action newFloatAction1(new_Float_action_1);
@@ -149,6 +170,8 @@ void MemPkg::load()
 	newBoolAction1.setNamed("id");
 	Action newStringAction1(new_String_action_1);
 	newStringAction1.setNamed("id");
+	Action newReferenceAction1(new_Reference_action_1);
+	newReferenceAction1.setNamed("id");
 	cmd("new").child("Integer").setAction(2, newIntegerAction);
 	cmd("new").child("Integer").setAction(1, newIntegerAction1);
 	cmd("new").child("Float").setAction(2, newFloatAction);
@@ -157,6 +180,8 @@ void MemPkg::load()
 	cmd("new").child("Bool").setAction(1, newBoolAction1);
 	cmd("new").child("String").setAction(2, newStringAction);
 	cmd("new").child("String").setAction(1, newStringAction1);
+	cmd("new").child("Reference").setAction(2, newReferenceAction);
+	cmd("new").child("Reference").setAction(1, newReferenceAction1);
 
 
 
@@ -167,6 +192,7 @@ void MemPkg::load()
 	cmdAlias(cmd("new").child("Float"), "Float");
 	cmdAlias(cmd("new").child("Bool"), "Bool");
 	cmdAlias(cmd("new").child("String"), "String");
+	cmdAlias(cmd("new").child("Reference"), "Reference");
 
 	Action constAction(const_action);
 	constAction.setNamed("id");
@@ -179,23 +205,23 @@ void MemPkg::load()
 
 
 	Action setAction(set_action);
-	{
 		setAction.setNamed("id");
 		setAction.setNamed("value");
 		cmd("set").setAction(2, setAction);
-	}
+
+	Action setReferenceAction(set_reference_action);
+		setReferenceAction.setNamed("id");
+		setReferenceAction.setNamed("value");
+		cmd("set").child("reference").setAction(2, setReferenceAction);
+	
 	Action getAction(get_action);
-	{
 		getAction.setNamed("id");
 		cmd("get").setAction(1, getAction);
-	}
+
 	Action typeAction(type_action);
-	{
 		cmd("type").setAction(1, typeAction);
-	}
+
 	Action existsAction(exists_action);
-	{
 		existsAction.setNamed("id");
 		cmd("exists").setAction(1, existsAction);
-	}
 }

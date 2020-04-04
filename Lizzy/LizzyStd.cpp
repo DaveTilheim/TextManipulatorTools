@@ -25,9 +25,16 @@ _def_action(StdPkg::load_package_action)
 
 _def_action(StdPkg::alias_action)
 {
-	string oldname = args.list();
+	Command *cmd = nullptr;
+	if(args.list().size() < 2) throw ("alias command must have at least two args");
 	string newname = args.list();
-	Command::getCommand(oldname).alias(newname);
+	while(not args.list().oob())
+	{
+		string cname = args.list();
+		if(not cmd) cmd = &Command::getCommand(cname);
+		else cmd = &cmd->getChild(cname);
+	}
+	if(cmd) cmd->alias(newname);
 	return newname;
 }
 
@@ -50,7 +57,7 @@ void StdPkg::load()
 	Action load_packageAction(load_package_action);
 	load_packageAction.setNamed("name");
 
-	cmd("alias").setAction(2, aliasAction);
+	cmd("alias").setAction(-1, aliasAction);
 	cmd("unload").child("package").setAction(1, unload_packageAction);
 	cmd("reload").child("package").setAction(1, reload_packageAction);
 	cmd("load").child("package").setAction(1, load_packageAction);

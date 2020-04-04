@@ -2,11 +2,13 @@
 
 println Lizzy V version
 
-
-//créer un entier sur base d'un flottant
-Lizzy.Lang.Mem.const Lizzy.Lang.Mem.new Integer intPI Lizzy.Lang.Mem.const Lizzy.Lang.Mem.new Float PI 3.4
+alias & [set] reference
 
 
-var tes input
+const Float PI 3.14
 
-println get tes type tes
+Reference ref
+
+& ref PI
+
+printmln ref

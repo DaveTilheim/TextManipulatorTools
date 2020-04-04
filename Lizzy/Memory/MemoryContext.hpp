@@ -34,8 +34,10 @@ namespace Lizzy
 		string new_Float(string id, string value);
 		string new_Bool(string id, string value);
 		string new_String(string id, string value);
+		string new_Reference(string id, string value);
 		string add_attribute(string id, int attr);
 		string set_memory(string id, string value);
+		string set_reference(string id, string value);
 		string get_memory(string id);
 		string type_memory(string id);
 		string exists_memory(string id);

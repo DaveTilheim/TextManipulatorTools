@@ -28,6 +28,12 @@ void Memory::setAttr(string id, int attr)
 	getData(id)->setAttr(attr);
 }
 
+string Memory::getId(Data *d)
+{
+	for(auto it : *this) if(d == it.second) return it.first;
+	throw Exception("Reference Memory is a reference to a Memory which not exists");
+}
+
 Data *Memory::generateDataFromValue(string value)
 {
 	switch(type(value)) //constante littérales
@@ -64,20 +70,26 @@ void Memory::addPrimitiveData(string id, string value)
 	}
 }
 
+Integer *Memory::generateInteger(Data *reference)
+{
+	switch(reference->typeId())
+	{
+		case BOOL_T:
+				return new Integer(((Bool *)reference)->get());
+		case STRING_T:
+			throw Exception(getId(reference) + " is String (can not convert String as Integer)");
+		case REFERENCE_T:
+			throw Exception(getId(reference) + " is a reference to null");
+		default:
+			return new Integer(reference->toString());
+	}
+}
+
 Integer *Memory::generateInteger(string value)
 {
 	if(exists(value))
 	{
-		switch(self[value]->typeId())
-		{
-			case BOOL_T:
-				return new Integer(((Bool *)self[value])->get());
-				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Integer)");
-			default:
-				return new Integer(self[value]->toString());
-		}
+		return generateInteger(self[value]);
 	}
 	else
 	{
@@ -94,20 +106,27 @@ Integer *Memory::generateInteger(string value)
 	}
 }
 
+
+Float *Memory::generateFloat(Data *reference)
+{
+	switch(reference->typeId())
+	{
+		case BOOL_T:
+			return new Float(((Bool *)reference)->get());
+		case STRING_T:
+			throw Exception(getId(reference) + " is String (can not convert String as Float)");
+		case REFERENCE_T:
+			throw Exception(getId(reference) + " is a reference to null");
+		default:
+			return new Float(reference->toString());
+	}
+}
+
 Float *Memory::generateFloat(string value)
 {
 	if(exists(value))
 	{
-		switch(self[value]->typeId())
-		{
-			case BOOL_T:
-				return new Float(((Bool *)self[value])->get());
-				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Float)");
-			default:
-				return new Float(self[value]->toString());
-		}
+		return generateFloat(self[value]);
 	}
 	else
 	{
@@ -115,7 +134,6 @@ Float *Memory::generateFloat(string value)
 		{
 			case BOOL_T:
 				return new Float(value == "true");
-				break;
 			case STRING_T:
 				throw Exception(value + " is String (can not convert String as Float)");
 			default:
@@ -124,23 +142,28 @@ Float *Memory::generateFloat(string value)
 	}
 }
 
+Bool *Memory::generateBool(Data *reference)
+{
+	switch(reference->typeId())
+	{
+		case REFERENCE_T:
+			throw Exception(getId(reference) + " is a reference to null");
+		case STRING_T:
+			throw Exception(getId(reference) + " is String (can not convert String as Bool)");
+		case INTEGER_T:
+			return new Bool(((Integer *)reference)->get());
+		case FLOAT_T:
+			return new Bool(((Float *)reference)->get());
+		default:
+			return new Bool(reference->toString());
+	}
+}
+
 Bool *Memory::generateBool(string value)
 {
 	if(exists(value))
 	{
-		switch(self[value]->typeId())
-		{
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Bool)");
-			case INTEGER_T:
-				return new Bool(((Integer *)self[value])->get());
-				break;
-			case FLOAT_T:
-				return new Bool(((Float *)self[value])->get());
-				break;
-			default:
-				return new Bool(self[value]->toString());
-		}
+		return generateBool(self[value]);
 	}
 	else
 	{
@@ -160,6 +183,7 @@ Bool *Memory::generateBool(string value)
 	}
 }
 
+
 String *Memory::generateString(string value)
 {
 	if(exists(value))
@@ -169,6 +193,22 @@ String *Memory::generateString(string value)
 	else
 	{
 		return new String(value);
+	}
+}
+
+Reference *Memory::generateReference(string value)
+{
+	if(exists(value))
+	{
+		Data **data = &self[value];
+		if(dynamic_cast<Reference *>(*data)) data = ((Reference *)*data)->getRef();
+		return new Reference(data);
+	}
+	else
+	{
+		if(value.size() == 0)
+			return new Reference(nullptr);
+		throw Exception(value + " not exists");
 	}
 }
 
@@ -221,27 +261,47 @@ void Memory::addString(string id, string value)
 }
 
 
+void Memory::addReference(string id, string value)
+{
+	if(not exists(id))
+	{
+		self[id] = generateReference(value);
+	}
+	else
+	{
+		throw Exception(id + " Memory already exists");
+	}
+}
 
 
+
+void Memory::castInInteger(Integer *data, Data *reference)
+{
+	switch(reference->typeId())
+	{
+		case REFERENCE_T:
+			if(((Reference *)reference)->get() == nullptr) throw Exception(getId(reference) + " is a reference to null");
+			castInInteger(data, ((Reference *)reference)->get());
+			break;
+		case BOOL_T:
+			data->set(((Bool *)reference)->get());
+			break;
+		case INTEGER_T:
+			data->set(((Integer *)reference)->get());
+			break;
+		case FLOAT_T:
+			data->set(((Float *)reference)->get());
+			break;
+		case STRING_T:
+			throw Exception(getId(reference) + " is String (can not convert String as Integer)");
+	}		
+}
 
 void Memory::castInInteger(Integer *data, string value)
 {
 	if(exists(value))
 	{
-		switch(self[value]->typeId())
-		{
-			case BOOL_T:
-				data->set(((Bool *)self[value])->get());
-				break;
-			case INTEGER_T:
-				data->set(((Integer *)self[value])->get());
-				break;
-			case FLOAT_T:
-				data->set(((Float *)self[value])->get());
-				break;
-			default:
-				throw Exception(value + " is String (can not convert " + self[value]->type() + " as Integer)");
-		}
+		castInInteger(data, self[value]);
 	}
 	else
 	{
@@ -254,30 +314,38 @@ void Memory::castInInteger(Integer *data, string value)
 			case FLOAT_T:
 				data->set(atoi(value.c_str()));
 				break;
-			default:
-				throw Exception(value + " is String (can not convert " + inferType(value) + " as Integer)");
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Integer)");
 		}
 	}
+}
+
+void Memory::castInFloat(Float *data, Data *reference)
+{
+	switch(reference->typeId())
+	{
+		case REFERENCE_T:
+			if(((Reference *)reference)->get() == nullptr) throw Exception(getId(reference) + " is a reference to null");
+			castInFloat(data, ((Reference *)reference)->get());
+		case BOOL_T:
+			data->set(((Bool *)reference)->get());
+			break;
+		case INTEGER_T:
+			data->set(((Integer *)reference)->get());
+			break;
+		case FLOAT_T:
+			data->set(((Float *)reference)->get());
+			break;
+		case STRING_T:
+			throw Exception(getId(reference) + " is String (can not convert String as Float)");
+	}	
 }
 
 void Memory::castInFloat(Float *data, string value)
 {
 	if(exists(value))
 	{
-		switch(self[value]->typeId())
-		{
-			case BOOL_T:
-				data->set(((Bool *)self[value])->get());
-				break;
-			case INTEGER_T:
-				data->set(((Integer *)self[value])->get());
-				break;
-			case FLOAT_T:
-				data->set(((Float *)self[value])->get());
-				break;
-			default:
-				throw Exception(value + " is String (can not convert " + self[value]->type() + " as Integer)");
-		}
+		castInFloat(data, self[value]);
 	}
 	else
 	{
@@ -290,30 +358,39 @@ void Memory::castInFloat(Float *data, string value)
 			case FLOAT_T:
 				data->set(atof(value.c_str()));
 				break;
-			default:
-				throw Exception(value + " is String (can not convert " + inferType(value) + " as Integer)");
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Float)");
 		}
 	}
 }
+
+void Memory::castInBool(Bool *data, Data *reference)
+{
+	switch(reference->typeId())
+	{
+		case REFERENCE_T:
+			if(((Reference *)reference)->get() == nullptr) throw Exception(getId(reference) + " is a reference to null");
+			castInBool(data, ((Reference *)reference)->get());
+		case BOOL_T:
+			data->set(((Bool *)reference)->get());
+			break;
+		case INTEGER_T:
+			data->set(((Integer *)reference)->get());
+			break;
+		case FLOAT_T:
+			data->set(((Float *)reference)->get());
+			break;
+		case STRING_T:
+			throw Exception(getId(reference) + " is String (can not convert String as Bool)");
+	}	
+}
+
 
 void Memory::castInBool(Bool *data, string value)
 {
 	if(exists(value))
 	{
-		switch(self[value]->typeId())
-		{
-			case BOOL_T:
-				data->set(((Bool *)self[value])->get());
-				break;
-			case INTEGER_T:
-				data->set(((Integer *)self[value])->get());
-				break;
-			case FLOAT_T:
-				data->set(((Float *)self[value])->get());
-				break;
-			default:
-				throw Exception(value + " is String (can not convert " + self[value]->type() + " as Integer)");
-		}
+		 castInBool(data, self[value]);
 	}
 	else
 	{
@@ -326,8 +403,8 @@ void Memory::castInBool(Bool *data, string value)
 			case FLOAT_T:
 				data->set(atof(value.c_str()));
 				break;
-			default:
-				throw Exception(value + " is String (can not convert " + inferType(value) + " as Integer)");
+			case STRING_T:
+				throw Exception(value + " is String (can not convert String as Bool)");
 		}
 	}
 }
@@ -345,6 +422,11 @@ void Memory::castInString(String *data, string value)
 	}
 }
 
+void Memory::castInReference(Reference *ref, string value)
+{
+	castIn(ref->get(), value);
+}
+
 void Memory::castIn(Data *data, string value)
 {
 	switch(data->typeId())
@@ -353,24 +435,41 @@ void Memory::castIn(Data *data, string value)
 		case FLOAT_T: castInFloat((Float *)data, value); break;
 		case BOOL_T: castInBool((Bool *)data, value); break;
 		case STRING_T: castInString((String *)data, value); break;
-		default:
-				throw Exception("Unknown type: " + data->type());
+		case REFERENCE_T: castInReference((Reference *)data, value); break;
 	}
+}
+
+Data **Memory::inferReference(string id, string value)
+{
+	Data **data = &self[id];
+	if(dynamic_cast<Reference *>(*data))
+	{
+		if(not ((Reference *)*data)->get())
+		{
+			throw Exception(id + " Reference is null");
+		}
+		else
+		{
+			data = ((Reference *)*data)->getRef();
+		}
+	}
+	return data;
 }
 
 void Memory::setDataFromValue(string id, string value)
 {
 	Types tv = type(value);
-	switch(attr_final_control(self[id], tv))
+	Data **data = inferReference(id, value);
+	switch(attr_final_control(*data, tv))
 	{
 		case FORB:
-			throw Exception(id + " is marked final, can not change his type (" + self[id]->type() + " into " + inferType(value) + ")");
+			throw Exception(id + " is marked final, can not change his type (" + (*data)->type() + " into " + inferType(value) + ")");
 		case CAST:
-			castIn(self[id], value);
+			castIn(*data, value);
 			break;
 		case FULL:
-			delete self[id];
-			self[id] = generateDataFromValue(value);
+			delete *data;
+			*data = generateDataFromValue(value);
 	}
 }
 
@@ -422,6 +521,21 @@ string Memory::getType(string id)
 	return data->type();
 }
 
+void Memory::changeReference(string id, string value)
+{
+	if(exists(value))
+	{
+		switch(attr_final_control(self[id], self[value]->typeId(), true))
+		{
+			case FORB:
+				throw Exception(id + " is marked final, can not change his reference type (" + self[id]->type() + " into " + inferType(value) + ")");
+			case CAST:
+			case FULL:
+				((Reference *)self[id])->set(&self[value]);
+
+		}
+	}
+}
 
 string Memory::new_primitive(string id, string value)
 {
@@ -453,10 +567,23 @@ string Memory::new_String(string id, string value)
 	return id;
 }
 
+string Memory::new_Reference(string id, string value)
+{
+	addReference(id, value);
+	return id;
+}
+
 string Memory::set_memory(string id, string value)
 {
 	attr_const_control(id);
 	setData(id, value);
+	return id;
+}
+
+string Memory::set_reference(string id, string value)
+{
+	attr_const_control(id, true);
+	changeReference(id, value);
 	return id;
 }
 
@@ -478,12 +605,13 @@ string Memory::data_type_memory(string id)
 
 
 
-void Memory::attr_const_control(string id)
+void Memory::attr_const_control(string id, bool refmode)
 {
 	if(exists(id))
 	{
 		Data *data = self[id];
-		if(data->getAttr() & CONST_A) throw Exception(id + " is marked const, it can not be modified");
+		int attr = refmode ? ((Reference *)data)->getRefAttr() : data->getAttr();
+		if(attr & CONST_A) throw Exception(id + " is marked const, it can not be modified");
 	}
 }
 
@@ -506,12 +634,12 @@ void Memory::addAttr(Data *data, int attr)
 
 bool Memory::isAllowedNumberFrom(Types otherType)
 {
-	return otherType == INTEGER_T or otherType == FLOAT_T or otherType == BOOL_T;
+	return otherType == REFERENCE_T or otherType == INTEGER_T or otherType == FLOAT_T or otherType == BOOL_T;
 }
 
 bool Memory::isAllowedStringFrom(Types otherType)
 {
-	return otherType == INTEGER_T or otherType == FLOAT_T or otherType == BOOL_T or otherType == STRING_T;
+	return otherType == REFERENCE_T or otherType == INTEGER_T or otherType == FLOAT_T or otherType == BOOL_T or otherType == STRING_T;
 }
 
 bool Memory::isAllowedTypeFrom(Types t1, Types t2)
@@ -521,12 +649,13 @@ bool Memory::isAllowedTypeFrom(Types t1, Types t2)
 		case INTEGER_T: case FLOAT_T: case BOOL_T: return isAllowedNumberFrom(t2);
 		case STRING_T: default: return isAllowedStringFrom(t2);
 	}
+	return true;
 }
 
 
-SetModes Memory::attr_final_control(Data *data, Types otherType)
+SetModes Memory::attr_final_control(Data *data, Types otherType, bool refmode)
 {
-	if(data->getAttr() & FINAL_A)
+	if((refmode ? ((Reference *)data)->getRefAttr() : data->getAttr()) & FINAL_A)
 	{
 		if(isAllowedTypeFrom(data->typeId(), otherType)) return CAST;
 		return FORB;

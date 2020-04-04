@@ -148,6 +148,12 @@ string MemoryContext::new_String(string id, string value)
 	return context.getDownMemory().new_String(id, value);
 }
 
+string MemoryContext::new_Reference(string id, string value)
+{
+	MemoryContext& context = getDownContext();
+	return context.getDownMemory().new_Reference(id, value);
+}
+
 string MemoryContext::add_attribute(string id, int attr)
 {
 	return getMemoryWhereIs_BeginDown(id).add_attribute(id, attr);
@@ -156,6 +162,11 @@ string MemoryContext::add_attribute(string id, int attr)
 string MemoryContext::set_memory(string id, string value)
 {
 	return getMemoryWhereIs_BeginDown(id).set_memory(id, value);
+}
+
+string MemoryContext::set_reference(string id, string value)
+{
+	return getMemoryWhereIs_BeginDown(id).set_reference(id, value);
 }
 
 string MemoryContext::get_memory(string id)

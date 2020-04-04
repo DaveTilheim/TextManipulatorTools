@@ -18,6 +18,7 @@ namespace Lizzy
 		FLOAT_T,
 		BOOL_T,
 		STRING_T,
+		REFERENCE_T,
 		VECTOR_T,
 		TABLE_T,
 		CLASS_T,
@@ -34,12 +35,12 @@ namespace Lizzy
 
 	class Data
 	{
-	private:
+	protected:
 		int attr = 0;
 	public:
 		virtual ~Data();
 		virtual string toString() = 0;
-		int getAttr();
+		virtual int getAttr();
 		void setAttr(int attr);
 		virtual string type();
 		virtual Types typeId();
