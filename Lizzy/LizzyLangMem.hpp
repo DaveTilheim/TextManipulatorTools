@@ -1,7 +1,7 @@
 #ifndef LIZZY_LANG_MEM_HPP
 #define LIZZY_LANG_MEM_HPP
 #include "LizzyStdIo.hpp"
-#include "Memory/MemoryContext.hpp"
+#include "Memory/Memory.hpp"
 
 
 namespace Lizzy
@@ -9,9 +9,10 @@ namespace Lizzy
 	class MemPkg : public Package
 	{
 	public:
-		static MemoryContext *_memoryContext; //to delete before static deletion
-		static MemoryContext& memoryContext;
+		static Memory *_memoryContext; //to delete before static deletion
+		static Memory& memoryContext;
 	protected:
+		//variables
 		_decl_action(new_action)
 		_decl_action(new_Integer_action)
 		_decl_action(new_Float_action)
@@ -23,13 +24,22 @@ namespace Lizzy
 		_decl_action(new_Bool_action_1)
 		_decl_action(new_String_action_1)
 		_decl_action(new_Reference_action_1)
+		//containers
+		_decl_action(new_Vector_action)
+		_decl_action(set_at_action)
+		//qualifiers
 		_decl_action(const_action)
 		_decl_action(final_action)
+		//accessors
 		_decl_action(set_action)
 		_decl_action(set_reference_action)
 		_decl_action(get_action)
+		//introspection
 		_decl_action(type_action)
 		_decl_action(exists_action)
+		//branchs
+		_decl_action(push_action)
+		_decl_action(pop_action);
 	public:
 		MemPkg();
 		~MemPkg();

@@ -22,14 +22,26 @@ namespace Lizzy
 
 	class Memory : private unordered_map<string, Data *>
 	{
-	private:
-		Memory& self;
 	public:
-		Memory();
+		const string id;
+		Memory& self;
+		Memory *parent;
+		Memory *child = nullptr;
+	public:
+		Memory(Memory *parent, string id);
 		~Memory();
+	public:
+		Memory *getDownMemory();
+		void push(string id);
+		void pop();
+	public:
 		bool exists(string id);
+		bool existsGlobalUp(string id);
+		Data *getDataGlobalUp(string id);
+		Data **getDataSlotGlobalUp(string id);
 		void setAttr(string id, int attr);
 		string getId(Data *);
+		string getId();
 		Data **inferReference(string id, string value);
 		//Generic primitive
 		void addPrimitiveData(string id, string strGenValue);
@@ -51,12 +63,17 @@ namespace Lizzy
 		void addReference(string id, string value);
 		//set primitive
 		void setDataFromValue(string id, string value);
+		void setDataFromId(string id, string value);
 		void setData(string id, string value);
 		Data *getData(string id);
 		string getType(string id);
 		string toString(string id);
 		static Types type(string constStrGenValue);
 		static string inferType(string constStrGenValue);
+		//containers
+		Vector *generateVector(vector<string>& values);
+		void addVector(string id, vector<string>& values);
+		void setVectorAt(string id, string index, string value);
 		//casting
 		void castIn(Data *data, string value);
 		void castInInteger(Integer *data, string value);
@@ -67,6 +84,7 @@ namespace Lizzy
 		void castInInteger(Integer *data, Data* value);
 		void castInFloat(Float *data, Data* value);
 		void castInBool(Bool *data, Data* value);
+		void castInVector(Vector *ref, string value);
 		static bool isAllowedTypeFrom(Types t1, Types t2);
 		static bool isAllowedNumberFrom(Types otherType);
 		static bool isAllowedStringFrom(Types otherType);
@@ -84,12 +102,14 @@ namespace Lizzy
 		string new_Bool(string id, string value);
 		string new_String(string id, string value);
 		string new_Reference(string id, string value);
+		string new_Vector(string id, vector<string>& values);
 		string set_memory(string id, string value);
 		string set_reference(string id, string value);
 		string get_memory(string id);
 		string add_attribute(string id, int attr);
-		static string value_type_memory(string value);
-		string data_type_memory(string id);
+		string type_memory(string id);
+		string exists_memory(string id);
+		string set_at(string id, string index, string value);
 	};
 }
 

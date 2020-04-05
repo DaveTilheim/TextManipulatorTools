@@ -3,7 +3,7 @@
 using namespace Lizzy;
 
 
-Memory::Memory() : unordered_map<string, Data *>(), self(*this)
+Memory::Memory(Memory *parent, string id) : unordered_map<string, Data *>(), self(*this), parent(parent), id(id)
 {
 	cout << "Memory created" << endl;
 }
@@ -18,19 +18,78 @@ Memory::~Memory()
 	cout << "Memory deleted" << endl;
 }
 
+Memory *Memory::getDownMemory()
+{
+	Memory *memory = this;
+	while(memory->child)
+	{
+		memory = memory->child;
+	}
+	return memory;
+}
+
+void Memory::push(string id)
+{
+	Memory *memory = getDownMemory();
+	memory->child = new Memory(memory, id);
+}
+
+void Memory::pop()
+{
+	Memory *memory = getDownMemory()->parent;
+	if(memory)
+	{
+		delete memory->child;
+		memory->child = nullptr;
+	}
+}
+
 bool Memory::exists(string id)
 {
 	return find(id) != end();
 }
 
+
+bool Memory::existsGlobalUp(string id)
+{
+	Memory *memory = this;
+	while(memory)
+	{
+		if(memory->exists(id)) return true;
+		memory = memory->parent;
+	}
+	return false;
+}
+
+Data *Memory::getDataGlobalUp(string id)
+{
+	Memory *memory = this;
+	while(memory)
+	{
+		if(memory->find(id) != memory->end()) return (*memory)[id];
+		memory = memory->parent;
+	}
+	throw Exception(id + " Memory not exists");
+}
+
 void Memory::setAttr(string id, int attr)
 {
-	getData(id)->setAttr(attr);
+	getDataGlobalUp(id)->setAttr(attr);
+}
+
+string Memory::getId()
+{
+	return id;
 }
 
 string Memory::getId(Data *d)
 {
-	for(auto it : *this) if(d == it.second) return it.first;
+	Memory *memory = this;
+	while(memory)
+	{
+		for(auto it : *memory) if(d == it.second) return it.first;
+		memory = memory->parent;
+	}
 	throw Exception("Reference Memory is a reference to a Memory which not exists");
 }
 
@@ -48,14 +107,14 @@ Data *Memory::generateDataFromValue(string value)
 
 Data *Memory::generateDataFromId(string id)
 {
-	return getData(id)->dup();
+	return getDataGlobalUp(id)->dup();
 }
 
 void Memory::addPrimitiveData(string id, string value)
 {
 	if(not exists(id))
 	{
-		if(exists(value))
+		if(existsGlobalUp(value))
 		{
 			self[id] = generateDataFromId(value);
 		}
@@ -78,6 +137,8 @@ Integer *Memory::generateInteger(Data *reference)
 				return new Integer(((Bool *)reference)->get());
 		case STRING_T:
 			throw Exception(getId(reference) + " is String (can not convert String as Integer)");
+		case VECTOR_T:
+			throw Exception(getId(reference) + " is Vector (can not convert Vector as Integer)");
 		case REFERENCE_T:
 			throw Exception(getId(reference) + " is a reference to null");
 		default:
@@ -87,9 +148,9 @@ Integer *Memory::generateInteger(Data *reference)
 
 Integer *Memory::generateInteger(string value)
 {
-	if(exists(value))
+	if(existsGlobalUp(value))
 	{
-		return generateInteger(self[value]);
+		return generateInteger(getDataGlobalUp(value));
 	}
 	else
 	{
@@ -115,6 +176,8 @@ Float *Memory::generateFloat(Data *reference)
 			return new Float(((Bool *)reference)->get());
 		case STRING_T:
 			throw Exception(getId(reference) + " is String (can not convert String as Float)");
+		case VECTOR_T:
+			throw Exception(getId(reference) + " is Vector (can not convert Vector as Float)");
 		case REFERENCE_T:
 			throw Exception(getId(reference) + " is a reference to null");
 		default:
@@ -124,9 +187,9 @@ Float *Memory::generateFloat(Data *reference)
 
 Float *Memory::generateFloat(string value)
 {
-	if(exists(value))
+	if(existsGlobalUp(value))
 	{
-		return generateFloat(self[value]);
+		return generateFloat(getDataGlobalUp(value));
 	}
 	else
 	{
@@ -148,6 +211,8 @@ Bool *Memory::generateBool(Data *reference)
 	{
 		case REFERENCE_T:
 			throw Exception(getId(reference) + " is a reference to null");
+		case VECTOR_T:
+			throw Exception(getId(reference) + " is Vector (can not convert Vector as Bool)");
 		case STRING_T:
 			throw Exception(getId(reference) + " is String (can not convert String as Bool)");
 		case INTEGER_T:
@@ -161,9 +226,9 @@ Bool *Memory::generateBool(Data *reference)
 
 Bool *Memory::generateBool(string value)
 {
-	if(exists(value))
+	if(existsGlobalUp(value))
 	{
-		return generateBool(self[value]);
+		return generateBool(getDataGlobalUp(value));
 	}
 	else
 	{
@@ -186,9 +251,9 @@ Bool *Memory::generateBool(string value)
 
 String *Memory::generateString(string value)
 {
-	if(exists(value))
+	if(existsGlobalUp(value))
 	{
-		return new String(self[value]->toString());
+		return new String(getDataGlobalUp(value)->toString());
 	}
 	else
 	{
@@ -198,9 +263,9 @@ String *Memory::generateString(string value)
 
 Reference *Memory::generateReference(string value)
 {
-	if(exists(value))
+	if(existsGlobalUp(value))
 	{
-		Data **data = &self[value];
+		Data **data = getDataSlotGlobalUp(value);
 		if(dynamic_cast<Reference *>(*data)) data = ((Reference *)*data)->getRef();
 		return new Reference(data);
 	}
@@ -210,6 +275,24 @@ Reference *Memory::generateReference(string value)
 			return new Reference(nullptr);
 		throw Exception(value + " not exists");
 	}
+}
+
+
+Vector *Memory::generateVector(vector<string>& values)
+{
+	Vector *data = new Vector();
+	for(string value : values)
+	{
+		if(existsGlobalUp(value))
+		{
+			data->add(getDataGlobalUp(value)->dup());
+		}
+		else
+		{
+			data->add(generateDataFromValue(value));
+		}
+	}
+	return data;
 }
 
 void Memory::addInteger(string id, string value)
@@ -273,6 +356,19 @@ void Memory::addReference(string id, string value)
 	}
 }
 
+void Memory::addVector(string id, vector<string>& values)
+{
+	if(not exists(id))
+	{
+		self[id] = generateVector(values);
+	}
+	else
+	{
+		throw Exception(id +  " Memory already exists");
+	}
+}
+
+
 
 
 void Memory::castInInteger(Integer *data, Data *reference)
@@ -300,9 +396,9 @@ void Memory::castInInteger(Integer *data, Data *reference)
 
 void Memory::castInInteger(Integer *data, string value)
 {
-	if(exists(value))
+	if(existsGlobalUp(value))
 	{
-		castInInteger(data, self[value]);
+		castInInteger(data, getDataGlobalUp(value));
 	}
 	else
 	{
@@ -346,9 +442,9 @@ void Memory::castInFloat(Float *data, Data *reference)
 
 void Memory::castInFloat(Float *data, string value)
 {
-	if(exists(value))
+	if(existsGlobalUp(value))
 	{
-		castInFloat(data, self[value]);
+		castInFloat(data, getDataGlobalUp(value));
 	}
 	else
 	{
@@ -393,9 +489,9 @@ void Memory::castInBool(Bool *data, Data *reference)
 
 void Memory::castInBool(Bool *data, string value)
 {
-	if(exists(value))
+	if(existsGlobalUp(value))
 	{
-		 castInBool(data, self[value]);
+		 castInBool(data, getDataGlobalUp(value));
 	}
 	else
 	{
@@ -418,9 +514,9 @@ void Memory::castInBool(Bool *data, string value)
 
 void Memory::castInString(String *data, string value)
 {
-	if(exists(value))
+	if(existsGlobalUp(value))
 	{
-		data->set(self[value]->toString());
+		data->set(getDataGlobalUp(value)->toString());
 	}
 	else
 	{
@@ -433,6 +529,28 @@ void Memory::castInReference(Reference *ref, string value)
 	castIn(ref->get(), value);
 }
 
+
+void Memory::castInVector(Vector *ref, string value)
+{
+	if(existsGlobalUp(value))
+	{
+		Data *data = getDataGlobalUp(value);
+		if(data->typeId() == VECTOR_T)
+		{
+			Vector *vec = dynamic_cast<Vector *>(data);
+			ref->copyVector(vec->getVector());
+		}
+		else
+		{
+			throw Exception("can not cast " + data->type() + " into Vector");
+		}
+	}
+	else
+	{
+		throw Exception("can not cast " + inferType(value) + " into Vector");
+	}
+}
+
 void Memory::castIn(Data *data, string value)
 {
 	switch(data->typeId())
@@ -442,13 +560,25 @@ void Memory::castIn(Data *data, string value)
 		case BOOL_T: castInBool((Bool *)data, value); break;
 		case STRING_T: castInString((String *)data, value); break;
 		case REFERENCE_T: castInReference((Reference *)data, value); break;
+		case VECTOR_T: castInVector((Vector *)data, value); break;
 		default:;
 	}
 }
 
+Data **Memory::getDataSlotGlobalUp(string id)
+{
+	Memory *memory = this;
+	while(memory)
+	{
+		if(memory->exists(id)) return &(*memory)[id];
+		memory = memory->parent;
+	}
+	throw Exception(id + " Memory not exists");
+}
+
 Data **Memory::inferReference(string id, string value)
 {
-	Data **data = &self[id];
+	Data **data = getDataSlotGlobalUp(id);
 	if(dynamic_cast<Reference *>(*data))
 	{
 		if(not ((Reference *)*data)->get())
@@ -480,15 +610,84 @@ void Memory::setDataFromValue(string id, string value)
 	}
 }
 
+void Memory::setDataFromId(string id, string value)
+{
+	Types tv = getDataGlobalUp(value)->typeId();
+	Data **data = inferReference(id, value);
+	switch(attr_final_control(*data, tv))
+	{
+		case FORB:
+			throw Exception(id + " is marked final, can not change his type (" + (*data)->type() + " into " + inferType(value) + ")");
+		case CAST:
+			castIn(*data, value);
+			break;
+		case FULL:
+			delete *data;
+			*data = generateDataFromId(value);
+	}
+}
+
 void Memory::setData(string id, string value)
 {
-	if(exists(id))
+	if(existsGlobalUp(id))
 	{
-		setDataFromValue(id, value);
+		if(existsGlobalUp(value))
+			setDataFromId(id, value);
+		else
+			setDataFromValue(id, value);
 	}
 	else
 	{
 		throw Exception(id +  " Memory not exists");
+	}
+}
+
+void Memory::setVectorAt(string id, string index, string value)
+{
+	if(existsGlobalUp(id))
+	{
+		Data *data = getDataGlobalUp(id);
+		if(data->typeId() == VECTOR_T)
+		{
+			Vector *vec = dynamic_cast<Vector *>(data);
+			int i = -1;
+			if(existsGlobalUp(index))
+			{
+				Data *dataIndex = getDataGlobalUp(index);
+				if(dataIndex->typeId() == INTEGER_T)
+				{
+					i = ((Integer *)dataIndex)->get();
+				}
+				else
+				{
+					throw Exception(index + " can not be interpreted as Vector index");
+				}
+			}
+			else
+			{
+				i = atoi(index.c_str());
+			}
+			if(i < 0 or i >= vec->getVector().size())
+			{
+				throw Exception("index out of band of size of Vector");
+			}
+			if(existsGlobalUp(value))
+			{
+				vec->getVector()[i] = generateDataFromId(value);
+			}
+			else
+			{
+				vec->getVector()[i] = generateDataFromValue(value);
+			}
+		}
+		else
+		{
+			throw Exception(id + " is not a Vector");
+		}
+	}
+	else
+	{
+		throw Exception(id + " Memory not exists");
 	}
 }
 
@@ -518,105 +717,129 @@ string Memory::inferType(string constStrGenValue)
 
 string Memory::toString(string id)
 {
-	Data *data = getData(id);
+	Data *data = getDataGlobalUp(id);
 	return data->toString();
 }
 
 string Memory::getType(string id)
 {
-	Data *data = getData(id);
+	Data *data = getDataGlobalUp(id);
 	return data->type();
 }
 
 void Memory::changeReference(string id, string value)
 {
-	if(exists(value))
+	if(existsGlobalUp(value))
 	{
-		switch(attr_final_control(self[id], self[value]->typeId(), true))
+
+		switch(attr_final_control(getDataGlobalUp(id), getDataGlobalUp(value)->typeId(), true))
 		{
 			case FORB:
-				throw Exception(id + " is marked final, can not change his reference type (" + self[id]->type() + " into " + inferType(value) + ")");
+				throw Exception(id + " is marked final, can not change his reference type (" + getDataGlobalUp(id)->type() + " into " + inferType(value) + ")");
 			case CAST:
 			case FULL:
-				((Reference *)self[id])->set(&self[value]);
+				((Reference *)getDataGlobalUp(id))->set(getDataSlotGlobalUp(value));
 
 		}
+	}
+	else
+	{
+		throw Exception("can not set reference to " + value + ", because it not exists");
 	}
 }
 
 string Memory::new_primitive(string id, string value)
 {
-	addPrimitiveData(id, value);
+	getDownMemory()->addPrimitiveData(id, value);
 	return id;
 }
 
 string Memory::new_Integer(string id, string value)
 {
-	addInteger(id, value);
+	getDownMemory()->addInteger(id, value);
 	return id;
 }
 
 string Memory::new_Float(string id, string value)
 {
-	addFloat(id, value);
+	getDownMemory()->addFloat(id, value);
 	return id;
 }
 
 string Memory::new_Bool(string id, string value)
 {
-	addBool(id, value);
+	getDownMemory()->addBool(id, value);
 	return id;
 }
 
 string Memory::new_String(string id, string value)
 {
-	addString(id, value);
+	getDownMemory()->addString(id, value);
 	return id;
 }
 
 string Memory::new_Reference(string id, string value)
 {
-	addReference(id, value);
+	getDownMemory()->addReference(id, value);
+	return id;
+}
+
+string Memory::new_Vector(string id, vector<string>& values)
+{
+	getDownMemory()->addVector(id, values);
 	return id;
 }
 
 string Memory::set_memory(string id, string value)
 {
-	attr_const_control(id);
-	setData(id, value);
+	Memory *memory = getDownMemory();
+	memory->attr_const_control(id);
+	memory->setData(id, value);
+	return id;
+}
+
+string Memory::set_at(string id, string index, string value)
+{
+	Memory *memory = getDownMemory();
+	memory->attr_const_control(id);
+	memory->setVectorAt(id, index, value);
 	return id;
 }
 
 string Memory::set_reference(string id, string value)
 {
-	attr_const_control(id, true);
-	changeReference(id, value);
+	Memory *memory = getDownMemory();
+	memory->attr_const_control(id, true);
+	memory->changeReference(id, value);
 	return id;
 }
 
 string Memory::get_memory(string id)
 {
-	return toString(id);
+	return getDownMemory()->toString(id);
 }
 
-string Memory::value_type_memory(string value)
+string Memory::type_memory(string id)
 {
-	return Memory::inferType(value);
+	Memory *memory = getDownMemory();
+	if(memory->existsGlobalUp(id))
+	{
+		return memory->getDataGlobalUp(id)->type();
+	}
+	return Memory::inferType(id);
 }
 
-
-string Memory::data_type_memory(string id)
+string Memory::exists_memory(string id)
 {
-	return getData(id)->type();
+	return getDownMemory()->existsGlobalUp(id) ? "true" : "false";
 }
-
 
 
 void Memory::attr_const_control(string id, bool refmode)
 {
-	if(exists(id))
+	if(existsGlobalUp(id))
 	{
-		Data *data = self[id];
+		Data *data = getDataGlobalUp(id);
 		int attr = refmode ? ((Reference *)data)->getRefAttr() : data->getAttr();
 		if(attr & CONST_A) throw Exception(id + " is marked const, it can not be modified");
 	}
@@ -624,7 +847,7 @@ void Memory::attr_const_control(string id, bool refmode)
 
 string Memory::add_attribute(string id, int attr)
 {
-	addAttr(getData(id), attr);
+	getDownMemory()->addAttr(getDownMemory()->getDataGlobalUp(id), attr);
 	return id;
 }
 
@@ -654,6 +877,7 @@ bool Memory::isAllowedTypeFrom(Types t1, Types t2)
 	switch(t1)
 	{
 		case INTEGER_T: case FLOAT_T: case BOOL_T: return isAllowedNumberFrom(t2);
+		case VECTOR_T: return t2 == VECTOR_T;
 		case STRING_T: default: return isAllowedStringFrom(t2);
 	}
 	return true;

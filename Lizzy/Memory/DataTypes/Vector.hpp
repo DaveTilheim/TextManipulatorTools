@@ -18,7 +18,7 @@ namespace Lizzy
 		Types typeId() override;
 		Data *dup() override;
 		Data *get(int i) const noexcept(false);
-		void add(Data &data) _dup_in_method;
+		void add(Data *data); _dup_in_method
 		void remove(int i) noexcept(false);
 		void clean();
 		void foreach(void (*operation)(Data *));

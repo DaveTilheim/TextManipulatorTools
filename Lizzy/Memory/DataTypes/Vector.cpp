@@ -19,6 +19,7 @@ Vector::~Vector()
 {
 	for(auto *data : value)
 	{
+		cout << data->type() +" deleted to Vector" << endl;
 		delete data;
 	}
 }
@@ -31,6 +32,7 @@ string Vector::toString()
 		buf += data->toString() + " ";
 	}
 	if(buf.size()) buf.pop_back();
+	else return " ";
 	return buf;
 }
 
@@ -77,9 +79,10 @@ void Vector::clean()
 	value.clear();
 }
 
-void Vector::add(Data &data)
+void Vector::add(Data *data)
 {
-	value.push_back(data.dup());
+	cout << data->type() +" added to Vector" << endl;
+	value.push_back(data);
 }
 
 void Vector::foreach(void (*operation)(Data *))

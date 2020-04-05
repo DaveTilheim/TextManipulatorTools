@@ -1,14 +1,22 @@
 #load package Lizzy
 
-println Lizzy V version
+println Lizzy Version version
 
-alias & [set] reference
+alias int 	[Integer]
+alias float [Float]
+alias bool 	[Bool]
+alias str 	[String]
+alias vec 	[Vector]
 
 
-const Float PI 3.14
+Vector v a a a a a a a a a a
 
-Reference ref
+set at v input:1 "index = " O
 
-& ref PI
+println get v
 
-printmln ref
+//get at
+//add at
+//add front
+//add back
+//size

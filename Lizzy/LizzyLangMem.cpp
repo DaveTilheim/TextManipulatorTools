@@ -3,8 +3,8 @@
 using namespace Lizzy;
 
 
-MemoryContext *MemPkg::_memoryContext = new MemoryContext("root");
-MemoryContext& MemPkg::memoryContext = *MemPkg::_memoryContext;
+Memory *MemPkg::_memoryContext = new Memory(nullptr, "root");
+Memory& MemPkg::memoryContext = *MemPkg::_memoryContext;
 
 _def_action(MemPkg::new_action)
 {
@@ -129,6 +129,44 @@ _def_action(MemPkg::set_reference_action)
 	return MemPkg::memoryContext.set_reference(id, value);
 }
 
+/* CONTAINERS */
+
+_def_action(MemPkg::new_Vector_action)
+{
+	if(args.list().size() == 0) throw Exception("new Vector Command must have at least one parameter");
+	string id = args("id");
+	vector<string> values;
+	args.list().next();
+	while(not args.list().oob())
+	{
+		values.push_back((string)args.list());
+	}
+	return MemPkg::memoryContext.new_Vector(id, values);
+}
+
+_def_action(MemPkg::set_at_action)
+{
+	string id = args("id");
+	string index = args("i", 1);
+	string value = args("value", 2);
+	return MemPkg::memoryContext.set_at(id, index, value);
+}
+
+/* BRANCHS */
+
+_def_action(MemPkg::push_action)
+{
+	string id = args("id");
+	MemPkg::memoryContext.push(id);
+	return id;
+}
+
+_def_action(MemPkg::pop_action)
+{
+	MemPkg::memoryContext.pop();
+	return "null";
+}
+
 
 MemPkg::MemPkg() : Package("Mem")
 {
@@ -183,7 +221,15 @@ void MemPkg::load()
 	cmd("new").child("Reference").setAction(2, newReferenceAction);
 	cmd("new").child("Reference").setAction(1, newReferenceAction1);
 
+	Action newVectorAction(new_Vector_action);
+	newVectorAction.setNamed("id");
+	cmd("new").child("Vector").setAction(-1, newVectorAction);
 
+	Action setAtAction(set_at_action);
+	setAtAction.setNamed("id");
+	setAtAction.setNamed("i");
+	setAtAction.setNamed("value");
+	cmd("set").child("at").setAction(3, setAtAction);
 
 
 
@@ -193,6 +239,7 @@ void MemPkg::load()
 	cmdAlias(cmd("new").child("Bool"), "Bool");
 	cmdAlias(cmd("new").child("String"), "String");
 	cmdAlias(cmd("new").child("Reference"), "Reference");
+	cmdAlias(cmd("new").child("Vector"), "Vector");
 
 	Action constAction(const_action);
 	constAction.setNamed("id");
@@ -224,4 +271,12 @@ void MemPkg::load()
 	Action existsAction(exists_action);
 		existsAction.setNamed("id");
 		cmd("exists").setAction(1, existsAction);
+
+
+	Action pushAction(push_action);
+		pushAction.setNamed("id");
+		cmd("push").setAction(1, pushAction);
+
+	Action popAction(pop_action);
+		cmd("pop").setAction(0, popAction);
 }
