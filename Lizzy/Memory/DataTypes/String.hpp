@@ -20,6 +20,7 @@ namespace Lizzy
 		string get() const;
 		void set(string newValue);
 		String& operator=(const String& cp);
+		char& operator[](int i);
 	};
 }
 

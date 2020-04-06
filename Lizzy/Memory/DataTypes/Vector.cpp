@@ -19,7 +19,7 @@ Vector::~Vector()
 {
 	for(auto *data : value)
 	{
-		cout << data->type() +" deleted to Vector" << endl;
+		//cout << data->type() +" deleted to Vector" << endl;
 		delete data;
 	}
 }
@@ -81,7 +81,7 @@ void Vector::clean()
 
 void Vector::add(Data *data)
 {
-	cout << data->type() +" added to Vector" << endl;
+	//cout << data->type() +" added to Vector" << endl;
 	value.push_back(data);
 }
 
@@ -95,6 +95,7 @@ void Vector::foreach(void (*operation)(Data *))
 
 void Vector::copyVector(const vector<Data *>& vec)
 {
+	value.clear();
 	for(auto *data : vec)
 	{
 		value.push_back(data->dup());

@@ -80,6 +80,18 @@ _def_action(MemPkg::new_Reference_action_1)
 }
 
 
+_def_action(MemPkg::to_reference_action)
+{
+	string id = args("id");
+	string value = args("value", 1);
+	return MemPkg::memoryContext.to_reference(id, value);
+}
+
+_def_action(MemPkg::to_reference_action_1)
+{
+	string id = args("id");
+	return MemPkg::memoryContext.to_reference(id, "");
+}
 
 
 _def_action(MemPkg::const_action)
@@ -92,6 +104,12 @@ _def_action(MemPkg::final_action)
 {
 	string id = args("id");
 	return MemPkg::memoryContext.add_attribute(id, FINAL_A);
+}
+
+_def_action(MemPkg::restrict_action)
+{
+	string id = args("id");
+	return MemPkg::memoryContext.add_attribute(id, RESTRICT_A);
 }
 
 
@@ -144,12 +162,10 @@ _def_action(MemPkg::new_Vector_action)
 	return MemPkg::memoryContext.new_Vector(id, values);
 }
 
-_def_action(MemPkg::set_at_action)
+_def_action(MemPkg::size_action)
 {
 	string id = args("id");
-	string index = args("i", 1);
-	string value = args("value", 2);
-	return MemPkg::memoryContext.set_at(id, index, value);
+	return MemPkg::memoryContext.size_vector(id);
 }
 
 /* BRANCHS */
@@ -166,6 +182,24 @@ _def_action(MemPkg::pop_action)
 	MemPkg::memoryContext.pop();
 	return "null";
 }
+
+
+
+_def_action(MemPkg::get_char_action)
+{
+	string id = args("id");
+	string index = args("i", 1);
+	return MemPkg::memoryContext.get_char_at(id, index);
+}
+
+_def_action(MemPkg::set_char_action)
+{
+	string id = args("id");
+	string index = args("i", 1);
+	string character = args("char", 2);
+	return MemPkg::memoryContext.set_char_at(id, index, character);
+}
+
 
 
 MemPkg::MemPkg() : Package("Mem")
@@ -222,15 +256,23 @@ void MemPkg::load()
 	cmd("new").child("Reference").setAction(1, newReferenceAction1);
 
 	Action newVectorAction(new_Vector_action);
-	newVectorAction.setNamed("id");
-	cmd("new").child("Vector").setAction(-1, newVectorAction);
+		newVectorAction.setNamed("id");
+		cmd("new").child("Vector").setAction(-1, newVectorAction);
 
-	Action setAtAction(set_at_action);
-	setAtAction.setNamed("id");
-	setAtAction.setNamed("i");
-	setAtAction.setNamed("value");
-	cmd("set").child("at").setAction(3, setAtAction);
 
+	Action toReferenceAction(to_reference_action);
+		toReferenceAction.setNamed("id");
+		toReferenceAction.setNamed("value");
+		cmd("to").child("reference").setAction(2, toReferenceAction);
+
+	Action toReferenceAction1(to_reference_action_1);
+		toReferenceAction1.setNamed("id");
+		cmd("to").child("reference").setAction(1, toReferenceAction1);
+
+
+	Action sizeAction(size_action);
+		sizeAction.setNamed("id");
+		cmd("size").setAction(1, sizeAction);
 
 
 	cmd("var").setAction(2, newAction);
@@ -241,13 +283,18 @@ void MemPkg::load()
 	cmdAlias(cmd("new").child("Reference"), "Reference");
 	cmdAlias(cmd("new").child("Vector"), "Vector");
 
+
 	Action constAction(const_action);
-	constAction.setNamed("id");
-	cmd("const").setAction(1, constAction);
+		constAction.setNamed("id");
+		cmd("const").setAction(1, constAction);
 
 	Action finalAction(final_action);
-	finalAction.setNamed("id");
-	cmd("final").setAction(1, finalAction);
+		finalAction.setNamed("id");
+		cmd("final").setAction(1, finalAction);
+
+	Action restrictAction(restrict_action);
+		restrictAction.setNamed("id");
+		cmd("restrict").setAction(1, restrictAction);
 	
 
 
@@ -279,4 +326,16 @@ void MemPkg::load()
 
 	Action popAction(pop_action);
 		cmd("pop").setAction(0, popAction);
+
+
+	Action getCharAction(get_char_action);
+		getCharAction.setNamed("id");
+		getCharAction.setNamed("i");
+		cmd("get").child("char").setAction(2, getCharAction);
+
+	Action setCharAction(set_char_action);
+		setCharAction.setNamed("id");
+		setCharAction.setNamed("i");
+		setCharAction.setNamed("char");
+		cmd("set").child("char").setAction(3, setCharAction);
 }

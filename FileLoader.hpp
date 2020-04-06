@@ -7,7 +7,7 @@
 #include <functional>
 
 using namespace std;
-
+using namespace cmd;
 
 class FileLoader
 {

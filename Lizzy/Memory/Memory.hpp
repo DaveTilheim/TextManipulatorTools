@@ -6,6 +6,7 @@
 #include "DataTypes/String.hpp"
 #include "DataTypes/Vector.hpp"
 #include "DataTypes/Reference.hpp"
+#include "../../String.hpp"
 #include <ctype.h>
 #include <unordered_map>
 
@@ -42,7 +43,7 @@ namespace Lizzy
 		void setAttr(string id, int attr);
 		string getId(Data *);
 		string getId();
-		Data **inferReference(string id, string value);
+		Data **inferReference(string id);
 		//Generic primitive
 		void addPrimitiveData(string id, string strGenValue);
 		Data *generateDataFromValue(string value);
@@ -73,7 +74,10 @@ namespace Lizzy
 		//containers
 		Vector *generateVector(vector<string>& values);
 		void addVector(string id, vector<string>& values);
-		void setVectorAt(string id, string index, string value);
+		int getVectorSize(string id);
+		//String
+		string getCharAt(string id, string index);
+		void setCharAt(string id, string index, string character);
 		//casting
 		void castIn(Data *data, string value);
 		void castInInteger(Integer *data, string value);
@@ -90,6 +94,7 @@ namespace Lizzy
 		static bool isAllowedStringFrom(Types otherType);
 		//reference
 		void changeReference(string id, string value);
+		void toReference(string id, string value);
 		//Memory controls
 		void attr_const_control(string id, bool refmode=false);
 		SetModes attr_final_control(Data *data, Types otherType, bool refmode=false);
@@ -109,7 +114,10 @@ namespace Lizzy
 		string add_attribute(string id, int attr);
 		string type_memory(string id);
 		string exists_memory(string id);
-		string set_at(string id, string index, string value);
+		string to_reference(string id, string value);
+		string size_vector(string id);
+		string get_char_at(string id, string index);
+		string set_char_at(string id, string index, string character);
 	};
 }
 

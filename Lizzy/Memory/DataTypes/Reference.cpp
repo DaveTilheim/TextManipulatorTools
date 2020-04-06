@@ -31,6 +31,17 @@ int Reference::getAttr()
 	return attr;
 }
 
+void Reference::setAttr(int attr)
+{
+	if(value and *value) (*value)->setAttr(attr);
+	Data::setAttr(attr);
+}
+
+void Reference::setRefAttr(int attr)
+{
+	Data::setAttr(attr);
+}
+
 int Reference::getRefAttr() const
 {
 	return attr;

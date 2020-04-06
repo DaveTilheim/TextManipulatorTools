@@ -61,3 +61,8 @@ bool String::is(string expr)
 {
 	return true;
 }
+
+char& String::operator[](int i)
+{
+	return value[i];
+}

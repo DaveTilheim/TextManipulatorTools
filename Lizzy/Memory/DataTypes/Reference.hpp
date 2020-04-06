@@ -15,6 +15,8 @@ namespace Lizzy
 		Reference(const Reference& cp);
 		~Reference();
 		int getAttr() override;
+		void setAttr(int attr) override;
+		void setRefAttr(int attr);
 		int getRefAttr() const;
 		string toString() override;
 		string type() override;

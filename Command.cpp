@@ -278,7 +278,7 @@ Attributes Command::extractAttributes(String& commandName)
 {
 	int i;
 	Attributes attr;
-	if((i = commandName.find(":")) != string::npos)
+	if(commandName.find(" ") == string::npos and (i = commandName.find(":")) != string::npos)
 	{
 		string name = commandName.substr(0, i);
 		String attributes = commandName.substr(i);

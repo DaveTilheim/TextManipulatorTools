@@ -24,12 +24,18 @@ namespace Lizzy
 		_decl_action(new_Bool_action_1)
 		_decl_action(new_String_action_1)
 		_decl_action(new_Reference_action_1)
+		_decl_action(to_reference_action)
+		_decl_action(to_reference_action_1)
 		//containers
 		_decl_action(new_Vector_action)
-		_decl_action(set_at_action)
+		_decl_action(size_action);
+		//String
+		_decl_action(set_char_action)
+		_decl_action(get_char_action)
 		//qualifiers
 		_decl_action(const_action)
 		_decl_action(final_action)
+		_decl_action(restrict_action)
 		//accessors
 		_decl_action(set_action)
 		_decl_action(set_reference_action)

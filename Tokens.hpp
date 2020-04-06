@@ -4,6 +4,8 @@
 #include <functional>
 #include <fstream>
 
+using namespace cmd;
+
 class Tokens : public vector<String>
 {
 private:

@@ -61,18 +61,25 @@ string Action::run(Tokens args)
 	while(not args.oob())
 	{
 		String elem = args;
-		auto splitString = elem.split(getSeparator());
-		if(nameExists(splitString[0]))
+		if(elem == getSeparator())
 		{
-			if(splitString.size() == 2)
-				namedContent[splitString[0]] = splitString[1];
-			else
-				namedContent[splitString[0]] = "used";
+			sequArgs.push_back(elem);
 		}
 		else
 		{
-			elem.unpack("["); //surround command / subcommand / named parameter
-			sequArgs.push_back(elem);
+			auto splitString = elem.split(getSeparator());
+			if(nameExists(splitString[0]))
+			{
+				if(splitString.size() == 2)
+					namedContent[splitString[0]] = splitString[1];
+				else
+					namedContent[splitString[0]] = "used";
+			}
+			else
+			{
+				elem.unpack("["); //surround command / subcommand / named parameter
+				sequArgs.push_back(elem);
+			}
 		}
 	}
 	Args_t actionArgs(sequArgs, namedContent);

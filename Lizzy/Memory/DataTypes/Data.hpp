@@ -28,7 +28,8 @@ namespace Lizzy
 	enum DataAttributes
 	{
 		CONST_A = 0x0001,
-		FINAL_A = 0x0002
+		FINAL_A = 0x0002,
+		RESTRICT_A = 0x0004
 	};
 
 	string getAttrAsString(int attr);
@@ -41,7 +42,7 @@ namespace Lizzy
 		virtual ~Data();
 		virtual string toString() = 0;
 		virtual int getAttr();
-		void setAttr(int attr);
+		virtual void setAttr(int attr);
 		virtual string type();
 		virtual Types typeId();
 		virtual Data *dup();

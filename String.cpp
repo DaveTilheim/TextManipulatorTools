@@ -1,5 +1,6 @@
 #include "String.hpp"
 
+using namespace cmd;
 
 String::String(const string& s) : string(s)
 {

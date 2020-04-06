@@ -2,21 +2,12 @@
 
 println Lizzy Version version
 
-alias int 	[Integer]
-alias float [Float]
-alias bool 	[Bool]
-alias str 	[String]
-alias vec 	[Vector]
+
+String myString input "string: "
+
+Reference ref myString
+
+set char ref 0 5
 
 
-Vector v a a a a a a a a a a
-
-set at v input:1 "index = " O
-
-println get v
-
-//get at
-//add at
-//add front
-//add back
-//size
+println get myString

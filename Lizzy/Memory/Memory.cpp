@@ -44,9 +44,37 @@ void Memory::pop()
 	}
 }
 
+vector<string> Memory::toAccessor(string id)
+{
+	return cmd::String(id).split_std(".");
+}
+
+bool Memory::isAccessor(string id)
+{
+	return toAccessor(id).size() > 1;
+}
+
+bool Memory::isAccessor(Data *data)
+{
+	return data->typeId() == VECTOR_T or data->typeId() == TABLE_T or data->typeId() == OBJECT_T;
+}
+
 bool Memory::exists(string id)
 {
-	return find(id) != end();
+	if(find(id) != end()) return true;
+	auto accessor = toAccessor(id);
+	if(accessor.size() > 1)
+	{
+		if(find(accessor[0]) != end())
+		{
+			Data *data = getDataGlobalUp(accessor[0]);
+			if(isAccessor(data))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 
@@ -61,12 +89,132 @@ bool Memory::existsGlobalUp(string id)
 	return false;
 }
 
+Data *Memory::getDataFromAccessor(string expr)
+{
+	auto accessor = toAccessor(expr);
+	auto len = accessor.size();
+	if(len > 1)
+	{
+		Data *data = getDataGlobalUp(accessor[0]);
+		for(int i = 1; i < len; i++)
+		{
+			Data *elem = nullptr;
+			int j = 0;
+			if(existsGlobalUp(accessor[i]))
+			{
+				 elem = getDataGlobalUp(accessor[i]);
+				 if(elem)
+				 {
+				 	if(elem->typeId() == INTEGER_T)
+				 	{
+				 		j = dynamic_cast<Integer *>(elem)->get();
+				 	}
+				 	else
+				 	{
+				 		throw Exception(getId(elem) + " is " + elem->type() + ", it can not be interpreted as an accessor index");
+				 	}
+				 }
+			}
+			else
+			{
+				if(type(accessor[i]) == INTEGER_T)
+				{
+					j = atoi(accessor[i].c_str());
+				}
+				else
+				{
+					throw Exception(accessor[i] + " is " + inferType(accessor[i]) + ", it can not be interpreted as an accessor index");
+				}
+			}
+			switch(data->typeId())
+			{
+				case VECTOR_T:
+					if(dynamic_cast<Reference *>(data)) data = dynamic_cast<Reference *>(data)->get();
+					if(j < 0 or j >= dynamic_cast<Vector *>(data)->getVector().size())
+						throw Exception(to_string(j) + " is out ouf band of the size of vector");
+					data = dynamic_cast<Vector *>(data)->getVector()[j];
+					break;
+				default:
+					throw Exception(expr + " try to access to a non accessible data type: " + data->type());
+			}
+		}
+		return data;
+	}
+	throw Exception(expr + " does not represents an accessor expression");
+}
+
+
+Data **Memory::getDataSlotFromAccessor(string expr)
+{
+	auto accessor = toAccessor(expr);
+	auto len = accessor.size();
+	if(len > 1)
+	{
+		Data **data = getDataSlotGlobalUp(accessor[0]);
+		for(int i = 1; i < len; i++)
+		{
+			Data **elem = nullptr;
+			int j = 0;
+			if(existsGlobalUp(accessor[i]))
+			{
+				 elem = getDataSlotGlobalUp(accessor[i]);
+				 if(*elem)
+				 {
+				 	if((*elem)->typeId() == INTEGER_T)
+				 	{
+				 		j = dynamic_cast<Integer *>(*elem)->get();
+				 	}
+				 	else
+				 	{
+				 		throw Exception(getId(*elem) + " is " + (*elem)->type() + ", it can not be interpreted as an accessor index");
+				 	}
+				 }
+			}
+			else
+			{
+				if(type(accessor[i]) == INTEGER_T)
+				{
+					j = atoi(accessor[i].c_str());
+				}
+				else
+				{
+					throw Exception(accessor[i] + " is " + inferType(accessor[i]) + ", it can not be interpreted as an accessor index");
+				}
+			}
+			switch((*data)->typeId())
+			{
+				case VECTOR_T:
+					if(dynamic_cast<Reference *>(*data)) data = dynamic_cast<Reference *>(*data)->getRef();
+					if(j < 0 or j >= dynamic_cast<Vector *>(*data)->getVector().size())
+						throw Exception(to_string(j) + " is out ouf band of the size of vector");
+					data = &dynamic_cast<Vector *>(*data)->getVector()[j];
+					break;
+				default:
+					throw Exception(expr + " try to access to a non accessible data type: " + (*data)->type());
+			}
+		}
+		return data;
+	}
+	throw Exception(expr + " does not represents an accessor expression");
+}
+
+
 Data *Memory::getDataGlobalUp(string id)
 {
 	Memory *memory = this;
 	while(memory)
 	{
-		if(memory->find(id) != memory->end()) return (*memory)[id];
+		if(memory->find(id) != memory->end())
+		{
+			 return (*memory)[id];
+		}
+		else
+		{
+			if(isAccessor(id))
+			{
+				return getDataFromAccessor(id);
+			}
+		}
 		memory = memory->parent;
 	}
 	throw Exception(id + " Memory not exists");
@@ -267,6 +415,7 @@ Reference *Memory::generateReference(string value)
 	{
 		Data **data = getDataSlotGlobalUp(value);
 		if(dynamic_cast<Reference *>(*data)) data = ((Reference *)*data)->getRef();
+		if((*data)->getAttr() & RESTRICT_A) throw Exception(value + " is marked 'restrict', it can not be referenced");
 		return new Reference(data);
 	}
 	else
@@ -570,13 +719,23 @@ Data **Memory::getDataSlotGlobalUp(string id)
 	Memory *memory = this;
 	while(memory)
 	{
-		if(memory->exists(id)) return &(*memory)[id];
+		if(memory->exists(id))
+		{
+			if(memory->find(id) != memory->end())
+			{
+				 return &(*memory)[id];
+			}
+			else if(memory->isAccessor(id))
+			{
+				return getDataSlotFromAccessor(id);
+			}
+		}
 		memory = memory->parent;
 	}
 	throw Exception(id + " Memory not exists");
 }
 
-Data **Memory::inferReference(string id, string value)
+Data **Memory::inferReference(string id)
 {
 	Data **data = getDataSlotGlobalUp(id);
 	if(dynamic_cast<Reference *>(*data))
@@ -596,7 +755,7 @@ Data **Memory::inferReference(string id, string value)
 void Memory::setDataFromValue(string id, string value)
 {
 	Types tv = type(value);
-	Data **data = inferReference(id, value);
+	Data **data = inferReference(id);
 	switch(attr_final_control(*data, tv))
 	{
 		case FORB:
@@ -613,7 +772,8 @@ void Memory::setDataFromValue(string id, string value)
 void Memory::setDataFromId(string id, string value)
 {
 	Types tv = getDataGlobalUp(value)->typeId();
-	Data **data = inferReference(id, value);
+	Data **data = inferReference(id);
+	Data *valueptr = nullptr;
 	switch(attr_final_control(*data, tv))
 	{
 		case FORB:
@@ -622,8 +782,9 @@ void Memory::setDataFromId(string id, string value)
 			castIn(*data, value);
 			break;
 		case FULL:
+			valueptr = generateDataFromId(value);
 			delete *data;
-			*data = generateDataFromId(value);
+			*data = valueptr;
 	}
 }
 
@@ -639,55 +800,6 @@ void Memory::setData(string id, string value)
 	else
 	{
 		throw Exception(id +  " Memory not exists");
-	}
-}
-
-void Memory::setVectorAt(string id, string index, string value)
-{
-	if(existsGlobalUp(id))
-	{
-		Data *data = getDataGlobalUp(id);
-		if(data->typeId() == VECTOR_T)
-		{
-			Vector *vec = dynamic_cast<Vector *>(data);
-			int i = -1;
-			if(existsGlobalUp(index))
-			{
-				Data *dataIndex = getDataGlobalUp(index);
-				if(dataIndex->typeId() == INTEGER_T)
-				{
-					i = ((Integer *)dataIndex)->get();
-				}
-				else
-				{
-					throw Exception(index + " can not be interpreted as Vector index");
-				}
-			}
-			else
-			{
-				i = atoi(index.c_str());
-			}
-			if(i < 0 or i >= vec->getVector().size())
-			{
-				throw Exception("index out of band of size of Vector");
-			}
-			if(existsGlobalUp(value))
-			{
-				vec->getVector()[i] = generateDataFromId(value);
-			}
-			else
-			{
-				vec->getVector()[i] = generateDataFromValue(value);
-			}
-		}
-		else
-		{
-			throw Exception(id + " is not a Vector");
-		}
-	}
-	else
-	{
-		throw Exception(id + " Memory not exists");
 	}
 }
 
@@ -731,21 +843,111 @@ void Memory::changeReference(string id, string value)
 {
 	if(existsGlobalUp(value))
 	{
-
-		switch(attr_final_control(getDataGlobalUp(id), getDataGlobalUp(value)->typeId(), true))
+		Data **slot = nullptr;
+		Data *ref = getDataGlobalUp(id);
+		if(dynamic_cast<Reference *>(ref))
 		{
-			case FORB:
-				throw Exception(id + " is marked final, can not change his reference type (" + getDataGlobalUp(id)->type() + " into " + inferType(value) + ")");
-			case CAST:
-			case FULL:
-				((Reference *)getDataGlobalUp(id))->set(getDataSlotGlobalUp(value));
-
+			switch(attr_final_control(ref, getDataGlobalUp(value)->typeId(), true))
+			{
+				case FORB:
+					throw Exception(id + " is marked final, can not change his reference type (" + getDataGlobalUp(id)->type() + " into " + inferType(value) + ")");
+				case CAST:
+				case FULL:
+					slot = getDataSlotGlobalUp(value);
+					if((*slot)->getAttr() & RESTRICT_A) throw Exception(value + " is marked 'restrict', it can not be referenced");
+					((Reference *)ref)->set(slot);
+			}
+		}
+		else
+		{
+			throw Exception(id + " is not a Reference");
 		}
 	}
 	else
 	{
 		throw Exception("can not set reference to " + value + ", because it not exists");
 	}
+}
+
+void Memory::toReference(string id, string value)
+{
+	Data **ref = getDataSlotGlobalUp(id);
+	switch(attr_final_control(*ref, REFERENCE_T))
+	{
+		case FORB:
+		case CAST:
+			throw Exception(id + " is marked final, can not change his reference type (" + getDataGlobalUp(id)->type() + " into " + inferType(value) + ")");
+		case FULL:
+			delete *ref;
+			*ref = generateReference(value);
+	}
+}
+
+string Memory::getCharAt(string id, string index)
+{
+	String *str = dynamic_cast<String *>(*inferReference(id));
+	if(not str)
+		throw Exception(id + " is not a String");
+	if(type(index) == STRING_T)
+	{
+		Integer *indexd = dynamic_cast<Integer *>(getDataGlobalUp(index));
+		if(indexd)
+		{
+			if(indexd->get() >= 0 and indexd->get() < str->get().size())
+			{
+				return string(1, str->get()[indexd->get()]);
+			}
+			throw Exception("index out of band");
+		}
+	}
+	else
+	{
+		if(Integer::is(index))
+		{
+			int i = atoi(index.c_str());
+			if(i >= 0 and i < str->get().size())
+			{
+				return string(1, str->get()[i]);
+			}
+			throw Exception("index out of band");
+		}
+	}
+	throw Exception(index + " can not be interpreted as a String index");
+}
+
+void Memory::setCharAt(string id, string index, string character)
+{
+	if(character.size() > 1) throw Exception(character + " is String, expected character");
+	String *str = dynamic_cast<String *>(*inferReference(id));
+	if(not str)
+		throw Exception(id + " is not a String");
+	if(type(index) == STRING_T)
+	{
+		Integer *indexd = dynamic_cast<Integer *>(getDataGlobalUp(index));
+		if(indexd)
+		{
+			if(indexd->get() >= 0 and indexd->get() < str->get().size())
+			{
+				(*str)[indexd->get()] = character[0];
+				return;
+			}
+			throw Exception("index out of band");
+		}
+	}
+	else
+	{
+		if(Integer::is(index))
+		{
+			int i = atoi(index.c_str());
+			if(i >= 0 and i < str->get().size())
+			{
+				(*str)[i] = character[0];
+				return;
+			}
+			throw Exception("index out of band");
+		}
+	}
+	throw Exception(index + " can not be interpreted as a String index");
 }
 
 string Memory::new_primitive(string id, string value)
@@ -798,14 +1000,6 @@ string Memory::set_memory(string id, string value)
 	return id;
 }
 
-string Memory::set_at(string id, string index, string value)
-{
-	Memory *memory = getDownMemory();
-	memory->attr_const_control(id);
-	memory->setVectorAt(id, index, value);
-	return id;
-}
-
 string Memory::set_reference(string id, string value)
 {
 	Memory *memory = getDownMemory();
@@ -814,10 +1008,47 @@ string Memory::set_reference(string id, string value)
 	return id;
 }
 
+string Memory::to_reference(string id, string value)
+{
+	Memory *memory = getDownMemory();
+	memory->attr_const_control(id);
+	memory->toReference(id, value);
+	return id;
+}
+
+int Memory::getVectorSize(string id)
+{
+	Vector *vec = dynamic_cast<Vector *>(getDataGlobalUp(id));
+	if(not vec)
+		throw Exception(id + " is not a Vector; it is " + inferType(id));
+	return vec->getVector().size();
+}
+
 string Memory::get_memory(string id)
 {
 	return getDownMemory()->toString(id);
 }
+
+
+string Memory::size_vector(string id)
+{
+	return to_string(getDownMemory()->getVectorSize(id));
+}
+
+
+string Memory::get_char_at(string id, string index)
+{
+	return getDownMemory()->getCharAt(id, index);
+}
+
+string Memory::set_char_at(string id, string index, string character)
+{
+	Memory *memory = getDownMemory();
+	memory->attr_const_control(id);
+	memory->setCharAt(id, index, character);
+	return id;
+}
+
 
 string Memory::type_memory(string id)
 {
