@@ -36,6 +36,11 @@ namespace Lizzy
 		void push(string id);
 		void pop();
 	public:
+		vector<string> toAccessor(string id);
+		bool isAccessor(string id);
+		bool isAccessor(Data *data);
+		Data *getDataFromAccessor(string expr);
+		Data **getDataSlotFromAccessor(string expr);
 		bool exists(string id);
 		bool existsGlobalUp(string id);
 		Data *getDataGlobalUp(string id);
