@@ -93,9 +93,11 @@ void Memory::deletePersistantData(Reference *ref)
 
 void Memory::attr_persistant_control(Data *data)
 {
-	if((data->getAttr() & PERSISTANT_A) == 0 or (dynamic_cast<Reference *>(data) and (dynamic_cast<Reference *>(data)->getRefAttr() & PERSISTANT_A) == 0))
+	if((dynamic_cast<Reference *>(data) and (dynamic_cast<Reference *>(data)->getRefAttr() & PERSISTANT_A) == 0)
+		or (data->getAttr() & PERSISTANT_A) == 0)
 	{
-		cout << "delete data" << endl;
+		cout << "delete data "<<endl;
+		//cout << data->type() << " " << data->toString() << endl;
 		delete data;
 	}
 }
@@ -512,6 +514,7 @@ Data **Memory::generateDataSlotPersistant(string value)
 {
 	Data **slot = new Data*;
 	*slot = generateDataFromValue(value);
+	(*slot)->setAttr(PERSISTANT_A);
 	persistantMemory.push_back(slot);
 	return slot;
 }
@@ -533,8 +536,12 @@ Reference *Memory::generateReference(string value)
 
 Reference *Memory::generateReference(Data **data)
 {
-	if(dynamic_cast<Reference *>(*data)) data = ((Reference *)*data)->getRef();
-	if((*data)->getAttr() & RESTRICT_A) throw Exception("Memeory is marked 'restrict', it can not be referenced");
+	if(dynamic_cast<Reference *>(*data))
+	{
+		if(((Reference *)*data)->getRef())
+			data = ((Reference *)*data)->getRef();
+	}
+	if((*data)->getAttr() & RESTRICT_A) throw Exception("Memory is marked 'restrict', it can not be referenced");
 	if((*data)->getAttr() & PERSISTANT_A) data = getPersistantDataSlot(*data);
 	return new Reference(data);
 }
@@ -851,7 +858,7 @@ Data **Memory::getDataSlotGlobalUp(string id)
 Data **Memory::inferReference(string id)
 {
 	Data **data = getDataSlotGlobalUp(id);
-	if(dynamic_cast<Reference *>(*data))
+	while(dynamic_cast<Reference *>(*data))
 	{
 		if(not ((Reference *)*data)->get())
 		{
@@ -1002,7 +1009,9 @@ void Memory::changeReference(string id, string value)
 
 void Memory::toReference(string id, string value)
 {
+	if(id == value) throw Exception("a Reference can not reference itself");
 	Data **ref = getDataSlotGlobalUp(id);
+	Data *newRef = nullptr;
 	switch(attr_final_control(*ref, REFERENCE_T))
 	{
 		case FORB:

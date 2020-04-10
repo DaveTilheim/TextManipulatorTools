@@ -2,8 +2,17 @@
 
 println Lizzy Version version
 
-persistant var i 5
+Reference r1
 
-to reference i 777
+Reference r2 r1
 
-printmln i
+Integer i 666
+
+Reference r3 i
+
+set reference r1 r3
+
+set i true
+
+println get r1 get r2 get r3 get i
+
