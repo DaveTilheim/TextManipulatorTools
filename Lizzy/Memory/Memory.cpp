@@ -2,6 +2,8 @@
 
 using namespace Lizzy;
 
+static vector<Data *> persistantMemory = vector<Data *>();
+
 
 Memory::Memory(Memory *parent, string id) : unordered_map<string, Data *>(), self(*this), parent(parent), id(id)
 {
@@ -12,11 +14,90 @@ Memory::~Memory()
 {
 	for(auto it : *this)
 	{
-		cout << it.second->type() << " deleted" << endl;
-		delete it.second;
+		cout <<  "pop " << it.first << endl;
+		attr_persistant_control(it.second);
 	}
+	clear();
 	cout << "Memory deleted" << endl;
 }
+
+
+
+Data **Memory::getPersistantDataSlot(Data *data)
+{
+	if(dynamic_cast<Reference *>(data)) data = dynamic_cast<Reference *>(data)->get();
+	auto len = persistantMemory.size();
+	for(int i = 0; i < len ; i++)
+	{
+		if(data == persistantMemory[i]) return &persistantMemory[i];
+	}
+	throw Exception("The data is not persistant");
+}
+
+void Memory::erasePersistantMemory()
+{
+	for(auto *data : persistantMemory)
+	{
+		cout << "delete " << data->type() << endl;
+		delete data;
+	}
+}
+
+
+Memory *Memory::getMemoryWhereIs(string id)
+{
+	Memory *memory = getDownMemory();
+	while(memory)
+	{
+		if(memory->find(id) != memory->end()) return memory;
+		memory = memory->parent;
+	}
+	throw Exception(id + " not exists");
+}
+
+void Memory::deleteData(string id)
+{
+	Memory *memory = getMemoryWhereIs(id);
+	Data *data = memory->self[id];
+	attr_persistant_control(memory->self[id]);
+	memory->erase(id);
+}
+
+void Memory::deletePersistantData(Reference *ref)
+{
+	Data *data = ref->get();
+	if(data)
+	{
+		auto len = persistantMemory.size();
+		for(int i = 0; i < len; i++)
+		{
+			if(persistantMemory[i] == data)
+			{
+				cout << "delete persistant " + persistantMemory[i]->type() << endl;
+				delete persistantMemory[i];
+				ref->set(nullptr);
+				persistantMemory.erase(persistantMemory.begin() + i);
+				return;
+			}
+		}
+		throw Exception("can not delete a non persistant data");
+	}
+	else
+	{
+		throw Exception("can not delete null data");
+	}
+}
+
+
+void Memory::attr_persistant_control(Data *data)
+{
+	if((data->getAttr() & PERSISTANT_A) == 0 or (dynamic_cast<Reference *>(data) and (dynamic_cast<Reference *>(data)->getRefAttr() & PERSISTANT_A) == 0))
+	{
+		cout << "delete data" << endl;
+		delete data;
+	}
+}
+
 
 Memory *Memory::getDownMemory()
 {
@@ -24,6 +105,16 @@ Memory *Memory::getDownMemory()
 	while(memory->child)
 	{
 		memory = memory->child;
+	}
+	return memory;
+}
+
+Memory *Memory::getUpMemory()
+{
+	Memory *memory = this;
+	while(memory->parent)
+	{
+		memory = memory->parent;
 	}
 	return memory;
 }
@@ -409,21 +500,39 @@ String *Memory::generateString(string value)
 	}
 }
 
+
+Reference *Memory::generatePersistantReference(string value)
+{
+	return new Reference(generateDataSlotPersistant(value));
+}
+
+Data **Memory::generateDataSlotPersistant(string value)
+{
+	persistantMemory.push_back(generateDataFromValue(value));
+	return &persistantMemory[persistantMemory.size()-1];
+}
+
 Reference *Memory::generateReference(string value)
 {
 	if(existsGlobalUp(value))
 	{
 		Data **data = getDataSlotGlobalUp(value);
-		if(dynamic_cast<Reference *>(*data)) data = ((Reference *)*data)->getRef();
-		if((*data)->getAttr() & RESTRICT_A) throw Exception(value + " is marked 'restrict', it can not be referenced");
-		return new Reference(data);
+		return generateReference(data);
 	}
 	else
 	{
 		if(value.size() == 0)
 			return new Reference(nullptr);
-		throw Exception(value + " not exists");
+		return generatePersistantReference(value);
 	}
+}
+
+Reference *Memory::generateReference(Data **data)
+{
+	if(dynamic_cast<Reference *>(*data)) data = ((Reference *)*data)->getRef();
+	if((*data)->getAttr() & RESTRICT_A) throw Exception("Memeory is marked 'restrict', it can not be referenced");
+	if((*data)->getAttr() & PERSISTANT_A) data = getPersistantDataSlot(*data);
+	return new Reference(data);
 }
 
 
@@ -764,7 +873,7 @@ void Memory::setDataFromValue(string id, string value)
 			castIn(*data, value);
 			break;
 		case FULL:
-			delete *data;
+			attr_persistant_control(*data);
 			*data = generateDataFromValue(value);
 	}
 }
@@ -783,7 +892,7 @@ void Memory::setDataFromId(string id, string value)
 			break;
 		case FULL:
 			valueptr = generateDataFromId(value);
-			delete *data;
+			attr_persistant_control(*data);
 			*data = valueptr;
 	}
 }
@@ -855,6 +964,8 @@ void Memory::changeReference(string id, string value)
 				case FULL:
 					slot = getDataSlotGlobalUp(value);
 					if((*slot)->getAttr() & RESTRICT_A) throw Exception(value + " is marked 'restrict', it can not be referenced");
+					if((*slot)->getAttr() & PERSISTANT_A) slot = getPersistantDataSlot(*slot);
+					if(ref == *slot) throw Exception("a Reference can not reference itself");
 					((Reference *)ref)->set(slot);
 			}
 		}
@@ -865,7 +976,23 @@ void Memory::changeReference(string id, string value)
 	}
 	else
 	{
-		throw Exception("can not set reference to " + value + ", because it not exists");
+		Data *ref = getDataGlobalUp(id);
+		if(dynamic_cast<Reference *>(ref))
+		{
+			Data **slot = generateDataSlotPersistant(value);
+			switch(attr_final_control(ref, (*slot)->typeId(), true))
+			{
+				case FORB:
+					throw Exception(id + " is marked final, can not change his reference type (" + getDataGlobalUp(id)->type() + " into " + inferType(value) + ")");
+				case CAST:
+				case FULL:
+					((Reference *)ref)->set(slot);
+			}
+		}
+		else
+		{
+			throw Exception(id + " is not a Reference");
+		}
 	}
 }
 
@@ -878,10 +1005,11 @@ void Memory::toReference(string id, string value)
 		case CAST:
 			throw Exception(id + " is marked final, can not change his reference type (" + getDataGlobalUp(id)->type() + " into " + inferType(value) + ")");
 		case FULL:
-			delete *ref;
+			attr_persistant_control(*ref);
 			*ref = generateReference(value);
 	}
 }
+
 
 string Memory::getCharAt(string id, string index)
 {
@@ -1016,12 +1144,12 @@ string Memory::to_reference(string id, string value)
 	return id;
 }
 
-int Memory::getVectorSize(string id)
+int Memory::getDataSize(string id)
 {
-	Vector *vec = dynamic_cast<Vector *>(getDataGlobalUp(id));
-	if(not vec)
-		throw Exception(id + " is not a Vector; it is " + inferType(id));
-	return vec->getVector().size();
+	Data *data = getDataGlobalUp(id);
+	if(data->typeId() == STRING_T) return dynamic_cast<String *>(data)->get().size();
+	if(data->typeId() == VECTOR_T) return dynamic_cast<Vector *>(data)->getVector().size();
+	throw Exception("can not take size of a " + data->type());
 }
 
 string Memory::get_memory(string id)
@@ -1030,9 +1158,9 @@ string Memory::get_memory(string id)
 }
 
 
-string Memory::size_vector(string id)
+string Memory::size_memory(string id)
 {
-	return to_string(getDownMemory()->getVectorSize(id));
+	return to_string(getDownMemory()->getDataSize(id));
 }
 
 
@@ -1046,6 +1174,22 @@ string Memory::set_char_at(string id, string index, string character)
 	Memory *memory = getDownMemory();
 	memory->attr_const_control(id);
 	memory->setCharAt(id, index, character);
+	return id;
+}
+
+string Memory::del_data(string id)
+{
+	deleteData(id);
+	return id;
+}
+
+string Memory::del_persistant_data(string id)
+{
+	Reference *ref = dynamic_cast<Reference *>(getDownMemory()->getDataGlobalUp(id));
+	if(ref)
+		deletePersistantData(ref);
+	else
+		throw Exception(id + " is not a Reference");
 	return id;
 }
 
@@ -1078,13 +1222,27 @@ void Memory::attr_const_control(string id, bool refmode)
 
 string Memory::add_attribute(string id, int attr)
 {
-	getDownMemory()->addAttr(getDownMemory()->getDataGlobalUp(id), attr);
+	Memory *memory = getDownMemory();
+	Data *data = memory->getDataGlobalUp(id);
+	memory->addAttr(data, attr);
+	if(attr == PERSISTANT_A)
+	{
+		persistantMemory.push_back(data);
+	}
 	return id;
 }
 
 void Memory::attr_set_control(Data *data, int attr)
 {
 	if(data->getAttr() & attr) throw Exception(getAttrAsString(attr) + " attribute is already set");
+	if(attr == RESTRICT_A)
+	{
+		if(data->getAttr() & PERSISTANT_A) throw Exception(getAttrAsString(attr) + " attribute can not be set because Data is persistant");
+	}
+	else if(attr == PERSISTANT_A)
+	{
+		if(data->getAttr() & RESTRICT_A) throw Exception(getAttrAsString(attr) + " attribute can not be set because Data is restrict");
+	}
 }
 
 void Memory::addAttr(Data *data, int attr)

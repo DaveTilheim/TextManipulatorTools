@@ -3,11 +3,21 @@
 println Lizzy Version version
 
 
-String myString input "string: "
+Reference pi 3.14
 
-Reference ref myString
+Reference r
 
-set char ref 0 5
+push a
+
+	persistant Vector vec 666 999 3.14 "Hello world!" false
+
+	set reference r vec.3
 
 
-println get myString
+	
+
+pop
+
+set r true
+
+println get r get pi

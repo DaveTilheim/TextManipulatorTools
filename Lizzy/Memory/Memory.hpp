@@ -26,16 +26,24 @@ namespace Lizzy
 	public:
 		const string id;
 		Memory& self;
-		Memory *parent;
+		Memory *parent = nullptr;
 		Memory *child = nullptr;
 	public:
 		Memory(Memory *parent, string id);
 		~Memory();
 	public:
 		Memory *getDownMemory();
+		Memory *getUpMemory();
+		Memory *getMemoryWhereIs(string id);
 		void push(string id);
 		void pop();
+		void deleteData(string id);
+		void deletePersistantData(Reference *ref);
 	public:
+		//persistantMemory
+		static Data **getPersistantDataSlot(Data *data);
+		static void erasePersistantMemory();
+		//
 		vector<string> toAccessor(string id);
 		bool isAccessor(string id);
 		bool isAccessor(Data *data);
@@ -49,6 +57,7 @@ namespace Lizzy
 		string getId(Data *);
 		string getId();
 		Data **inferReference(string id);
+		int getDataSize(string id);
 		//Generic primitive
 		void addPrimitiveData(string id, string strGenValue);
 		Data *generateDataFromValue(string value);
@@ -62,6 +71,9 @@ namespace Lizzy
 		Bool *generateBool(string value);
 		String *generateString(string value);
 		Reference *generateReference(string value);
+		Reference *generateReference(Data **value);
+		Reference *generatePersistantReference(string value);
+		Data **generateDataSlotPersistant(string value);
 		void addInteger(string id, string value);
 		void addFloat(string id, string value);
 		void addBool(string id, string value);
@@ -79,7 +91,6 @@ namespace Lizzy
 		//containers
 		Vector *generateVector(vector<string>& values);
 		void addVector(string id, vector<string>& values);
-		int getVectorSize(string id);
 		//String
 		string getCharAt(string id, string index);
 		void setCharAt(string id, string index, string character);
@@ -101,6 +112,7 @@ namespace Lizzy
 		void changeReference(string id, string value);
 		void toReference(string id, string value);
 		//Memory controls
+		void attr_persistant_control(Data *data);
 		void attr_const_control(string id, bool refmode=false);
 		SetModes attr_final_control(Data *data, Types otherType, bool refmode=false);
 		void attr_set_control(Data *data, int attr);
@@ -120,9 +132,11 @@ namespace Lizzy
 		string type_memory(string id);
 		string exists_memory(string id);
 		string to_reference(string id, string value);
-		string size_vector(string id);
+		string size_memory(string id);
 		string get_char_at(string id, string index);
 		string set_char_at(string id, string index, string character);
+		string del_data(string id);
+		string del_persistant_data(string id);
 	};
 }
 

@@ -112,6 +112,12 @@ _def_action(MemPkg::restrict_action)
 	return MemPkg::memoryContext.add_attribute(id, RESTRICT_A);
 }
 
+_def_action(MemPkg::persistant_action)
+{
+	string id = args("id");
+	return MemPkg::memoryContext.add_attribute(id, PERSISTANT_A);
+}
+
 
 
 
@@ -165,7 +171,7 @@ _def_action(MemPkg::new_Vector_action)
 _def_action(MemPkg::size_action)
 {
 	string id = args("id");
-	return MemPkg::memoryContext.size_vector(id);
+	return MemPkg::memoryContext.size_memory(id);
 }
 
 /* BRANCHS */
@@ -201,6 +207,20 @@ _def_action(MemPkg::set_char_action)
 }
 
 
+_def_action(MemPkg::del_action)
+{
+	string id = args("id");
+	return MemPkg::memoryContext.del_data(id);
+}
+
+
+_def_action(MemPkg::del_persistant_action)
+{
+	string id = args("id");
+	return MemPkg::memoryContext.del_persistant_data(id);
+}
+
+
 
 MemPkg::MemPkg() : Package("Mem")
 {
@@ -210,6 +230,7 @@ MemPkg::MemPkg() : Package("Mem")
 MemPkg::~MemPkg()
 {
 	delete MemPkg::_memoryContext;
+	Memory::erasePersistantMemory();
 }
 
 void MemPkg::load()
@@ -295,6 +316,10 @@ void MemPkg::load()
 	Action restrictAction(restrict_action);
 		restrictAction.setNamed("id");
 		cmd("restrict").setAction(1, restrictAction);
+
+	Action persistantAction(persistant_action);
+		persistantAction.setNamed("id");
+		cmd("persistant").setAction(1, persistantAction);
 	
 
 
@@ -326,6 +351,14 @@ void MemPkg::load()
 
 	Action popAction(pop_action);
 		cmd("pop").setAction(0, popAction);
+
+	Action delAction(del_action);
+		delAction.setNamed("id");
+		cmd("del").setAction(1, delAction);
+
+	Action delPersistantAction(del_persistant_action);
+		delPersistantAction.setNamed("id");
+		cmd("del").child("persistant").setAction(1, delPersistantAction);
 
 
 	Action getCharAction(get_char_action);

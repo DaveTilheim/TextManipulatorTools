@@ -10,6 +10,8 @@ string Lizzy::getAttrAsString(int attr)
 	{
 		case CONST_A: return "const";
 		case FINAL_A: return "final";
+		case RESTRICT_A: return "restrict";
+		case PERSISTANT_A: return "persistant";
 		default: return "unknown attribute";
 	}
 }

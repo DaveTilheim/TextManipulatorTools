@@ -22,7 +22,7 @@ Reference::Reference(const Reference& cp) : value(cp.value)
 
 Reference::~Reference()
 {
-
+	value = nullptr;
 }
 
 int Reference::getAttr()

@@ -19,9 +19,13 @@ Vector::~Vector()
 {
 	for(auto *data : value)
 	{
-		//cout << data->type() +" deleted to Vector" << endl;
-		delete data;
+		if((data->getAttr() & PERSISTANT_A) == 0)
+		{
+			cout  << "del " << data->type() <<endl;
+			delete data;
+		}
 	}
+	value.clear();
 }
 
 string Vector::toString()

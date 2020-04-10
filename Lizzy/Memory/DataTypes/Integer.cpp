@@ -22,7 +22,7 @@ Integer::Integer(const Integer& cp) : value(cp.value)
 
 Integer::~Integer()
 {
-
+	
 }
 
 string Integer::toString()

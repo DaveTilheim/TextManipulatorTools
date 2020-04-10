@@ -36,6 +36,7 @@ namespace Lizzy
 		_decl_action(const_action)
 		_decl_action(final_action)
 		_decl_action(restrict_action)
+		_decl_action(persistant_action);
 		//accessors
 		_decl_action(set_action)
 		_decl_action(set_reference_action)
@@ -46,6 +47,8 @@ namespace Lizzy
 		//branchs
 		_decl_action(push_action)
 		_decl_action(pop_action);
+		_decl_action(del_action)
+		_decl_action(del_persistant_action)
 	public:
 		MemPkg();
 		~MemPkg();

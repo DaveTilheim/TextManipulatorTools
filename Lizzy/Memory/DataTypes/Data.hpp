@@ -29,7 +29,8 @@ namespace Lizzy
 	{
 		CONST_A = 0x0001,
 		FINAL_A = 0x0002,
-		RESTRICT_A = 0x0004
+		RESTRICT_A = 0x0004,
+		PERSISTANT_A = 0x0008
 	};
 
 	string getAttrAsString(int attr);
