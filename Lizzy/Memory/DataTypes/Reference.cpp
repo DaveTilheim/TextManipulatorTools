@@ -34,7 +34,11 @@ int Reference::getAttr()
 
 void Reference::setAttr(int attr)
 {
-	if(value and *value) (*value)->setAttr(attr);
+	if(value and *value)
+	{
+		(*value)->setAttr(attr);
+		return;
+	}
 	Data::setAttr(attr);
 }
 

@@ -38,7 +38,7 @@ void Memory::erasePersistantMemory()
 {
 	for(auto **data : persistantMemory)
 	{
-		cout << "delete " << (*data)->type() << endl;
+		cout << "pers delete " << (*data)->type() << endl;
 		delete *data;
 		delete data;
 	}
@@ -93,10 +93,15 @@ void Memory::deletePersistantData(Reference *ref)
 
 void Memory::attr_persistant_control(Data *data)
 {
-	if((dynamic_cast<Reference *>(data) and (dynamic_cast<Reference *>(data)->getRefAttr() & PERSISTANT_A) == 0)
-		or (data->getAttr() & PERSISTANT_A) == 0)
+	if(dynamic_cast<Reference *>(data) and (dynamic_cast<Reference *>(data)->getRefAttr() & PERSISTANT_A) == 0)
 	{
-		cout << "delete data "<<endl;
+		cout << "delete Reference data "<<endl;
+		//cout << data->type() << " " << data->toString() << endl;
+		delete data;
+	}
+	else if(not dynamic_cast<Reference *>(data) and (data->getAttr() & PERSISTANT_A) == 0)
+	{
+		cout << "delete Primitive data "<<endl;
 		//cout << data->type() << " " << data->toString() << endl;
 		delete data;
 	}
@@ -1240,6 +1245,10 @@ string Memory::add_attribute(string id, int attr)
 	memory->addAttr(data, attr);
 	if(attr == PERSISTANT_A)
 	{
+		while(dynamic_cast<Reference *>(data) and dynamic_cast<Reference *>(data)->get() != nullptr)
+		{
+			data = dynamic_cast<Reference *>(data)->get();
+		}
 		Data **slot = new Data*;
 		*slot = data;
 		persistantMemory.push_back(slot);

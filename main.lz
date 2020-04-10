@@ -4,15 +4,14 @@ println Lizzy Version version
 
 Reference r1
 
-Reference r2 r1
+push a
 
-Integer i 666
+	persistant Integer i 666
 
-Reference r3 i
+	set reference r1 i
 
-set reference r1 r3
+pop
 
-set i true
+ 
 
-println get r1 get r2 get r3 get i
-
+println get r1
