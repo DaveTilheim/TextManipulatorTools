@@ -18,7 +18,7 @@ String::String(const String& cp) : value(cp.value)
 
 String::~String()
 {
-
+	cout << "ERASE STRING" << endl;
 }
 
 string String::toString()

@@ -2,22 +2,8 @@
 
 println Lizzy Version version
 
+persistant var i 5
 
-Reference pi 3.14
+to reference i 777
 
-Reference r
-
-push a
-
-	persistant Vector vec 666 999 3.14 "Hello world!" false
-
-	set reference r vec.3
-
-
-	
-
-pop
-
-set r true
-
-println get r get pi
+printmln i

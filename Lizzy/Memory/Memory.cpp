@@ -2,7 +2,7 @@
 
 using namespace Lizzy;
 
-static vector<Data *> persistantMemory = vector<Data *>();
+static vector<Data **> persistantMemory = vector<Data **>();
 
 
 Memory::Memory(Memory *parent, string id) : unordered_map<string, Data *>(), self(*this), parent(parent), id(id)
@@ -29,16 +29,17 @@ Data **Memory::getPersistantDataSlot(Data *data)
 	auto len = persistantMemory.size();
 	for(int i = 0; i < len ; i++)
 	{
-		if(data == persistantMemory[i]) return &persistantMemory[i];
+		if(data == *persistantMemory[i]) return persistantMemory[i];
 	}
 	throw Exception("The data is not persistant");
 }
 
 void Memory::erasePersistantMemory()
 {
-	for(auto *data : persistantMemory)
+	for(auto **data : persistantMemory)
 	{
-		cout << "delete " << data->type() << endl;
+		cout << "delete " << (*data)->type() << endl;
+		delete *data;
 		delete data;
 	}
 }
@@ -59,7 +60,7 @@ void Memory::deleteData(string id)
 {
 	Memory *memory = getMemoryWhereIs(id);
 	Data *data = memory->self[id];
-	attr_persistant_control(memory->self[id]);
+	memory->attr_persistant_control(memory->self[id]);
 	memory->erase(id);
 }
 
@@ -71,9 +72,10 @@ void Memory::deletePersistantData(Reference *ref)
 		auto len = persistantMemory.size();
 		for(int i = 0; i < len; i++)
 		{
-			if(persistantMemory[i] == data)
+			if(*persistantMemory[i] == data)
 			{
-				cout << "delete persistant " + persistantMemory[i]->type() << endl;
+				cout << "delete persistant " + (*persistantMemory[i])->type() << endl;
+				delete (*persistantMemory[i]);
 				delete persistantMemory[i];
 				ref->set(nullptr);
 				persistantMemory.erase(persistantMemory.begin() + i);
@@ -508,8 +510,10 @@ Reference *Memory::generatePersistantReference(string value)
 
 Data **Memory::generateDataSlotPersistant(string value)
 {
-	persistantMemory.push_back(generateDataFromValue(value));
-	return &persistantMemory[persistantMemory.size()-1];
+	Data **slot = new Data*;
+	*slot = generateDataFromValue(value);
+	persistantMemory.push_back(slot);
+	return slot;
 }
 
 Reference *Memory::generateReference(string value)
@@ -1227,7 +1231,9 @@ string Memory::add_attribute(string id, int attr)
 	memory->addAttr(data, attr);
 	if(attr == PERSISTANT_A)
 	{
-		persistantMemory.push_back(data);
+		Data **slot = new Data*;
+		*slot = data;
+		persistantMemory.push_back(slot);
 	}
 	return id;
 }

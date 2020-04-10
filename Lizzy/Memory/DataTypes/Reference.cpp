@@ -22,6 +22,7 @@ Reference::Reference(const Reference& cp) : value(cp.value)
 
 Reference::~Reference()
 {
+	cout << "ERASE REFERENCE" << endl;
 	value = nullptr;
 }
 
