@@ -2,16 +2,12 @@
 
 println Lizzy Version version
 
-Reference r1
-
+Reference r
+Integer i 666
+set reference r i
 push a
 
-	persistant Integer i 666
-
-	set reference r1 i
-
+	Float o 3.14
+trace memory
 pop
 
- 
-
-println get r1

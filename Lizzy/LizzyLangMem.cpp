@@ -222,6 +222,14 @@ _def_action(MemPkg::del_persistant_action)
 
 
 
+_def_action(MemPkg::trace_memory_action)
+{
+	MemPkg::memoryContext.traceMemory();
+	return "null";
+}
+
+
+
 MemPkg::MemPkg() : Package("Mem")
 {
 	CALL_ONCE
@@ -232,6 +240,7 @@ MemPkg::~MemPkg()
 	delete MemPkg::_memoryContext;
 	Memory::erasePersistantMemory();
 }
+
 
 void MemPkg::load()
 {
@@ -371,4 +380,8 @@ void MemPkg::load()
 		setCharAction.setNamed("i");
 		setCharAction.setNamed("char");
 		cmd("set").child("char").setAction(3, setCharAction);
+
+
+	Action traceMemeoryAction(trace_memory_action);
+		cmd("trace").child("memory").setAction(0, traceMemeoryAction);
 }

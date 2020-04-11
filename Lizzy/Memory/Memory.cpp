@@ -22,6 +22,19 @@ Memory::~Memory()
 }
 
 
+void Memory::traceMemory()
+{
+	Memory *memory = getUpMemory();
+	while(memory)
+	{
+		for(auto it : *memory)
+		{
+			cout << memory->id << " : " << it.first << " : " << it.second->type() << " : " << it.second->toString() << endl;
+		}
+		memory = memory->child;
+	}
+}
+
 
 Data **Memory::getPersistantDataSlot(Data *data)
 {

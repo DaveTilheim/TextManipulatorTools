@@ -44,6 +44,7 @@ namespace Lizzy
 		//introspection
 		_decl_action(type_action)
 		_decl_action(exists_action)
+		_decl_action(trace_memory_action)
 		//branchs
 		_decl_action(push_action)
 		_decl_action(pop_action);
