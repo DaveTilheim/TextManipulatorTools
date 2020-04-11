@@ -25,13 +25,16 @@ Memory::~Memory()
 void Memory::traceMemory()
 {
 	Memory *memory = getUpMemory();
+	int i = 0;
 	while(memory)
 	{
 		for(auto it : *memory)
 		{
-			cout << memory->id << " : " << it.first << " : " << it.second->type() << " : " << it.second->toString() << endl;
+			cout << "[ " + it.first + " | ";
+			cout << it.second << " | " + it.second->type() + "(" + it.second->toString() + ") ]" << endl;
 		}
 		memory = memory->child;
+		i++;
 	}
 }
 
