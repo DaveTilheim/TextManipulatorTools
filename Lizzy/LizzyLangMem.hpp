@@ -28,6 +28,10 @@ namespace Lizzy
 		_decl_action(to_reference_action_1)
 		//containers
 		_decl_action(new_Vector_action)
+		_decl_action(new_Table_action)
+		_decl_action(new_Table_action_1)
+		_decl_action(field_action);
+		_decl_action(field_action_0);
 		_decl_action(size_action);
 		//String
 		_decl_action(set_char_action)

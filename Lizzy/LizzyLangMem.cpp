@@ -168,6 +168,19 @@ _def_action(MemPkg::new_Vector_action)
 	return MemPkg::memoryContext.new_Vector(id, values);
 }
 
+_def_action(MemPkg::new_Table_action)
+{
+	string id = args("id");
+	return MemPkg::memoryContext.new_Table(id, "");
+}
+
+_def_action(MemPkg::new_Table_action_1)
+{
+	string id = args("id");
+	string value = args("value", 1);
+	return MemPkg::memoryContext.new_Table(id, value);
+}
+
 _def_action(MemPkg::size_action)
 {
 	string id = args("id");
@@ -228,6 +241,20 @@ _def_action(MemPkg::trace_memory_action)
 	return "null";
 }
 
+_def_action(MemPkg::field_action)
+{
+	string id = args("id");
+	string value = args("value", 1);
+	MemPkg::memoryContext.field_memory(id, value);
+	return id;
+}
+
+_def_action(MemPkg::field_action_0)
+{
+	string id = args("id");
+	MemPkg::memoryContext.field_memory(id, "");
+	return id;
+}
 
 
 MemPkg::MemPkg() : Package("Mem")
@@ -289,6 +316,14 @@ void MemPkg::load()
 		newVectorAction.setNamed("id");
 		cmd("new").child("Vector").setAction(-1, newVectorAction);
 
+	Action newTableAction1(new_Table_action_1);
+		newTableAction1.setNamed("id");
+		newTableAction1.setNamed("value");
+		cmd("new").child("Table").setAction(2, newTableAction1);
+	Action newTableAction(new_Table_action);
+		newTableAction.setNamed("id");
+		cmd("new").child("Table").setAction(1, newTableAction);
+
 
 	Action toReferenceAction(to_reference_action);
 		toReferenceAction.setNamed("id");
@@ -304,6 +339,15 @@ void MemPkg::load()
 		sizeAction.setNamed("id");
 		cmd("size").setAction(1, sizeAction);
 
+	Action fieldAction(field_action);
+		fieldAction.setNamed("id");
+		fieldAction.setNamed("value");
+		cmd("field").setAction(2, fieldAction);
+
+	Action fieldAction0(field_action_0);
+		fieldAction0.setNamed("id");
+		cmd("field").setAction(1, fieldAction0);
+
 
 	cmd("var").setAction(2, newAction);
 	cmdAlias(cmd("new").child("Integer"), "Integer");
@@ -312,6 +356,7 @@ void MemPkg::load()
 	cmdAlias(cmd("new").child("String"), "String");
 	cmdAlias(cmd("new").child("Reference"), "Reference");
 	cmdAlias(cmd("new").child("Vector"), "Vector");
+	cmdAlias(cmd("new").child("Table"), "Table");
 
 
 	Action constAction(const_action);

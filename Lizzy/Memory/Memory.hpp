@@ -6,6 +6,7 @@
 #include "DataTypes/String.hpp"
 #include "DataTypes/Vector.hpp"
 #include "DataTypes/Reference.hpp"
+#include "DataTypes/Table.hpp"
 #include "../../String.hpp"
 #include <ctype.h>
 #include <unordered_map>
@@ -93,6 +94,8 @@ namespace Lizzy
 		//containers
 		Vector *generateVector(vector<string>& values);
 		void addVector(string id, vector<string>& values);
+		Table *generateTable(string value);
+		void addTable(string id, string value);
 		//String
 		string getCharAt(string id, string index);
 		void setCharAt(string id, string index, string character);
@@ -107,6 +110,7 @@ namespace Lizzy
 		void castInFloat(Float *data, Data* value);
 		void castInBool(Bool *data, Data* value);
 		void castInVector(Vector *ref, string value);
+		void castInTable(Table *ref, string value);
 		static bool isAllowedTypeFrom(Types t1, Types t2);
 		static bool isAllowedNumberFrom(Types otherType);
 		static bool isAllowedStringFrom(Types otherType);
@@ -119,6 +123,8 @@ namespace Lizzy
 		SetModes attr_final_control(Data *data, Types otherType, bool refmode=false);
 		void attr_set_control(Data *data, int attr);
 		void addAttr(Data *data, int attr);
+		//
+		void field(string, string);
 	public: //command bridge
 		string new_primitive(string id, string value);
 		string new_Integer(string id, string value);
@@ -127,6 +133,7 @@ namespace Lizzy
 		string new_String(string id, string value);
 		string new_Reference(string id, string value);
 		string new_Vector(string id, vector<string>& values);
+		string new_Table(string id, string value);
 		string set_memory(string id, string value);
 		string set_reference(string id, string value);
 		string get_memory(string id);
@@ -139,6 +146,7 @@ namespace Lizzy
 		string set_char_at(string id, string index, string character);
 		string del_data(string id);
 		string del_persistant_data(string id);
+		string field_memory(string id, string value);
 	};
 }
 

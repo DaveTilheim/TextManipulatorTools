@@ -2,12 +2,15 @@
 
 println Lizzy Version version
 
-Reference r
-Integer i 666
-set reference r i
-push a
+Table tab
 
-	Float o 3.14
-trace memory
-pop
+field tab.name Arthur
+field tab.age 20
+to reference field:1 tab.ref tab
 
+Integer i 8
+set i i
+
+
+
+println get tab.ref.ref.ref.ref.name

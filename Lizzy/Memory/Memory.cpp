@@ -227,7 +227,7 @@ Data *Memory::getDataFromAccessor(string expr)
 				 	}
 				 	else
 				 	{
-				 		throw Exception(getId(elem) + " is " + elem->type() + ", it can not be interpreted as an accessor index");
+				 		accessor[i] = elem->toString();
 				 	}
 				 }
 			}
@@ -239,7 +239,7 @@ Data *Memory::getDataFromAccessor(string expr)
 				}
 				else
 				{
-					throw Exception(accessor[i] + " is " + inferType(accessor[i]) + ", it can not be interpreted as an accessor index");
+					j = -1;
 				}
 			}
 			switch(data->typeId())
@@ -249,6 +249,10 @@ Data *Memory::getDataFromAccessor(string expr)
 					if(j < 0 or j >= dynamic_cast<Vector *>(data)->getVector().size())
 						throw Exception(to_string(j) + " is out ouf band of the size of vector");
 					data = dynamic_cast<Vector *>(data)->getVector()[j];
+					break;
+				case TABLE_T:
+					if(dynamic_cast<Reference *>(data)) data = dynamic_cast<Reference *>(data)->get();
+					data = dynamic_cast<Table *>(data)->get(accessor[i]);
 					break;
 				default:
 					throw Exception(expr + " try to access to a non accessible data type: " + data->type());
@@ -282,7 +286,7 @@ Data **Memory::getDataSlotFromAccessor(string expr)
 				 	}
 				 	else
 				 	{
-				 		throw Exception(getId(*elem) + " is " + (*elem)->type() + ", it can not be interpreted as an accessor index");
+				 		accessor[i] = (*elem)->toString();
 				 	}
 				 }
 			}
@@ -294,7 +298,7 @@ Data **Memory::getDataSlotFromAccessor(string expr)
 				}
 				else
 				{
-					throw Exception(accessor[i] + " is " + inferType(accessor[i]) + ", it can not be interpreted as an accessor index");
+					j = -1;
 				}
 			}
 			switch((*data)->typeId())
@@ -304,6 +308,11 @@ Data **Memory::getDataSlotFromAccessor(string expr)
 					if(j < 0 or j >= dynamic_cast<Vector *>(*data)->getVector().size())
 						throw Exception(to_string(j) + " is out ouf band of the size of vector");
 					data = &dynamic_cast<Vector *>(*data)->getVector()[j];
+					break;
+
+				case TABLE_T:
+					if(dynamic_cast<Reference *>(*data)) data = dynamic_cast<Reference *>(*data)->getRef();
+					data = dynamic_cast<Table *>(*data)->getAddr(accessor[i]);
 					break;
 				default:
 					throw Exception(expr + " try to access to a non accessible data type: " + (*data)->type());
@@ -403,6 +412,8 @@ Integer *Memory::generateInteger(Data *reference)
 			throw Exception(getId(reference) + " is String (can not convert String as Integer)");
 		case VECTOR_T:
 			throw Exception(getId(reference) + " is Vector (can not convert Vector as Integer)");
+		case TABLE_T:
+			throw Exception(getId(reference) + "is Table (can not convert Table as Integer)");
 		case REFERENCE_T:
 			throw Exception(getId(reference) + " is a reference to null");
 		default:
@@ -442,6 +453,8 @@ Float *Memory::generateFloat(Data *reference)
 			throw Exception(getId(reference) + " is String (can not convert String as Float)");
 		case VECTOR_T:
 			throw Exception(getId(reference) + " is Vector (can not convert Vector as Float)");
+		case TABLE_T:
+			throw Exception(getId(reference) + "is Table (can not convert Table as Float)");
 		case REFERENCE_T:
 			throw Exception(getId(reference) + " is a reference to null");
 		default:
@@ -479,6 +492,8 @@ Bool *Memory::generateBool(Data *reference)
 			throw Exception(getId(reference) + " is Vector (can not convert Vector as Bool)");
 		case STRING_T:
 			throw Exception(getId(reference) + " is String (can not convert String as Bool)");
+		case TABLE_T:
+			throw Exception(getId(reference) + "is Table (can not convert Table as Bool)");
 		case INTEGER_T:
 			return new Bool(((Integer *)reference)->get());
 		case FLOAT_T:
@@ -524,6 +539,7 @@ String *Memory::generateString(string value)
 		return new String(value);
 	}
 }
+
 
 
 Reference *Memory::generatePersistantReference(string value)
@@ -582,6 +598,28 @@ Vector *Memory::generateVector(vector<string>& values)
 			data->add(generateDataFromValue(value));
 		}
 	}
+	return data;
+}
+
+Table *Memory::generateTable(string value)
+{
+	Table *data;
+	if(existsGlobalUp(value))
+	{
+		Data *other = getDataGlobalUp(value);
+		if(other->typeId() == TABLE_T)
+		{
+			data = (Table *)other->dup();
+		}
+		else
+		{
+			throw Exception(value +  " is not a Table");
+		}
+	}
+	else
+	{
+		data = new Table();
+ 	}
 	return data;
 }
 
@@ -658,6 +696,18 @@ void Memory::addVector(string id, vector<string>& values)
 	}
 }
 
+void Memory::addTable(string id, string value)
+{
+	if(not exists(id))
+	{
+		self[id] = generateTable(value);
+	}
+	else
+	{
+		throw Exception(id +  " Memory already exists");
+	}
+}
+
 
 
 
@@ -678,9 +728,8 @@ void Memory::castInInteger(Integer *data, Data *reference)
 		case FLOAT_T:
 			data->set(((Float *)reference)->get());
 			break;
-		case STRING_T:
-			throw Exception(getId(reference) + " is String (can not convert String as Integer)");
-		default:;
+		default:
+			throw Exception(getId(reference) + " is " + reference->type() + " (can not convert " + reference->type() + " as Integer)");
 	}		
 }
 
@@ -724,9 +773,8 @@ void Memory::castInFloat(Float *data, Data *reference)
 		case FLOAT_T:
 			data->set(((Float *)reference)->get());
 			break;
-		case STRING_T:
-			throw Exception(getId(reference) + " is String (can not convert String as Float)");
-		default:;
+		default:
+			throw Exception(getId(reference) + " is " + reference->type() + " (can not convert " + reference->type() + " as Integer)");
 	}	
 }
 
@@ -770,9 +818,8 @@ void Memory::castInBool(Bool *data, Data *reference)
 		case FLOAT_T:
 			data->set(((Float *)reference)->get());
 			break;
-		case STRING_T:
-			throw Exception(getId(reference) + " is String (can not convert String as Bool)");
-		default:;
+		default:
+			throw Exception(getId(reference) + " is " + reference->type() + " (can not convert " + reference->type() + " as Integer)");
 	}	
 }
 
@@ -841,6 +888,27 @@ void Memory::castInVector(Vector *ref, string value)
 	}
 }
 
+void Memory::castInTable(Table *ref, string value)
+{
+	if(existsGlobalUp(value))
+	{
+		Data *data = getDataGlobalUp(value);
+		if(data->typeId() == TABLE_T)
+		{
+			Table *tab = dynamic_cast<Table *>(data);
+			ref->copyTable(tab->getTable());
+		}
+		else
+		{
+			throw Exception("can not cast " + data->type() + " into Vector");
+		}
+	}
+	else
+	{
+		throw Exception("can not cast " + inferType(value) + " into Vector");
+	}
+}
+
 void Memory::castIn(Data *data, string value)
 {
 	switch(data->typeId())
@@ -851,6 +919,7 @@ void Memory::castIn(Data *data, string value)
 		case STRING_T: castInString((String *)data, value); break;
 		case REFERENCE_T: castInReference((Reference *)data, value); break;
 		case VECTOR_T: castInVector((Vector *)data, value); break;
+		case TABLE_T: castInTable((Table *)data, value); break;
 		default:;
 	}
 }
@@ -1112,6 +1181,47 @@ void Memory::setCharAt(string id, string index, string character)
 	throw Exception(index + " can not be interpreted as a String index");
 }
 
+void Memory::field(string id, string value)
+{
+	if(isAccessor(id))
+	{
+		auto acc = toAccessor(id);
+		int i;
+		id = "";
+		for(i = 0; i < acc.size() - 1; i++)
+		{
+			id += acc[i] + ".";
+		}
+		id.pop_back();
+		Data *data = getDataGlobalUp(id);
+		if(data->typeId() != TABLE_T) throw Exception(id + " is not a table");
+		Table *table = dynamic_cast<Reference *>(data) ? (Table *)dynamic_cast<Reference *>(data)->get() : (Table *)data;
+
+		if(table->getTable().find(acc[i]) == table->getTable().end())
+		{
+			if(value.size())
+			{
+				if(existsGlobalUp(value))
+				{
+					table->set(*generateDataFromId(value), acc[i]);
+				}
+				else
+				{
+					table->set(*generateDataFromValue(value), acc[i]);
+				}
+			}
+			else
+			{
+				table->set(*generateTable(value), acc[i]);
+			}
+		}
+		else
+		{
+			throw Exception(acc[i] + " field already exists in " + id + " Table");
+		}
+	}
+}
+
 string Memory::new_primitive(string id, string value)
 {
 	getDownMemory()->addPrimitiveData(id, value);
@@ -1154,6 +1264,12 @@ string Memory::new_Vector(string id, vector<string>& values)
 	return id;
 }
 
+string Memory::new_Table(string id, string value)
+{
+	getDownMemory()->addTable(id, value);
+	return id;
+}
+
 string Memory::set_memory(string id, string value)
 {
 	Memory *memory = getDownMemory();
@@ -1167,6 +1283,13 @@ string Memory::set_reference(string id, string value)
 	Memory *memory = getDownMemory();
 	memory->attr_const_control(id, true);
 	memory->changeReference(id, value);
+	return id;
+}
+
+string Memory::field_memory(string id, string value)
+{
+	Memory *memory = getDownMemory();
+	field(id, value);
 	return id;
 }
 
@@ -1307,6 +1430,7 @@ bool Memory::isAllowedTypeFrom(Types t1, Types t2)
 	{
 		case INTEGER_T: case FLOAT_T: case BOOL_T: return isAllowedNumberFrom(t2);
 		case VECTOR_T: return t2 == VECTOR_T;
+		case TABLE_T: return t2 == TABLE_T;
 		case STRING_T: default: return isAllowedStringFrom(t2);
 	}
 	return true;

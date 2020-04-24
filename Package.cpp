@@ -6,7 +6,7 @@ vector<Package *> Package::packages = vector<Package *>();
 
 Package::Package(string name) : name(name)
 {
-	cout << "Package created: " << getName() << endl;
+	//cout << "Package created: " << getName() << endl;
 	Package::packages.push_back(this);
 }
 
@@ -22,7 +22,7 @@ Package::~Package()
 	}
 	commands.clear();
 	subPackages.clear();
-	cout << "Package destroyed: " << getName() << endl;
+	//cout << "Package destroyed: " << getName() << endl;
 }
 
 
