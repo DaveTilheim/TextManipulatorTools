@@ -22,7 +22,8 @@ namespace Lizzy
 		VECTOR_T,
 		TABLE_T,
 		CLASS_T,
-		OBJECT_T
+		OBJECT_T,
+		SLOT_T
 	};
 
 	enum DataAttributes
@@ -47,7 +48,7 @@ namespace Lizzy
 		virtual string type();
 		virtual Types typeId();
 		virtual Data *dup();
-		virtual void set(const Data* data);
+		virtual void set(Data* data);
 	};
 }
 
