@@ -1,6 +1,11 @@
 #ifndef LIZZY_INTEGER_HPP
 #define LIZZY_INTEGER_HPP
-#include "Data.hpp"
+#include "Float.hpp"
+#include "String.hpp"
+#include "Bool.hpp"
+#include "Vector.hpp"
+#include "Table.hpp"
+#include "Reference.hpp"
 #include <ctype.h>
 
 namespace Lizzy
@@ -13,6 +18,7 @@ namespace Lizzy
 		Integer(long value=0L);
 		Integer(string expr);
 		Integer(const Integer& cp);
+		Integer(Data *data);
 		~Integer();
 		string toString() override;
 		string type() override;
@@ -21,6 +27,8 @@ namespace Lizzy
 		static bool is(string expr);
 		long get() const;
 		void set(long newValue);
+		void set(Data *data) override;
+		void set(string value) override;
 		Integer& operator=(const Integer& cp);
 	};
 }

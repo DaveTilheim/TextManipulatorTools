@@ -10,14 +10,19 @@ Integer::Integer(long value) : value(value)
 	
 }
 
-Integer::Integer(string expr) : value(atoi(expr.c_str()))
+Integer::Integer(string expr)// : value(atoi(expr.c_str()))
 {
-
+	set(expr);
 }
 
 Integer::Integer(const Integer& cp) : value(cp.value)
 {
 
+}
+
+Integer::Integer(Data *data)
+{
+	set(data);
 }
 
 Integer::~Integer()
@@ -52,21 +57,53 @@ long Integer::get() const
 
 void Integer::set(long newValue)
 {
+	CONST_CONTROL
 	value = newValue;
+}
+
+void Integer::set(Data *data)
+{
+	CONST_CONTROL
+	Reference::StrictInfer(&data);
+	if(dynamic_cast<Integer *>(data))
+	{
+		set(dynamic_cast<Integer *>(data)->get());
+	}
+	else if(dynamic_cast<Float *>(data))
+	{
+		set(dynamic_cast<Float *>(data)->get());
+	}
+	else if(dynamic_cast<Bool *>(data))
+	{
+		set(dynamic_cast<Bool *>(data)->get());
+	}
+	else
+	{
+		throw Exception("Data is " + data->type() + " (can not convert " + data->type() + " into Integer)");
+	}
+}
+
+void Integer::set(string value)
+{
+	CONST_CONTROL
+	if(Integer::is(value) or Float::is(value))
+		set(atoi(value.c_str()));
+	else if(Bool::is(value))
+		set(value == "true");
+	throw Exception("Can not set '" + value + "' as Integer value");
 }
 
 Integer& Integer::operator=(const Integer& cp)
 {
-	value = cp.value;
+	set(cp.get());
 	return *this;
 }
 
 bool Integer::is(string expr)
 {
 	auto len = expr.size();
-	for(int i = 0; i < len; i++)
+	for(int i = (expr[0] == '-'); i < len; i++)
 	{
-		if(not i and expr[i] == '-') continue;
 		if(not isdigit(expr[i])) return false;
 	}
 	return true;

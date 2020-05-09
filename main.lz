@@ -2,11 +2,8 @@
 
 println Lizzy Version version
 
-Table tab
 
-field tab.name Arthur
-field tab.age 20
+Integer i 666
+Integer j -666
 
-
-
-println get tab.name
+println i type i j type j

@@ -104,5 +104,3 @@ Slot::operator Vector*()
 {
 	return dynamic_cast<Vector *>(get());
 }
-
-

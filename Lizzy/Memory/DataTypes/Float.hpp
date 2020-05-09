@@ -12,6 +12,7 @@ namespace Lizzy
 		Float(double value=0.f);
 		Float(string expr);
 		Float(const Float& cp);
+		Float(Data *data);
 		~Float();
 		string toString() override;
 		string type() override;
@@ -20,6 +21,8 @@ namespace Lizzy
 		static bool is(string expr);
 		double get() const;
 		void set(double newValue);
+		void set(Data *data) override;
+		void set(string value) override;
 		Float& operator=(const Float& cp);
 	};
 }

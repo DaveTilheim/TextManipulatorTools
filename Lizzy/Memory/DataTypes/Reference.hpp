@@ -30,6 +30,7 @@ namespace Lizzy
 		int getSlotAttr() const;
 		void setSlotAttr(int attr);
 		Reference& operator=(Reference& other);
+		static void StrictInfer(Data **ref);
 	};
 }
 

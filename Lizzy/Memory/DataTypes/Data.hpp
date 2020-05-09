@@ -9,6 +9,8 @@
 
 using namespace std;
 
+#define CONST_CONTROL if(getAttr() & (int)CONST_A) throw Exception("Data is marked const. It can not be modified");
+
 namespace Lizzy
 {
 	enum Types
@@ -48,7 +50,9 @@ namespace Lizzy
 		virtual string type();
 		virtual Types typeId();
 		virtual Data *dup();
-		virtual void set(Data* data);
+		virtual void set(Data* data); //cast Data
+		virtual void set(string value); //cast value
+		bool hasAttr(DataAttributes attr);
 	};
 }
 

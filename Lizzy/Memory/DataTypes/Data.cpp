@@ -53,4 +53,9 @@ void Data::set(Data* data)
 
 }
 
+bool Data::hasAttr(DataAttributes attr)
+{
+	return getAttr() & (int)attr;
+}
+
 

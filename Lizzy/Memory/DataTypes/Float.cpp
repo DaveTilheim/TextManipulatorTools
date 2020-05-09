@@ -10,9 +10,14 @@ Float::Float(double value) : value(value)
 
 }
 
-Float::Float(string expr) : value(atof(expr.c_str()))
+Float::Float(string expr)
 {
+	set(expr);
+}
 
+Float::Float(Data *data)
+{
+	set(data);
 }
 
 Float::Float(const Float& cp) : value(cp.value)
@@ -52,22 +57,46 @@ double Float::get() const
 
 void Float::set(double newValue)
 {
+	CONST_CONTROL
 	value = newValue;
 }
 
 Float& Float::operator=(const Float& cp)
 {
-	value = cp.value;
+	set(cp.value);
 	return *this;
+}
+
+void Float::set(Data *data)
+{
+	CONST_CONTROL
+	Reference::StrictInfer(&data);
+	if(dynamic_cast<Float *>(data))
+		set(dynamic_cast<Float *>(data)->get());
+	else if(dynamic_cast<Integer *>(data))
+		set(dynamic_cast<Integer *>(data)->get());
+	else if(dynamic_cast<Bool *>(data))
+		set(dynamic_cast<Bool *>(data)->get());
+	else
+		throw Exception("Data is " + data->type() + " (can not convert " + data->type() + " into Float)");
+}
+
+void Float::set(string value)
+{
+	CONST_CONTROL
+	if(Integer::is(value) or Float::is(value))
+		set(atof(value.c_str()));
+	else if(Bool::is(value))
+		set(value == "true");
+	throw Exception("Can not set '" + value + "' as Float value");
 }
 
 bool Float::is(string expr)
 {
 	auto len = expr.size();
 	int ptCounter = 0;
-	for(int i = 0; i < len; i++)
+	for(int i = expr[i] == '-'; i < len; i++)
 	{
-		if(not i and expr[i] == '-') continue;
 		if(not isdigit(expr[i]))
 		{
 			if(i != 0 and i != len -1 and ptCounter == 0 and expr[i] == '.')

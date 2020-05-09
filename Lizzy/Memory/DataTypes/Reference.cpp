@@ -133,4 +133,19 @@ Reference& Reference::operator=(Reference& other)
 	return *this;
 }
 
+static void Reference::StrictInfer(Data **ref)
+{
+	if(dynamic_cast<Reference *>(*ref))
+	{
+		if(dynamic_cast<Reference *>(*ref)->get())
+		{
+			*ref = dynamic_cast<Reference *>(*ref)->get();
+		}
+		else
+		{
+			throw Exception("Reference to null");
+		}
+	}
+}
+
 
