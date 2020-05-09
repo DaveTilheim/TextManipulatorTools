@@ -48,4 +48,9 @@ Data* Data::dup()
 	return nullptr;
 }
 
+void Data::set(const Data* data)
+{
+
+}
+
 

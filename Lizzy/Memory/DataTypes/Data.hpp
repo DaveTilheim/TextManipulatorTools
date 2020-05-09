@@ -47,6 +47,7 @@ namespace Lizzy
 		virtual string type();
 		virtual Types typeId();
 		virtual Data *dup();
+		virtual void set(const Data* data);
 	};
 }
 

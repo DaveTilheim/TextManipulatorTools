@@ -7,7 +7,7 @@ using namespace Lizzy;
 
 Integer::Integer(long value) : value(value)
 {
-
+	
 }
 
 Integer::Integer(string expr) : value(atoi(expr.c_str()))

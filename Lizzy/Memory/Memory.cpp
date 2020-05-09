@@ -47,7 +47,7 @@ Data **Memory::getPersistantDataSlot(Data *data)
 	{
 		if(data == *persistantMemory[i]) return persistantMemory[i];
 	}
-	throw Exception("The data is not persistant");
+	throw Exception("Data is not persistant");
 }
 
 void Memory::erasePersistantMemory()
