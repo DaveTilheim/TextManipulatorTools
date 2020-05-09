@@ -6,11 +6,7 @@ Table tab
 
 field tab.name Arthur
 field tab.age 20
-to reference field:1 tab.ref tab
-
-Integer i 8
-set i i
 
 
 
-println get tab.ref.ref.ref.ref.name
+println get tab.name

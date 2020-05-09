@@ -93,7 +93,7 @@ void Memory::deletePersistantData(Reference *ref)
 				cout << "delete persistant " + (*persistantMemory[i])->type() << endl;
 				delete (*persistantMemory[i]);
 				delete persistantMemory[i];
-				ref->set(nullptr);
+				ref->set((Data *)nullptr);
 				persistantMemory.erase(persistantMemory.begin() + i);
 				return;
 			}
@@ -109,7 +109,7 @@ void Memory::deletePersistantData(Reference *ref)
 
 void Memory::attr_persistant_control(Data *data)
 {
-	if(dynamic_cast<Reference *>(data) and (dynamic_cast<Reference *>(data)->getRefAttr() & PERSISTANT_A) == 0)
+	if(dynamic_cast<Reference *>(data) and (dynamic_cast<Reference *>(data)->getSlotAttr() & PERSISTANT_A) == 0)
 	{
 		cout << "delete Reference data "<<endl;
 		//cout << data->type() << " " << data->toString() << endl;
@@ -304,14 +304,14 @@ Data **Memory::getDataSlotFromAccessor(string expr)
 			switch((*data)->typeId())
 			{
 				case VECTOR_T:
-					if(dynamic_cast<Reference *>(*data)) data = dynamic_cast<Reference *>(*data)->getRef();
+					if(dynamic_cast<Reference *>(*data)) data = dynamic_cast<Reference *>(*data)->getSlot();
 					if(j < 0 or j >= dynamic_cast<Vector *>(*data)->getVector().size())
 						throw Exception(to_string(j) + " is out ouf band of the size of vector");
 					data = &dynamic_cast<Vector *>(*data)->getVector()[j];
 					break;
 
 				case TABLE_T:
-					if(dynamic_cast<Reference *>(*data)) data = dynamic_cast<Reference *>(*data)->getRef();
+					if(dynamic_cast<Reference *>(*data)) data = dynamic_cast<Reference *>(*data)->getSlot();
 					data = dynamic_cast<Table *>(*data)->getAddr(accessor[i]);
 					break;
 				default:
@@ -566,7 +566,7 @@ Reference *Memory::generateReference(string value)
 	else
 	{
 		if(value.size() == 0)
-			return new Reference(nullptr);
+			return new Reference();
 		return generatePersistantReference(value);
 	}
 }
@@ -575,8 +575,8 @@ Reference *Memory::generateReference(Data **data)
 {
 	if(dynamic_cast<Reference *>(*data))
 	{
-		if(((Reference *)*data)->getRef())
-			data = ((Reference *)*data)->getRef();
+		if(((Reference *)*data)->getSlot())
+			data = ((Reference *)*data)->getSlot();
 	}
 	if((*data)->getAttr() & RESTRICT_A) throw Exception("Memory is marked 'restrict', it can not be referenced");
 	if((*data)->getAttr() & PERSISTANT_A) data = getPersistantDataSlot(*data);
@@ -956,7 +956,7 @@ Data **Memory::inferReference(string id)
 		}
 		else
 		{
-			data = ((Reference *)*data)->getRef();
+			data = ((Reference *)*data)->getSlot();
 		}
 	}
 	return data;
@@ -1372,7 +1372,7 @@ void Memory::attr_const_control(string id, bool refmode)
 	if(existsGlobalUp(id))
 	{
 		Data *data = getDataGlobalUp(id);
-		int attr = refmode ? ((Reference *)data)->getRefAttr() : data->getAttr();
+		int attr = refmode ? ((Reference *)data)->getSlotAttr() : data->getAttr();
 		if(attr & CONST_A) throw Exception(id + " is marked const, it can not be modified");
 	}
 }
@@ -1439,7 +1439,7 @@ bool Memory::isAllowedTypeFrom(Types t1, Types t2)
 
 SetModes Memory::attr_final_control(Data *data, Types otherType, bool refmode)
 {
-	if((refmode ? ((Reference *)data)->getRefAttr() : data->getAttr()) & FINAL_A)
+	if((refmode ? ((Reference *)data)->getSlotAttr() : data->getAttr()) & FINAL_A)
 	{
 		if(isAllowedTypeFrom(data->typeId(), otherType)) return CAST;
 		return FORB;

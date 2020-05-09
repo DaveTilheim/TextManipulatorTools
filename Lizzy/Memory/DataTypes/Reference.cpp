@@ -5,99 +5,132 @@ using namespace Lizzy;
 
 
 
-Reference::Reference(Data **value) : value(value)
-{
 
+
+Reference::Reference()
+{
+	dataPointer = new Data*;
+	*dataPointer = nullptr;
 }
 
-Reference::Reference(string expr) : value(reinterpret_cast<Data **>(atoi(expr.c_str())))
+Reference::Reference(Reference& other)
 {
-
+	dataPointer = new Data*;
+	*dataPointer = other.dup();
 }
 
-Reference::Reference(const Reference& cp) : value(cp.value)
+Reference::Reference(Data *data)
 {
+	dataPointer = new Data*;
+	*dataPointer = data->dup();
+}
 
+Reference::Reference(Data **data)
+{
+	dataPointer = data;
 }
 
 Reference::~Reference()
 {
-	cout << "ERASE REFERENCE" << endl;
-	value = nullptr;
+	if(*dataPointer)
+	{
+		delete *dataPointer;
+		*dataPointer = nullptr;
+	}
+	delete dataPointer;
 }
 
 int Reference::getAttr()
 {
-	if(value and *value) return (*value)->getAttr();
-	return attr;
+	if(*dataPointer)
+		return (*dataPointer)->getAttr();
+	throw Exception("Reference is empty");
 }
 
 void Reference::setAttr(int attr)
 {
-	if(value and *value)
-	{
-		(*value)->setAttr(attr);
-		return;
-	}
-	Data::setAttr(attr);
-}
-
-void Reference::setRefAttr(int attr)
-{
-	Data::setAttr(attr);
-}
-
-int Reference::getRefAttr() const
-{
-	return attr;
+	if(*dataPointer)
+		(*dataPointer)->setAttr(attr);
+	else
+		throw Exception("Reference is empty");
 }
 
 string Reference::toString()
 {
-	if(value and *value) return (*value)->toString();
+	if(*dataPointer)
+		return (*dataPointer)->toString();
 	return "null";
 }
 
+
 string Reference::type()
 {
-	if(value and *value) return (*value)->type();
+	if(*dataPointer)
+		return (*dataPointer)->type();
 	return "Reference";
 }
 
 Types Reference::typeId()
 {
-	if(value and *value) return (*value)->typeId();
+	if(*dataPointer)
+		return (*dataPointer)->typeId();
 	return REFERENCE_T;
 }
 
 Data *Reference::dup()
 {
-	if(value and *value) return (*value)->dup();
-	return new Reference(nullptr);
+	if(*dataPointer)
+		return (*dataPointer)->dup();
+	return new Reference();
 }
 
-Data *Reference::get() const
+void Reference::set(Data* data)
 {
-	return value ? *value : nullptr;
+	if(*dataPointer)
+		(*dataPointer)->set(data);
+	else
+		*dataPointer = data;
 }
 
-Data **Reference::getRef() const
+void Reference::set(Data** data)
 {
-	return value;
+	if(*dataPointer)
+		delete *dataPointer;
+	delete *dataPointer;
+	dataPointer = data;
 }
 
-void Reference::set(Data **newValue)
+Data *Reference::get()
 {
-	value = newValue;
+	if(*dataPointer)
+		return *dataPointer;
+	return nullptr;
 }
 
-Reference& Reference::operator=(const Reference& cp)
+Data **Reference::getSlot()
 {
-	value = cp.value;
+	return dataPointer;
+}
+
+bool Reference::isEmpty() const
+{
+	return *dataPointer == nullptr;
+}
+
+int Reference::getSlotAttr() const
+{
+	return attr;
+}
+
+void Reference::setSlotAttr(int attr)
+{
+	Data::setAttr(attr);
+}
+
+Reference& Reference::operator=(Reference& other)
+{
+	set(other.get());
 	return *this;
 }
 
-bool Reference::is(string expr)
-{
-	return false;
-}
+

@@ -2,53 +2,24 @@
 
 using namespace Lizzy;
 
-
-Slot::Slot()
+Slot::Slot(string strvalue) : Reference()
 {
-	dataPointer = new Data*;
-	*dataPointer = nullptr;
-}
-
-Slot::Slot(Slot& other)
-{
-	dataPointer = new Data*;
-	*dataPointer = other.dup();
-}
-
-Slot::Slot(string strvalue)
-{
-
-}
-
-Slot::Slot(Data *data)
-{
-	dataPointer = new Data*;
-	*dataPointer = data->dup();
-}
-
-Slot::~Slot()
-{
-	if(*dataPointer)
+	switch(Type::type(strvalue))
 	{
-		delete *dataPointer;
+		case INTEGER_T:
+			set(new Integer(strvalue));
+			break;
+		case FLOAT_T:
+			set(new Float(strvalue));
+			break;
+		case BOOL_T:
+			set(new Bool(strvalue));
+			break;
+		default:
+			set(new String(strvalue));
 	}
-	delete dataPointer;
 }
 
-int Slot::getAttr()
-{
-	if(*dataPointer)
-		return (*dataPointer)->getAttr();
-	throw Exception("Slot is empty");
-}
-
-void Slot::setAttr(int attr)
-{
-	if(*dataPointer)
-		(*dataPointer)->setAttr(attr);
-	else
-		throw Exception("Slot is empty");
-}
 
 string Slot::toString()
 {
@@ -92,32 +63,6 @@ Data *Slot::get()
 	if(*dataPointer)
 		return *dataPointer;
 	throw Exception("Slot is empty");
-}
-
-Data **Slot::getSlot()
-{
-	return dataPointer;
-}
-
-bool Slot::isEmpty() const
-{
-	return *dataPointer == nullptr;
-}
-
-int Slot::getSlotAttr() const
-{
-	return attr;
-}
-
-void Slot::setSlotAttr(int attr)
-{
-	Data::setAttr(attr);
-}
-
-Slot& Slot::operator=(Slot& other)
-{
-	set(other.get());
-	return *this;
 }
 
 Slot::operator Data*()
