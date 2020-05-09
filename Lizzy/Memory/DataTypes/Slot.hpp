@@ -11,7 +11,7 @@ namespace Lizzy
 		Data **dataPointer;
 	public:
 		Slot();
-		Slot(const Slot& other);
+		Slot(Slot& other);
 		Slot(string strvalue);
 		Slot(Data *data);
 		~Slot();
@@ -27,7 +27,7 @@ namespace Lizzy
 		bool isEmpty() const;
 		int getSlotAttr() const;
 		void setSlotAttr(int attr);
-		Slot& operator=(const Slot& other);
+		Slot& operator=(Slot& other);
 		operator Data*();
 		operator Bool*();
 		operator Float*();

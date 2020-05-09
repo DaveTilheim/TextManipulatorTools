@@ -13,8 +13,8 @@ namespace Lizzy
 {
 	namespace Type
 	{
-		Types Memory::type(string constStrGenValue);
-		string Memory::inferType(string constStrGenValue);
+		Types type(string constStrGenValue);
+		string inferType(string constStrGenValue);
 	}
 }
 

@@ -9,7 +9,7 @@ Slot::Slot()
 	*dataPointer = nullptr;
 }
 
-Slot::Slot(const Slot& other)
+Slot::Slot(Slot& other)
 {
 	dataPointer = new Data*;
 	*dataPointer = other.dup();
@@ -114,7 +114,7 @@ void Slot::setSlotAttr(int attr)
 	Data::setAttr(attr);
 }
 
-Slot& Slot::operator=(const Slot& other)
+Slot& Slot::operator=(Slot& other)
 {
 	set(other.get());
 	return *this;
