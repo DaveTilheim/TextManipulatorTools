@@ -5,6 +5,18 @@ using namespace Lizzy;
 
 
 
+Reference::Reference(string data)
+{
+	dataPointer = new Data*;
+	if(Integer::is(data))
+		*dataPointer = new Integer(atoi(data.c_str()));
+	else if(Float::is(data))
+		*dataPointer = new Float(atof(data.c_str()));
+	else if(Bool::is(data))
+		*dataPointer = new Bool(data == "true");
+	else
+		*dataPointer = new String(data);
+}
 
 
 Reference::Reference()
@@ -22,7 +34,7 @@ Reference::Reference(Reference& other)
 Reference::Reference(Data *data)
 {
 	dataPointer = new Data*;
-	*dataPointer = data->dup();
+	*dataPointer = data;
 }
 
 Reference::Reference(Data **data)
@@ -84,20 +96,40 @@ Data *Reference::dup()
 	return new Reference();
 }
 
-void Reference::set(Data* data)
+void Reference::setFromData(Data* data)
 {
+	Reference::StrictInfer(&data);
 	if(*dataPointer)
-		(*dataPointer)->set(data);
+		(*dataPointer)->setFromData(data);
 	else
+	{
+		CONST_CONTROL
 		*dataPointer = data;
+	}
 }
 
 void Reference::set(Data** data)
 {
+	CONST_CONTROL
 	if(*dataPointer)
 		delete *dataPointer;
 	delete *dataPointer;
 	dataPointer = data;
+}
+
+void Reference::setFromValue(string data)
+{
+	if(*dataPointer)
+		(*dataPointer)->setFromValue(data);
+	CONST_CONTROL
+	if(Integer::is(data))
+		*dataPointer = new Integer(atoi(data.c_str()));
+	else if(Float::is(data))
+		*dataPointer = new Float(atof(data.c_str()));
+	else if(Bool::is(data))
+		*dataPointer = new Bool(data == "true");
+	else
+		*dataPointer = new String(data);
 }
 
 Data *Reference::get()

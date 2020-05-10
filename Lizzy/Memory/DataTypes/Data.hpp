@@ -50,8 +50,8 @@ namespace Lizzy
 		virtual string type();
 		virtual Types typeId();
 		virtual Data *dup();
-		virtual void set(Data* data); //cast Data
-		virtual void set(string value); //cast value
+		virtual void setFromData(Data* data); //cast Data
+		virtual void setFromValue(string value); //cast value
 		bool hasAttr(DataAttributes attr);
 	};
 }

@@ -11,12 +11,12 @@ namespace Lizzy
 		Data **dataPointer;
 	public:
 		using Reference::Reference;
-		Slot(string strvalue);
 		string toString() override;
 		string type() override;
 		Types typeId() override;
 		Data *dup() override;
-		void set(Data* data) override;
+		void setFromData(Data* data) override;
+		void setFromValue(string value) override;
 		Data *get() override;
 		Slot& operator=(Slot& other);
 		operator Data*();

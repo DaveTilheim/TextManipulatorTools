@@ -5,15 +5,20 @@ using namespace Lizzy;
 
 
 
-String::String(string value) : value(value)
+String::String(string value)
 {
-
+	setFromValue(value);
 }
 
 
 String::String(const String& cp) : value(cp.value)
 {
 
+}
+
+String::String(Data *data)
+{
+	setFromData(data);
 }
 
 String::~String()
@@ -48,12 +53,26 @@ string String::get() const
 
 void String::set(string newValue)
 {
+	CONST_CONTROL
 	value = newValue;
+}
+
+void String::setFromValue(string value)
+{
+	CONST_CONTROL
+	this->value = value;
+}
+
+void String::setFromData(Data *data)
+{
+	CONST_CONTROL
+	Reference::StrictInfer(&data);
+	value = data->toString();
 }
 
 String& String::operator=(const String& cp)
 {
-	value = cp.value;
+	set(cp.value);
 	return *this;
 }
 

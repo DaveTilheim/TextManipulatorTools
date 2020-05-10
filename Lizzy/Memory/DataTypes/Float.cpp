@@ -12,12 +12,12 @@ Float::Float(double value) : value(value)
 
 Float::Float(string expr)
 {
-	set(expr);
+	setFromValue(expr);
 }
 
 Float::Float(Data *data)
 {
-	set(data);
+	setFromData(data);
 }
 
 Float::Float(const Float& cp) : value(cp.value)
@@ -67,7 +67,7 @@ Float& Float::operator=(const Float& cp)
 	return *this;
 }
 
-void Float::set(Data *data)
+void Float::setFromData(Data *data)
 {
 	CONST_CONTROL
 	Reference::StrictInfer(&data);
@@ -81,14 +81,15 @@ void Float::set(Data *data)
 		throw Exception("Data is " + data->type() + " (can not convert " + data->type() + " into Float)");
 }
 
-void Float::set(string value)
+void Float::setFromValue(string value)
 {
 	CONST_CONTROL
 	if(Integer::is(value) or Float::is(value))
 		set(atof(value.c_str()));
 	else if(Bool::is(value))
 		set(value == "true");
-	throw Exception("Can not set '" + value + "' as Float value");
+	else
+		throw Exception("Can not set '" + value + "' as Float value");
 }
 
 bool Float::is(string expr)

@@ -1,6 +1,11 @@
 #ifndef LIZZY_FLOAT_HPP
 #define LIZZY_FLOAT_HPP
-#include "Data.hpp"
+#include "Integer.hpp"
+#include "String.hpp"
+#include "Bool.hpp"
+#include "Vector.hpp"
+#include "Table.hpp"
+#include "Reference.hpp"
 
 namespace Lizzy
 {
@@ -21,8 +26,8 @@ namespace Lizzy
 		static bool is(string expr);
 		double get() const;
 		void set(double newValue);
-		void set(Data *data) override;
-		void set(string value) override;
+		void setFromData(Data *data) override;
+		void setFromValue(string value) override;
 		Float& operator=(const Float& cp);
 	};
 }

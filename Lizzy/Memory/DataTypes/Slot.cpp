@@ -2,24 +2,6 @@
 
 using namespace Lizzy;
 
-Slot::Slot(string strvalue) : Reference()
-{
-	switch(Type::type(strvalue))
-	{
-		case INTEGER_T:
-			set(new Integer(strvalue));
-			break;
-		case FLOAT_T:
-			set(new Float(strvalue));
-			break;
-		case BOOL_T:
-			set(new Bool(strvalue));
-			break;
-		default:
-			set(new String(strvalue));
-	}
-}
-
 
 string Slot::toString()
 {
@@ -50,10 +32,18 @@ Data *Slot::dup()
 	throw Exception("Slot is empty");
 }
 
-void Slot::set(Data* data)
+void Slot::setFromData(Data* data)
 {
 	if(*dataPointer)
-		(*dataPointer)->set(data);
+		(*dataPointer)->setFromData(data);
+	else
+		throw Exception("Slot is empty");
+}
+
+void Slot::setFromValue(string value)
+{
+	if(*dataPointer)
+		(*dataPointer)->setFromValue(value);
 	else
 		throw Exception("Slot is empty");
 }

@@ -12,7 +12,7 @@ Integer::Integer(long value) : value(value)
 
 Integer::Integer(string expr)// : value(atoi(expr.c_str()))
 {
-	set(expr);
+	setFromValue(expr);
 }
 
 Integer::Integer(const Integer& cp) : value(cp.value)
@@ -22,7 +22,7 @@ Integer::Integer(const Integer& cp) : value(cp.value)
 
 Integer::Integer(Data *data)
 {
-	set(data);
+	setFromData(data);
 }
 
 Integer::~Integer()
@@ -61,7 +61,7 @@ void Integer::set(long newValue)
 	value = newValue;
 }
 
-void Integer::set(Data *data)
+void Integer::setFromData(Data *data)
 {
 	CONST_CONTROL
 	Reference::StrictInfer(&data);
@@ -83,14 +83,15 @@ void Integer::set(Data *data)
 	}
 }
 
-void Integer::set(string value)
+void Integer::setFromValue(string value)
 {
 	CONST_CONTROL
 	if(Integer::is(value) or Float::is(value))
 		set(atoi(value.c_str()));
 	else if(Bool::is(value))
 		set(value == "true");
-	throw Exception("Can not set '" + value + "' as Integer value");
+	else
+		throw Exception("Can not set '" + value + "' as Integer value");
 }
 
 Integer& Integer::operator=(const Integer& cp)

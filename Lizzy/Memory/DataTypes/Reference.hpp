@@ -22,7 +22,8 @@ namespace Lizzy
 		virtual string type() override;
 		virtual Types typeId() override;
 		virtual Data *dup() override;
-		virtual void set(Data* data) override;
+		virtual void setFromData(Data* data) override;
+		virtual void setFromValue(string data) override;
 		void set(Data** data);
 		virtual Data *get();
 		Data **getSlot();

@@ -27,8 +27,8 @@ namespace Lizzy
 		static bool is(string expr);
 		long get() const;
 		void set(long newValue);
-		void set(Data *data) override;
-		void set(string value) override;
+		void setFromData(Data *data) override;
+		void setFromValue(string value) override;
 		Integer& operator=(const Integer& cp);
 	};
 }
