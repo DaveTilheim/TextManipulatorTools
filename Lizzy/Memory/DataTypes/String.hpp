@@ -29,6 +29,8 @@ namespace Lizzy
 		void setFromData(Data *data);
 		String& operator=(const String& cp);
 		char& operator[](int i);
+		string getCharAt(string iexpr);
+		void setCharAt(string iexpr, string chars);
 	};
 }
 

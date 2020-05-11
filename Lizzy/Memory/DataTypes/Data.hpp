@@ -9,7 +9,24 @@
 
 using namespace std;
 
-#define CONST_CONTROL if(getAttr() & (int)CONST_A) throw Exception("Data is marked const. It can not be modified");
+#define CONST_CONTROL if(this->getAttr() & (int)CONST_A) throw Exception("Data is marked const. It can not be modified");
+#define REF_CONST_CONTROL if(this->getSlotAttr() & (int)CONST_A) throw Exception("Data is marked const. It can not be modified");
+#define CONST_CONTROL_(data) if((data)->getAttr() & (int)CONST_A) throw Exception("Data is marked const. It can not be modified");
+#define RESTRICT_CONTROL(data) if((data)->getAttr() & (int)RESTRICT_A) throw Exception("Data is marked restrict. Ic can not be referenced");
+#define TRY_DELETE(data) if(dynamic_cast<Reference *>(data))\
+						{\
+							if((dynamic_cast<Reference *>(data)->getSlotAttr() & PERSISTANT_A) == 0)\
+							{\
+								delete data;data=nullptr;\
+							}\
+						}\
+						else\
+						{\
+							if(((data)->getAttr() & PERSISTANT_A) == 0)\
+							{\
+								delete data;data=nullptr;\
+							}\
+						}\
 
 namespace Lizzy
 {
@@ -42,6 +59,10 @@ namespace Lizzy
 	{
 	protected:
 		int attr = 0;
+		static Data *(*generateInteger)(int);
+		static Data *(*generateFloat)(double);
+		static Data *(*generateBool)(bool);
+		static Data *(*generateString)(string);
 	public:
 		virtual ~Data();
 		virtual string toString() = 0;
@@ -53,6 +74,9 @@ namespace Lizzy
 		virtual void setFromData(Data* data); //cast Data
 		virtual void setFromValue(string value); //cast value
 		bool hasAttr(DataAttributes attr);
+		static bool isInteger(string value);
+		static bool isFloat(string value);
+		static bool isBool(string value);
 	};
 }
 

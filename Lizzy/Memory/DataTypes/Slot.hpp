@@ -7,16 +7,19 @@ namespace Lizzy
 {
 	class Slot : public Reference
 	{
-	private:
-		Data **dataPointer;
 	public:
 		using Reference::Reference;
+		~Slot();
 		string toString() override;
 		string type() override;
 		Types typeId() override;
 		Data *dup() override;
-		void setFromData(Data* data) override;
-		void setFromValue(string value) override;
+		/*void setFromData(Data* data) override;
+		void setFromValue(string value) override;*/
+		void setData(Data *data);
+		void setData(string value);
+		void toReference(Data **data);
+		void toReference(string value);
 		Data *get() override;
 		Slot& operator=(Slot& other);
 		operator Data*();
@@ -27,6 +30,8 @@ namespace Lizzy
 		operator String*();
 		operator Table*();
 		operator Vector*();
+		static Data *generatePrimitive(string value);
+		static Data **generateSlotPrimitive(string value);
 	};
 }
 

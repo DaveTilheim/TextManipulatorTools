@@ -4,6 +4,8 @@
 using namespace Lizzy;
 
 
+Data *(*Data::generateBool)(bool) = [](bool b){return (Data *)new Bool(b);};
+
 
 Bool::Bool(bool value) : value(value)
 {
@@ -12,7 +14,7 @@ Bool::Bool(bool value) : value(value)
 
 Bool::Bool(string expr)
 {
-	setFromValue(data);
+	setFromValue(expr);
 }
 
 Bool::Bool(const Bool& cp) : value(cp.value)
@@ -61,7 +63,7 @@ void Bool::set(bool newValue)
 	value = newValue;
 }
 
-void setFromData(Data *data)
+void Bool::setFromData(Data *data)
 {
 	CONST_CONTROL
 	Reference::StrictInfer(&data);
@@ -75,7 +77,7 @@ void setFromData(Data *data)
 		throw Exception("Data is " + data->type() + " (can not convert " + data->type() + " into Bool)");
 }
 
-void setFromValue(string value)
+void Bool::setFromValue(string value)
 {
 	CONST_CONTROL
 	if(Bool::is(value))

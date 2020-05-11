@@ -8,14 +8,14 @@ using namespace Lizzy;
 Reference::Reference(string data)
 {
 	dataPointer = new Data*;
-	if(Integer::is(data))
-		*dataPointer = new Integer(atoi(data.c_str()));
-	else if(Float::is(data))
-		*dataPointer = new Float(atof(data.c_str()));
-	else if(Bool::is(data))
-		*dataPointer = new Bool(data == "true");
+	if(Data::isInteger(data))
+		*dataPointer = Data::generateInteger(atoi(data.c_str()));
+	else if(Data::isFloat(data))
+		*dataPointer = Data::generateFloat(atof(data.c_str()));
+	else if(Data::isBool(data))
+		*dataPointer = Data::generateBool(data == "true");
 	else
-		*dataPointer = new String(data);
+		*dataPointer = Data::generateString(data);
 }
 
 
@@ -44,11 +44,12 @@ Reference::Reference(Data **data)
 
 Reference::~Reference()
 {
-	if(*dataPointer)
+	/*if(*dataPointer)
 	{
 		delete *dataPointer;
 		*dataPointer = nullptr;
-	}
+	}*/
+	cout << "delete ref " << this << endl;
 	delete dataPointer;
 }
 
@@ -104,38 +105,41 @@ void Reference::setFromData(Data* data)
 	else
 	{
 		CONST_CONTROL
+		RESTRICT_CONTROL(data);
 		*dataPointer = data;
 	}
 }
 
 void Reference::set(Data** data)
 {
-	CONST_CONTROL
-	if(*dataPointer)
-		delete *dataPointer;
-	delete *dataPointer;
+	REF_CONST_CONTROL
+	RESTRICT_CONTROL(*data);
+	delete dataPointer;
 	dataPointer = data;
 }
+
 
 void Reference::setFromValue(string data)
 {
 	if(*dataPointer)
 		(*dataPointer)->setFromValue(data);
 	CONST_CONTROL
-	if(Integer::is(data))
-		*dataPointer = new Integer(atoi(data.c_str()));
-	else if(Float::is(data))
-		*dataPointer = new Float(atof(data.c_str()));
-	else if(Bool::is(data))
-		*dataPointer = new Bool(data == "true");
+	if(Data::isInteger(data))
+		*dataPointer = Data::generateInteger(atoi(data.c_str()));
+	else if(Data::isFloat(data))
+		*dataPointer = Data::generateFloat(atof(data.c_str()));
+	else if(Data::isBool(data))
+		*dataPointer = Data::generateBool(data == "true");
 	else
-		*dataPointer = new String(data);
+		*dataPointer = Data::generateString(data);
 }
 
 Data *Reference::get()
 {
 	if(*dataPointer)
+	{
 		return *dataPointer;
+	}
 	return nullptr;
 }
 
@@ -161,11 +165,11 @@ void Reference::setSlotAttr(int attr)
 
 Reference& Reference::operator=(Reference& other)
 {
-	set(other.get());
+	set(other.getSlot());
 	return *this;
 }
 
-static void Reference::StrictInfer(Data **ref)
+void Reference::StrictInfer(Data **ref)
 {
 	if(dynamic_cast<Reference *>(*ref))
 	{

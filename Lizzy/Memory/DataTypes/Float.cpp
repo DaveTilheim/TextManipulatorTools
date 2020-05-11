@@ -3,6 +3,7 @@
 
 using namespace Lizzy;
 
+Data *(*Data::generateFloat)(double) = [](double d){return (Data *)new Float(d);};
 
 
 Float::Float(double value) : value(value)

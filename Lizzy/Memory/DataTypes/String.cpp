@@ -3,7 +3,7 @@
 
 using namespace Lizzy;
 
-
+Data *(*Data::generateString)(string) = [](string s){return (Data *)new String(s);};
 
 String::String(string value)
 {
@@ -85,3 +85,43 @@ char& String::operator[](int i)
 {
 	return value[i];
 }
+
+string String::getCharAt(string iexpr)
+{
+	if(Integer::is(iexpr))
+	{
+		int i = atoi(iexpr.c_str());
+		if(i >= 0 and i < value.size())
+		{
+			return string(1, value[i]);
+		}
+		throw Exception("Index out of band. " + to_string(i) + " give but boundaries are: [0, " + to_string(value.size() - 1) + "]");
+	}
+	throw Exception(iexpr + " can not be interpreted as String index");
+}
+
+void String::setCharAt(string iexpr, string chars)
+{
+	CONST_CONTROL
+	if(Integer::is(iexpr))
+	{
+		int i = atoi(iexpr.c_str());
+		if(i >= 0 and i < value.size())
+		{
+			if(chars.size() == 1)
+			{
+				value[i] = chars[0];
+			}
+			else
+			{
+				throw Exception(chars.size() + " characers given but expected 1");
+			}
+		}
+		else
+			throw Exception("Index out of band. " + to_string(i) + " give but boundaries are: [0, " + to_string(value.size() - 1) + "]");
+	}
+	else
+		throw Exception(iexpr + " can not be interpreted as String index");
+}
+
+

@@ -1,12 +1,6 @@
 #ifndef MEMORY_HPP
 #define MEMORY_HPP
-#include "DataTypes/Integer.hpp"
-#include "DataTypes/Float.hpp"
-#include "DataTypes/Bool.hpp"
-#include "DataTypes/String.hpp"
-#include "DataTypes/Vector.hpp"
-#include "DataTypes/Reference.hpp"
-#include "DataTypes/Table.hpp"
+#include "DataTypes/Slot.hpp"
 #include "../../String.hpp"
 #include <ctype.h>
 #include <unordered_map>
@@ -23,7 +17,7 @@ namespace Lizzy
 		FULL
 	};
 
-	class Memory : private unordered_map<string, Data *>
+	class Memory : private unordered_map<string, Slot *>
 	{
 	public:
 		const string id;
@@ -44,39 +38,39 @@ namespace Lizzy
 		void deletePersistantData(Reference *ref);
 	public:
 		//persistantMemory
-		static Data **getPersistantDataSlot(Data *data);
+		static Slot *getPersistantDataSlot(Data *data);
 		static void erasePersistantMemory();
 		//
 		vector<string> toAccessor(string id);
 		bool isAccessor(string id);
 		bool isAccessor(Data *data);
 		Data *getDataFromAccessor(string expr);
-		Data **getDataSlotFromAccessor(string expr);
+		Slot *getDataSlotFromAccessor(string expr);
 		bool exists(string id);
 		bool existsGlobalUp(string id);
 		Data *getDataGlobalUp(string id);
-		Data **getDataSlotGlobalUp(string id);
+		Slot *getDataSlotGlobalUp(string id);
 		void setAttr(string id, int attr);
 		string getId(Data *);
 		string getId();
-		Data **inferReference(string id);
+		Slot *inferReference(string id);
 		int getDataSize(string id);
 		//Generic primitive
 		void addPrimitiveData(string id, string strGenValue);
-		Data *generateDataFromValue(string value);
-		Data *generateDataFromId(string id);
+		Slot *generateDataFromValue(string value);
+		Slot *generateDataFromId(string id);
 		//Specific Data
-		Integer *generateInteger(Data* value);
-		Integer *generateInteger(string value);
-		Float *generateFloat(Data* value);
-		Float *generateFloat(string value);
-		Bool *generateBool(Data* value);
-		Bool *generateBool(string value);
-		String *generateString(string value);
-		Reference *generateReference(string value);
-		Reference *generateReference(Data **value);
-		Reference *generatePersistantReference(string value);
-		Data **generateDataSlotPersistant(string value);
+		Slot *generateInteger(Data* value);
+		Slot *generateInteger(string value);
+		Slot *generateFloat(Data* value);
+		Slot *generateFloat(string value);
+		Slot *generateBool(Data* value);
+		Slot *generateBool(string value);
+		Slot *generateString(string value);
+		Slot *generateReference(string value);
+		Slot *generateReference(Data **value);
+		Slot *generatePersistantReference(string value);
+		Slot *generateDataSlotPersistant(string value);
 		void addInteger(string id, string value);
 		void addFloat(string id, string value);
 		void addBool(string id, string value);
@@ -89,28 +83,17 @@ namespace Lizzy
 		Data *getData(string id);
 		string getType(string id);
 		string toString(string id);
-		static Types type(string constStrGenValue);
-		static string inferType(string constStrGenValue);
 		//containers
-		Vector *generateVector(vector<string>& values);
+		Slot *generateVector(vector<string>& values);
 		void addVector(string id, vector<string>& values);
-		Table *generateTable(string value);
+		Slot *generateTable(string value);
 		void addTable(string id, string value);
 		//String
 		string getCharAt(string id, string index);
 		void setCharAt(string id, string index, string character);
 		//casting
-		void castIn(Data *data, string value);
-		void castInInteger(Integer *data, string value);
-		void castInFloat(Float *data, string value);
-		void castInBool(Bool *data, string value);
-		void castInString(String *data, string value);
-		void castInReference(Reference *data, string value);
-		void castInInteger(Integer *data, Data* value);
-		void castInFloat(Float *data, Data* value);
-		void castInBool(Bool *data, Data* value);
-		void castInVector(Vector *ref, string value);
-		void castInTable(Table *ref, string value);
+		void cast(Data *to, Data *from);
+		void cast(Data *to, string from);
 		static bool isAllowedTypeFrom(Types t1, Types t2);
 		static bool isAllowedNumberFrom(Types otherType);
 		static bool isAllowedStringFrom(Types otherType);

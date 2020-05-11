@@ -1,6 +1,6 @@
 #ifndef LIZZY_VECTOR_HPP
 #define LIZZY_VECTOR_HPP
-#include "Data.hpp"
+#include "Reference.hpp"
 #include <vector>
 
 namespace Lizzy
@@ -12,6 +12,7 @@ namespace Lizzy
 	public:
 		Vector();
 		Vector(const Vector& cp) _dup_in_method;
+		Vector(Data *data);
 		~Vector();
 		string toString() override;
 		string type() override;
@@ -24,6 +25,7 @@ namespace Lizzy
 		void foreach(void (*operation)(Data *));
 		vector<Data *>& getVector();
 		void set(Data& data, int i) noexcept(false) _dup_in_method;
+		void setFromData(Data *data) override;
 		void copyVector(const vector<Data *>& vec);
 		Vector& operator=(const Vector& cp);
 	};

@@ -2,10 +2,10 @@
 
 using namespace Lizzy;
 
-static vector<Data **> persistantMemory = vector<Data **>();
+static vector<Slot *> persistantMemory = vector<Slot *>();
 
 
-Memory::Memory(Memory *parent, string id) : unordered_map<string, Data *>(), self(*this), parent(parent), id(id)
+Memory::Memory(Memory *parent, string id) : unordered_map<string, Slot *>(), self(*this), parent(parent), id(id)
 {
 	cout << "Memory created" << endl;
 }
@@ -14,8 +14,8 @@ Memory::~Memory()
 {
 	for(auto it : *this)
 	{
-		cout <<  "pop " << it.first << endl;
-		attr_persistant_control(it.second);
+		cout << it.first << endl;
+		delete it.second;
 	}
 	clear();
 	cout << "Memory deleted" << endl;
@@ -39,24 +39,22 @@ void Memory::traceMemory()
 }
 
 
-Data **Memory::getPersistantDataSlot(Data *data)
+Slot *Memory::getPersistantDataSlot(Data *data)
 {
-	if(dynamic_cast<Reference *>(data)) data = dynamic_cast<Reference *>(data)->get();
+	Reference::StrictInfer(&data);
 	auto len = persistantMemory.size();
 	for(int i = 0; i < len ; i++)
 	{
-		if(data == *persistantMemory[i]) return persistantMemory[i];
+		if(data == persistantMemory[i]->get()) return persistantMemory[i];
 	}
 	throw Exception("Data is not persistant");
 }
 
 void Memory::erasePersistantMemory()
 {
-	for(auto **data : persistantMemory)
+	for(auto *slot : persistantMemory)
 	{
-		cout << "pers delete " << (*data)->type() << endl;
-		delete *data;
-		delete data;
+		delete slot;
 	}
 }
 
@@ -75,8 +73,8 @@ Memory *Memory::getMemoryWhereIs(string id)
 void Memory::deleteData(string id)
 {
 	Memory *memory = getMemoryWhereIs(id);
-	Data *data = memory->self[id];
-	memory->attr_persistant_control(memory->self[id]);
+	Slot *slot = memory->self[id];
+	delete slot;
 	memory->erase(id);
 }
 
@@ -88,12 +86,11 @@ void Memory::deletePersistantData(Reference *ref)
 		auto len = persistantMemory.size();
 		for(int i = 0; i < len; i++)
 		{
-			if(*persistantMemory[i] == data)
+			if(persistantMemory[i]->get() == data)
 			{
-				cout << "delete persistant " + (*persistantMemory[i])->type() << endl;
-				delete (*persistantMemory[i]);
+				cout << "delete persistant " + (persistantMemory[i])->type() << endl;
 				delete persistantMemory[i];
-				ref->set((Data *)nullptr);
+				ref->set((Data **)nullptr);
 				persistantMemory.erase(persistantMemory.begin() + i);
 				return;
 			}
@@ -233,7 +230,7 @@ Data *Memory::getDataFromAccessor(string expr)
 			}
 			else
 			{
-				if(type(accessor[i]) == INTEGER_T)
+				if(Type::type(accessor[i]) == INTEGER_T)
 				{
 					j = atoi(accessor[i].c_str());
 				}
@@ -264,8 +261,8 @@ Data *Memory::getDataFromAccessor(string expr)
 }
 
 
-Data **Memory::getDataSlotFromAccessor(string expr)
-{
+Slot *Memory::getDataSlotFromAccessor(string expr)
+{/*
 	auto accessor = toAccessor(expr);
 	auto len = accessor.size();
 	if(len > 1)
@@ -320,7 +317,8 @@ Data **Memory::getDataSlotFromAccessor(string expr)
 		}
 		return data;
 	}
-	throw Exception(expr + " does not represents an accessor expression");
+	throw Exception(expr + " does not represents an accessor expression");*/
+return nullptr;
 }
 
 
@@ -331,7 +329,7 @@ Data *Memory::getDataGlobalUp(string id)
 	{
 		if(memory->find(id) != memory->end())
 		{
-			 return (*memory)[id];
+			 return (*memory)[id]->get();
 		}
 		else
 		{
@@ -366,21 +364,14 @@ string Memory::getId(Data *d)
 	throw Exception("Reference Memory is a reference to a Memory which not exists");
 }
 
-Data *Memory::generateDataFromValue(string value)
+Slot *Memory::generateDataFromValue(string value)
 {
-	switch(type(value)) //constante littérales
-	{
-		case INTEGER_T: return new Integer(value);
-		case FLOAT_T: return new Float(value);
-		case BOOL_T: return new Bool(value);
-		case STRING_T: return new String(value);
-		default: throw Exception("Uknown type has been occured");
-	}
+	return new Slot(value);
 }
 
-Data *Memory::generateDataFromId(string id)
+Slot *Memory::generateDataFromId(string id)
 {
-	return getDataGlobalUp(id)->dup();
+	return new Slot(getDataGlobalUp(id)->dup());
 }
 
 void Memory::addPrimitiveData(string id, string value)
@@ -402,26 +393,12 @@ void Memory::addPrimitiveData(string id, string value)
 	}
 }
 
-Integer *Memory::generateInteger(Data *reference)
+Slot *Memory::generateInteger(Data *reference)
 {
-	switch(reference->typeId())
-	{
-		case BOOL_T:
-				return new Integer(((Bool *)reference)->get());
-		case STRING_T:
-			throw Exception(getId(reference) + " is String (can not convert String as Integer)");
-		case VECTOR_T:
-			throw Exception(getId(reference) + " is Vector (can not convert Vector as Integer)");
-		case TABLE_T:
-			throw Exception(getId(reference) + "is Table (can not convert Table as Integer)");
-		case REFERENCE_T:
-			throw Exception(getId(reference) + " is a reference to null");
-		default:
-			return new Integer(reference->toString());
-	}
+	return new Slot(new Integer(reference));
 }
 
-Integer *Memory::generateInteger(string value)
+Slot *Memory::generateInteger(string value)
 {
 	if(existsGlobalUp(value))
 	{
@@ -429,40 +406,17 @@ Integer *Memory::generateInteger(string value)
 	}
 	else
 	{
-		switch(type(value))
-		{
-			case BOOL_T:
-				return new Integer(value == "true");
-				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Integer)");
-			default:
-				return new Integer(value);
-		}
+		return new Slot(new Integer(value));
 	}
 }
 
 
-Float *Memory::generateFloat(Data *reference)
+Slot *Memory::generateFloat(Data *reference)
 {
-	switch(reference->typeId())
-	{
-		case BOOL_T:
-			return new Float(((Bool *)reference)->get());
-		case STRING_T:
-			throw Exception(getId(reference) + " is String (can not convert String as Float)");
-		case VECTOR_T:
-			throw Exception(getId(reference) + " is Vector (can not convert Vector as Float)");
-		case TABLE_T:
-			throw Exception(getId(reference) + "is Table (can not convert Table as Float)");
-		case REFERENCE_T:
-			throw Exception(getId(reference) + " is a reference to null");
-		default:
-			return new Float(reference->toString());
-	}
+	return new Slot(new Float(reference));
 }
 
-Float *Memory::generateFloat(string value)
+Slot *Memory::generateFloat(string value)
 {
 	if(existsGlobalUp(value))
 	{
@@ -470,40 +424,16 @@ Float *Memory::generateFloat(string value)
 	}
 	else
 	{
-		switch(type(value))
-		{
-			case BOOL_T:
-				return new Float(value == "true");
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Float)");
-			default:
-				return new Float(value);
-		}
+		return new Slot(new Float(value));
 	}
 }
 
-Bool *Memory::generateBool(Data *reference)
+Slot *Memory::generateBool(Data *reference)
 {
-	switch(reference->typeId())
-	{
-		case REFERENCE_T:
-			throw Exception(getId(reference) + " is a reference to null");
-		case VECTOR_T:
-			throw Exception(getId(reference) + " is Vector (can not convert Vector as Bool)");
-		case STRING_T:
-			throw Exception(getId(reference) + " is String (can not convert String as Bool)");
-		case TABLE_T:
-			throw Exception(getId(reference) + "is Table (can not convert Table as Bool)");
-		case INTEGER_T:
-			return new Bool(((Integer *)reference)->get());
-		case FLOAT_T:
-			return new Bool(((Float *)reference)->get());
-		default:
-			return new Bool(reference->toString());
-	}
+	return new Slot(new Bool(reference));
 }
 
-Bool *Memory::generateBool(string value)
+Slot *Memory::generateBool(string value)
 {
 	if(existsGlobalUp(value))
 	{
@@ -511,80 +441,59 @@ Bool *Memory::generateBool(string value)
 	}
 	else
 	{
-		switch(type(value))
-		{
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Bool)");
-			case INTEGER_T:
-				return new Bool(atoi(value.c_str()));
-				break;
-			case FLOAT_T:
-				return new Bool(atof(value.c_str()));
-				break;
-			default:
-				return new Bool(value);
-		}
+		return new Slot(new Bool(value));
 	}
 }
 
 
-String *Memory::generateString(string value)
+Slot *Memory::generateString(string value)
 {
 	if(existsGlobalUp(value))
 	{
-		return new String(getDataGlobalUp(value)->toString());
+		return new Slot(new String(getDataGlobalUp(value)));
 	}
 	else
 	{
-		return new String(value);
+		return new Slot(new String(value));
 	}
 }
 
 
 
-Reference *Memory::generatePersistantReference(string value)
+Slot *Memory::generatePersistantReference(string value)
 {
-	return new Reference(generateDataSlotPersistant(value));
+	return new Slot(generateDataSlotPersistant(value)->getSlot());
 }
 
-Data **Memory::generateDataSlotPersistant(string value)
+Slot *Memory::generateDataSlotPersistant(string value)
 {
-	Data **slot = new Data*;
-	*slot = generateDataFromValue(value);
-	(*slot)->setAttr(PERSISTANT_A);
+	Slot *slot = generateDataFromValue(value);
+	slot->setAttr(PERSISTANT_A);
 	persistantMemory.push_back(slot);
 	return slot;
 }
 
-Reference *Memory::generateReference(string value)
+Slot *Memory::generateReference(string value)
 {
 	if(existsGlobalUp(value))
 	{
-		Data **data = getDataSlotGlobalUp(value);
-		return generateReference(data);
+		return generateReference(getDataSlotGlobalUp(value)->getSlot());
 	}
 	else
 	{
 		if(value.size() == 0)
-			return new Reference();
-		return generatePersistantReference(value);
+			return new Slot(new Reference());
+		return new Slot(new Reference(value));
 	}
 }
 
-Reference *Memory::generateReference(Data **data)
+Slot *Memory::generateReference(Data **data)
 {
-	if(dynamic_cast<Reference *>(*data))
-	{
-		if(((Reference *)*data)->getSlot())
-			data = ((Reference *)*data)->getSlot();
-	}
-	if((*data)->getAttr() & RESTRICT_A) throw Exception("Memory is marked 'restrict', it can not be referenced");
-	if((*data)->getAttr() & PERSISTANT_A) data = getPersistantDataSlot(*data);
-	return new Reference(data);
+	return new Slot(new Reference(data));
 }
 
 
-Vector *Memory::generateVector(vector<string>& values)
+Slot *Memory::generateVector(vector<string>& values)
 {
 	Vector *data = new Vector();
 	for(string value : values)
@@ -595,32 +504,24 @@ Vector *Memory::generateVector(vector<string>& values)
 		}
 		else
 		{
-			data->add(generateDataFromValue(value));
+			data->add(Slot::generatePrimitive(value));
 		}
 	}
-	return data;
+	return new Slot(data);
 }
 
-Table *Memory::generateTable(string value)
+Slot *Memory::generateTable(string value)
 {
 	Table *data;
 	if(existsGlobalUp(value))
 	{
-		Data *other = getDataGlobalUp(value);
-		if(other->typeId() == TABLE_T)
-		{
-			data = (Table *)other->dup();
-		}
-		else
-		{
-			throw Exception(value +  " is not a Table");
-		}
+		data = new Table(getDataGlobalUp(value));
 	}
 	else
 	{
 		data = new Table();
  	}
-	return data;
+	return new Slot(data);
 }
 
 void Memory::addInteger(string id, string value)
@@ -709,222 +610,27 @@ void Memory::addTable(string id, string value)
 }
 
 
-
-
-void Memory::castInInteger(Integer *data, Data *reference)
+void Memory::cast(Data *to, Data *from)
 {
-	switch(reference->typeId())
-	{
-		case REFERENCE_T:
-			if(((Reference *)reference)->get() == nullptr) throw Exception(getId(reference) + " is a reference to null");
-			castInInteger(data, ((Reference *)reference)->get());
-			break;
-		case BOOL_T:
-			data->set(((Bool *)reference)->get());
-			break;
-		case INTEGER_T:
-			data->set(((Integer *)reference)->get());
-			break;
-		case FLOAT_T:
-			data->set(((Float *)reference)->get());
-			break;
-		default:
-			throw Exception(getId(reference) + " is " + reference->type() + " (can not convert " + reference->type() + " as Integer)");
-	}		
+	to->setFromData(from);
 }
 
-void Memory::castInInteger(Integer *data, string value)
+
+
+void Memory::cast(Data *to, string from)
 {
-	if(existsGlobalUp(value))
+	if(existsGlobalUp(from))
 	{
-		castInInteger(data, getDataGlobalUp(value));
+		to->setFromData(getDataGlobalUp(from));
 	}
 	else
 	{
-		switch(type(value))
-		{
-			case BOOL_T:
-				data->set(value == "true");
-				break;
-			case INTEGER_T:
-			case FLOAT_T:
-				data->set(atoi(value.c_str()));
-				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Integer)");
-			default:;
-		}
-	}
-}
-
-void Memory::castInFloat(Float *data, Data *reference)
-{
-	switch(reference->typeId())
-	{
-		case REFERENCE_T:
-			if(((Reference *)reference)->get() == nullptr) throw Exception(getId(reference) + " is a reference to null");
-			castInFloat(data, ((Reference *)reference)->get());
-		case BOOL_T:
-			data->set(((Bool *)reference)->get());
-			break;
-		case INTEGER_T:
-			data->set(((Integer *)reference)->get());
-			break;
-		case FLOAT_T:
-			data->set(((Float *)reference)->get());
-			break;
-		default:
-			throw Exception(getId(reference) + " is " + reference->type() + " (can not convert " + reference->type() + " as Integer)");
-	}	
-}
-
-void Memory::castInFloat(Float *data, string value)
-{
-	if(existsGlobalUp(value))
-	{
-		castInFloat(data, getDataGlobalUp(value));
-	}
-	else
-	{
-		switch(type(value))
-		{
-			case BOOL_T:
-				data->set(value == "true");
-				break;
-			case INTEGER_T:
-			case FLOAT_T:
-				data->set(atof(value.c_str()));
-				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Float)");
-			default:;
-		}
-	}
-}
-
-void Memory::castInBool(Bool *data, Data *reference)
-{
-	switch(reference->typeId())
-	{
-		case REFERENCE_T:
-			if(((Reference *)reference)->get() == nullptr) throw Exception(getId(reference) + " is a reference to null");
-			castInBool(data, ((Reference *)reference)->get());
-		case BOOL_T:
-			data->set(((Bool *)reference)->get());
-			break;
-		case INTEGER_T:
-			data->set(((Integer *)reference)->get());
-			break;
-		case FLOAT_T:
-			data->set(((Float *)reference)->get());
-			break;
-		default:
-			throw Exception(getId(reference) + " is " + reference->type() + " (can not convert " + reference->type() + " as Integer)");
-	}	
-}
-
-
-void Memory::castInBool(Bool *data, string value)
-{
-	if(existsGlobalUp(value))
-	{
-		 castInBool(data, getDataGlobalUp(value));
-	}
-	else
-	{
-		switch(type(value))
-		{
-			case BOOL_T:
-				data->set(value == "true");
-				break;
-			case INTEGER_T:
-			case FLOAT_T:
-				data->set(atof(value.c_str()));
-				break;
-			case STRING_T:
-				throw Exception(value + " is String (can not convert String as Bool)");
-			default:;
-		}
+		to->setFromValue(from);
 	}
 }
 
 
-void Memory::castInString(String *data, string value)
-{
-	if(existsGlobalUp(value))
-	{
-		data->set(getDataGlobalUp(value)->toString());
-	}
-	else
-	{
-		data->set(value);
-	}
-}
-
-void Memory::castInReference(Reference *ref, string value)
-{
-	castIn(ref->get(), value);
-}
-
-
-void Memory::castInVector(Vector *ref, string value)
-{
-	if(existsGlobalUp(value))
-	{
-		Data *data = getDataGlobalUp(value);
-		if(data->typeId() == VECTOR_T)
-		{
-			Vector *vec = dynamic_cast<Vector *>(data);
-			ref->copyVector(vec->getVector());
-		}
-		else
-		{
-			throw Exception("can not cast " + data->type() + " into Vector");
-		}
-	}
-	else
-	{
-		throw Exception("can not cast " + inferType(value) + " into Vector");
-	}
-}
-
-void Memory::castInTable(Table *ref, string value)
-{
-	if(existsGlobalUp(value))
-	{
-		Data *data = getDataGlobalUp(value);
-		if(data->typeId() == TABLE_T)
-		{
-			Table *tab = dynamic_cast<Table *>(data);
-			ref->copyTable(tab->getTable());
-		}
-		else
-		{
-			throw Exception("can not cast " + data->type() + " into Vector");
-		}
-	}
-	else
-	{
-		throw Exception("can not cast " + inferType(value) + " into Vector");
-	}
-}
-
-void Memory::castIn(Data *data, string value)
-{
-	switch(data->typeId())
-	{
-		case INTEGER_T: castInInteger((Integer *)data, value); break;
-		case FLOAT_T: castInFloat((Float *)data, value); break;
-		case BOOL_T: castInBool((Bool *)data, value); break;
-		case STRING_T: castInString((String *)data, value); break;
-		case REFERENCE_T: castInReference((Reference *)data, value); break;
-		case VECTOR_T: castInVector((Vector *)data, value); break;
-		case TABLE_T: castInTable((Table *)data, value); break;
-		default:;
-	}
-}
-
-Data **Memory::getDataSlotGlobalUp(string id)
+Slot *Memory::getDataSlotGlobalUp(string id)
 {
 	Memory *memory = this;
 	while(memory)
@@ -933,7 +639,7 @@ Data **Memory::getDataSlotGlobalUp(string id)
 		{
 			if(memory->find(id) != memory->end())
 			{
-				 return &(*memory)[id];
+				return (*memory)[id];
 			}
 			else if(memory->isAccessor(id))
 			{
@@ -945,57 +651,16 @@ Data **Memory::getDataSlotGlobalUp(string id)
 	throw Exception(id + " Memory not exists");
 }
 
-Data **Memory::inferReference(string id)
-{
-	Data **data = getDataSlotGlobalUp(id);
-	while(dynamic_cast<Reference *>(*data))
-	{
-		if(not ((Reference *)*data)->get())
-		{
-			throw Exception(id + " Reference is null");
-		}
-		else
-		{
-			data = ((Reference *)*data)->getSlot();
-		}
-	}
-	return data;
-}
-
 void Memory::setDataFromValue(string id, string value)
 {
-	Types tv = type(value);
-	Data **data = inferReference(id);
-	switch(attr_final_control(*data, tv))
-	{
-		case FORB:
-			throw Exception(id + " is marked final, can not change his type (" + (*data)->type() + " into " + inferType(value) + ")");
-		case CAST:
-			castIn(*data, value);
-			break;
-		case FULL:
-			attr_persistant_control(*data);
-			*data = generateDataFromValue(value);
-	}
+	Slot *slot = getDataSlotGlobalUp(id);
+	slot->setData(value);
 }
 
 void Memory::setDataFromId(string id, string value)
 {
-	Types tv = getDataGlobalUp(value)->typeId();
-	Data **data = inferReference(id);
-	Data *valueptr = nullptr;
-	switch(attr_final_control(*data, tv))
-	{
-		case FORB:
-			throw Exception(id + " is marked final, can not change his type (" + (*data)->type() + " into " + inferType(value) + ")");
-		case CAST:
-			castIn(*data, value);
-			break;
-		case FULL:
-			valueptr = generateDataFromId(value);
-			attr_persistant_control(*data);
-			*data = valueptr;
-	}
+	Slot *slot = getDataSlotGlobalUp(id);
+	slot->setData(getDataGlobalUp(value));
 }
 
 void Memory::setData(string id, string value)
@@ -1016,24 +681,8 @@ void Memory::setData(string id, string value)
 
 Data *Memory::getData(string id)
 {
-	if(exists(id)) return self[id];
+	if(exists(id)) return self[id]->get();
 	throw Exception(id + " Memory does not exists");
-}
-
-Types Memory::type(string constStrGenValue)
-{
-	if(Integer::is(constStrGenValue)) return INTEGER_T;
-	if(Float::is(constStrGenValue)) return FLOAT_T;
-	if(Bool::is(constStrGenValue)) return BOOL_T;
-	return STRING_T;
-}
-
-string Memory::inferType(string constStrGenValue)
-{
-	if(Integer::is(constStrGenValue)) return "Integer";
-	if(Float::is(constStrGenValue)) return "Float";
-	if(Bool::is(constStrGenValue)) return "Bool";
-	return "String";
 }
 
 
@@ -1051,23 +700,18 @@ string Memory::getType(string id)
 
 void Memory::changeReference(string id, string value)
 {
-	if(existsGlobalUp(value))
+	if(existsGlobalUp(id))
 	{
-		Data **slot = nullptr;
-		Data *ref = getDataGlobalUp(id);
-		if(dynamic_cast<Reference *>(ref))
+		auto *slot = getDataSlotGlobalUp(id);
+		if(dynamic_cast<Reference *>(slot->get()))
 		{
-			switch(attr_final_control(ref, getDataGlobalUp(value)->typeId(), true))
+			if(existsGlobalUp(value))
 			{
-				case FORB:
-					throw Exception(id + " is marked final, can not change his reference type (" + getDataGlobalUp(id)->type() + " into " + inferType(value) + ")");
-				case CAST:
-				case FULL:
-					slot = getDataSlotGlobalUp(value);
-					if((*slot)->getAttr() & RESTRICT_A) throw Exception(value + " is marked 'restrict', it can not be referenced");
-					if((*slot)->getAttr() & PERSISTANT_A) slot = getPersistantDataSlot(*slot);
-					if(ref == *slot) throw Exception("a Reference can not reference itself");
-					((Reference *)ref)->set(slot);
+				dynamic_cast<Reference *>(slot->get())->set(getDataSlotGlobalUp(value)->getSlot());
+			}
+			else
+			{
+				dynamic_cast<Reference *>(slot->get())->set(Slot::generateSlotPrimitive(value));
 			}
 		}
 		else
@@ -1077,112 +721,73 @@ void Memory::changeReference(string id, string value)
 	}
 	else
 	{
-		Data *ref = getDataGlobalUp(id);
-		if(dynamic_cast<Reference *>(ref))
-		{
-			Data **slot = generateDataSlotPersistant(value);
-			switch(attr_final_control(ref, (*slot)->typeId(), true))
-			{
-				case FORB:
-					throw Exception(id + " is marked final, can not change his reference type (" + getDataGlobalUp(id)->type() + " into " + inferType(value) + ")");
-				case CAST:
-				case FULL:
-					((Reference *)ref)->set(slot);
-			}
-		}
-		else
-		{
-			throw Exception(id + " is not a Reference");
-		}
+		throw Exception(id + " not exists");
 	}
 }
 
 void Memory::toReference(string id, string value)
 {
-	if(id == value) throw Exception("a Reference can not reference itself");
-	Data **ref = getDataSlotGlobalUp(id);
-	Data *newRef = nullptr;
-	switch(attr_final_control(*ref, REFERENCE_T))
+	if(existsGlobalUp(id))
 	{
-		case FORB:
-		case CAST:
-			throw Exception(id + " is marked final, can not change his reference type (" + getDataGlobalUp(id)->type() + " into " + inferType(value) + ")");
-		case FULL:
-			attr_persistant_control(*ref);
-			*ref = generateReference(value);
+		Slot *slot = getDataSlotGlobalUp(id);
+		if(existsGlobalUp(value))
+		{
+			slot->toReference(getDataSlotGlobalUp(value)->getSlot());
+		}
+		else
+		{
+			slot->toReference(value);
+		}
+	}
+	else
+	{
+		throw Exception(id +  " not exists");
 	}
 }
 
 
 string Memory::getCharAt(string id, string index)
 {
-	String *str = dynamic_cast<String *>(*inferReference(id));
-	if(not str)
-		throw Exception(id + " is not a String");
-	if(type(index) == STRING_T)
+	if(existsGlobalUp(id))
 	{
-		Integer *indexd = dynamic_cast<Integer *>(getDataGlobalUp(index));
-		if(indexd)
+		Slot *slot = getDataSlotGlobalUp(id);
+		if(dynamic_cast<String *>(slot->get()))
 		{
-			if(indexd->get() >= 0 and indexd->get() < str->get().size())
-			{
-				return string(1, str->get()[indexd->get()]);
-			}
-			throw Exception("index out of band");
+			return ((String *)slot)->getCharAt(index);
+		}
+		else
+		{
+			throw Exception(id + " is not a String");
 		}
 	}
 	else
 	{
-		if(Integer::is(index))
-		{
-			int i = atoi(index.c_str());
-			if(i >= 0 and i < str->get().size())
-			{
-				return string(1, str->get()[i]);
-			}
-			throw Exception("index out of band");
-		}
+		throw Exception(id + " not exists");
 	}
-	throw Exception(index + " can not be interpreted as a String index");
 }
 
 void Memory::setCharAt(string id, string index, string character)
 {
-	if(character.size() > 1) throw Exception(character + " is String, expected character");
-	String *str = dynamic_cast<String *>(*inferReference(id));
-	if(not str)
-		throw Exception(id + " is not a String");
-	if(type(index) == STRING_T)
+	if(existsGlobalUp(id))
 	{
-		Integer *indexd = dynamic_cast<Integer *>(getDataGlobalUp(index));
-		if(indexd)
+		Slot *slot = getDataSlotGlobalUp(id);
+		if(dynamic_cast<String *>(slot->get()))
 		{
-			if(indexd->get() >= 0 and indexd->get() < str->get().size())
-			{
-				(*str)[indexd->get()] = character[0];
-				return;
-			}
-			throw Exception("index out of band");
+			((String *)slot)->setCharAt(index, character);
+		}
+		else
+		{
+			throw Exception(id + " is not a String");
 		}
 	}
 	else
 	{
-		if(Integer::is(index))
-		{
-			int i = atoi(index.c_str());
-			if(i >= 0 and i < str->get().size())
-			{
-				(*str)[i] = character[0];
-				return;
-			}
-			throw Exception("index out of band");
-		}
+		throw Exception(id + " not exists");
 	}
-	throw Exception(index + " can not be interpreted as a String index");
 }
 
 void Memory::field(string id, string value)
-{
+{/*
 	if(isAccessor(id))
 	{
 		auto acc = toAccessor(id);
@@ -1219,7 +824,7 @@ void Memory::field(string id, string value)
 		{
 			throw Exception(acc[i] + " field already exists in " + id + " Table");
 		}
-	}
+	}*/
 }
 
 string Memory::new_primitive(string id, string value)
@@ -1273,7 +878,6 @@ string Memory::new_Table(string id, string value)
 string Memory::set_memory(string id, string value)
 {
 	Memory *memory = getDownMemory();
-	memory->attr_const_control(id);
 	memory->setData(id, value);
 	return id;
 }
@@ -1281,7 +885,6 @@ string Memory::set_memory(string id, string value)
 string Memory::set_reference(string id, string value)
 {
 	Memory *memory = getDownMemory();
-	memory->attr_const_control(id, true);
 	memory->changeReference(id, value);
 	return id;
 }
@@ -1296,7 +899,6 @@ string Memory::field_memory(string id, string value)
 string Memory::to_reference(string id, string value)
 {
 	Memory *memory = getDownMemory();
-	memory->attr_const_control(id);
 	memory->toReference(id, value);
 	return id;
 }
@@ -1304,8 +906,8 @@ string Memory::to_reference(string id, string value)
 int Memory::getDataSize(string id)
 {
 	Data *data = getDataGlobalUp(id);
-	if(data->typeId() == STRING_T) return dynamic_cast<String *>(data)->get().size();
-	if(data->typeId() == VECTOR_T) return dynamic_cast<Vector *>(data)->getVector().size();
+	if(dynamic_cast<String *>(data)) return dynamic_cast<String *>(data)->get().size();
+	if(dynamic_cast<Vector *>(data)) return dynamic_cast<Vector *>(data)->getVector().size();
 	throw Exception("can not take size of a " + data->type());
 }
 
@@ -1329,7 +931,6 @@ string Memory::get_char_at(string id, string index)
 string Memory::set_char_at(string id, string index, string character)
 {
 	Memory *memory = getDownMemory();
-	memory->attr_const_control(id);
 	memory->setCharAt(id, index, character);
 	return id;
 }
@@ -1358,23 +959,12 @@ string Memory::type_memory(string id)
 	{
 		return memory->getDataGlobalUp(id)->type();
 	}
-	return Memory::inferType(id);
+	return Type::inferType(id);
 }
 
 string Memory::exists_memory(string id)
 {
 	return getDownMemory()->existsGlobalUp(id) ? "true" : "false";
-}
-
-
-void Memory::attr_const_control(string id, bool refmode)
-{
-	if(existsGlobalUp(id))
-	{
-		Data *data = getDataGlobalUp(id);
-		int attr = refmode ? ((Reference *)data)->getSlotAttr() : data->getAttr();
-		if(attr & CONST_A) throw Exception(id + " is marked const, it can not be modified");
-	}
 }
 
 string Memory::add_attribute(string id, int attr)
@@ -1388,61 +978,12 @@ string Memory::add_attribute(string id, int attr)
 		{
 			data = dynamic_cast<Reference *>(data)->get();
 		}
-		Data **slot = new Data*;
-		*slot = data;
-		persistantMemory.push_back(slot);
+		persistantMemory.push_back(new Slot(data));
 	}
 	return id;
 }
 
-void Memory::attr_set_control(Data *data, int attr)
-{
-	if(data->getAttr() & attr) throw Exception(getAttrAsString(attr) + " attribute is already set");
-	if(attr == RESTRICT_A)
-	{
-		if(data->getAttr() & PERSISTANT_A) throw Exception(getAttrAsString(attr) + " attribute can not be set because Data is persistant");
-	}
-	else if(attr == PERSISTANT_A)
-	{
-		if(data->getAttr() & RESTRICT_A) throw Exception(getAttrAsString(attr) + " attribute can not be set because Data is restrict");
-	}
-}
-
 void Memory::addAttr(Data *data, int attr)
 {
-	attr_set_control(data, attr);
-	data->setAttr(data->getAttr() | attr);
-}
-
-bool Memory::isAllowedNumberFrom(Types otherType)
-{
-	return otherType == REFERENCE_T or otherType == INTEGER_T or otherType == FLOAT_T or otherType == BOOL_T;
-}
-
-bool Memory::isAllowedStringFrom(Types otherType)
-{
-	return otherType == REFERENCE_T or otherType == INTEGER_T or otherType == FLOAT_T or otherType == BOOL_T or otherType == STRING_T;
-}
-
-bool Memory::isAllowedTypeFrom(Types t1, Types t2)
-{
-	switch(t1)
-	{
-		case INTEGER_T: case FLOAT_T: case BOOL_T: return isAllowedNumberFrom(t2);
-		case VECTOR_T: return t2 == VECTOR_T;
-		case TABLE_T: return t2 == TABLE_T;
-		case STRING_T: default: return isAllowedStringFrom(t2);
-	}
-	return true;
-}
-
-
-SetModes Memory::attr_final_control(Data *data, Types otherType, bool refmode)
-{
-	if((refmode ? ((Reference *)data)->getSlotAttr() : data->getAttr()) & FINAL_A)
-	{
-		if(isAllowedTypeFrom(data->typeId(), otherType)) return CAST;
-		return FORB;
-	}
-	return FULL;
+	data->setAttr(attr);
 }

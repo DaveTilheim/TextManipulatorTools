@@ -1,13 +1,14 @@
 #ifndef LIZZY_REFERENCE_HPP
 #define LIZZY_REFERENCE_HPP
-#include "Data.hpp"
 #include <ctype.h>
+#include "Data.hpp"
+
 
 namespace Lizzy
 {
 	class Reference : public Data
 	{
-	private:
+	protected:
 		Data **dataPointer;
 	public:
 		Reference();
@@ -15,7 +16,7 @@ namespace Lizzy
 		Reference(string strvalue);
 		Reference(Data *data);
 		Reference(Data **data);
-		~Reference();
+		virtual ~Reference();
 		int getAttr() override;
 		void setAttr(int attr) override;
 		virtual string toString() override;

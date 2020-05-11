@@ -19,7 +19,7 @@ string Lizzy::getAttrAsString(int attr)
 
 Data::~Data()
 {
-
+	cout << "Data deleted " << this << endl;
 }
 
 int Data::getAttr()
@@ -29,7 +29,16 @@ int Data::getAttr()
 
 void Data::setAttr(int dattr)
 {
-	attr = dattr;
+	if(attr & dattr) throw Exception("Attribut already set: " + getAttrAsString(dattr));
+	if(dattr == RESTRICT_A)
+	{
+		if(attr & PERSISTANT_A) throw Exception(getAttrAsString(dattr) + " attribute can not be set because Data is persistant");
+	}
+	else if(dattr == PERSISTANT_A)
+	{
+		if(attr & RESTRICT_A) throw Exception(getAttrAsString(dattr) + " attribute can not be set because Data is restrict");
+	}
+	attr = attr | dattr;
 }
 
 string Data::type()
@@ -64,3 +73,38 @@ bool Data::hasAttr(DataAttributes attr)
 }
 
 
+bool Data::isInteger(string expr)
+{
+	auto len = expr.size();
+	for(int i = (expr[0] == '-'); i < len; i++)
+	{
+		if(not isdigit(expr[i])) return false;
+	}
+	return true;
+}
+
+bool Data::isFloat(string expr)
+{
+	auto len = expr.size();
+	int ptCounter = 0;
+	for(int i = expr[i] == '-'; i < len; i++)
+	{
+		if(not isdigit(expr[i]))
+		{
+			if(i != 0 and i != len -1 and ptCounter == 0 and expr[i] == '.')
+			{
+				ptCounter++;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool Data::isBool(string expr)
+{
+	return expr == "true" or expr == "false";
+}

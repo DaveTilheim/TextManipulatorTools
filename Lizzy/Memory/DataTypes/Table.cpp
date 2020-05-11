@@ -15,15 +15,16 @@ Table::Table(const Table& cp)
 	copyTable(cp.value);
 }
 
+Table::Table(Data *data)
+{
+	setFromData(data);
+}
+
 Table::~Table()
 {
 	for(auto it : value)
 	{
-		if((it.second->getAttr() & PERSISTANT_A) == 0)
-		{
-			cout  << "del " << it.second->type() <<endl;
-			delete it.second;
-		}
+		TRY_DELETE(it.second);
 	}
 	value.clear();
 }
@@ -74,6 +75,7 @@ void Table::set(Data& newData, string id) noexcept(false)
 
 void Table::remove(string id) noexcept(false)
 {
+	CONST_CONTROL
 	if(value.find(id) == value.end()) throw Exception("key: " + id + " not exists for the current table");
 	delete value[id];
 	value.erase(id);
@@ -90,6 +92,7 @@ void Table::foreach(void (*operation)(Data *))
 
 void Table::copyTable(const unordered_map<string, Data *>& table)
 {
+	CONST_CONTROL
 	value.clear();
 	for(auto it : table)
 	{
@@ -106,4 +109,17 @@ Table& Table::operator=(const Table& cp)
 {
 	copyTable(cp.value);
 	return *this;
+}
+
+void Table::setFromData(Data *data)
+{
+	Reference::StrictInfer(&data);
+	if(dynamic_cast<Table *>(data))
+	{
+		*this = *dynamic_cast<const Table *>(data);
+	}
+	else
+	{
+		throw Exception("Can not convert " + data->type() + " into Table");
+	}
 }

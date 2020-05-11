@@ -3,7 +3,7 @@
 
 using namespace Lizzy;
 
-
+Data *(*Data::generateInteger)(int) = [](int i){return (Data *)new Integer(i);};
 
 Integer::Integer(long value) : value(value)
 {
@@ -27,7 +27,7 @@ Integer::Integer(Data *data)
 
 Integer::~Integer()
 {
-	
+
 }
 
 string Integer::toString()

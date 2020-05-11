@@ -15,15 +15,16 @@ Vector::Vector(const Vector& cp)
 	copyVector(cp.value);
 }
 
+Vector::Vector(Data *data)
+{
+	setFromData(data);
+}
+
 Vector::~Vector()
 {
 	for(auto *data : value)
 	{
-		if((data->getAttr() & PERSISTANT_A) == 0)
-		{
-			cout  << "del " << data->type() <<endl;
-			delete data;
-		}
+		TRY_DELETE(data);
 	}
 	value.clear();
 }
@@ -69,6 +70,7 @@ void Vector::set(Data& newData, int i) noexcept(false)
 
 void Vector::remove(int i) noexcept(false)
 {
+	CONST_CONTROL
 	if(i >= value.size()) throw Exception("Index out of band : i=" + to_string(i) + " and Vector size is " + to_string(value.size()));
 	delete value[i];
 	value.erase(value.begin() + i);
@@ -85,7 +87,7 @@ void Vector::clean()
 
 void Vector::add(Data *data)
 {
-	//cout << data->type() +" added to Vector" << endl;
+	CONST_CONTROL
 	value.push_back(data);
 }
 
@@ -99,6 +101,7 @@ void Vector::foreach(void (*operation)(Data *))
 
 void Vector::copyVector(const vector<Data *>& vec)
 {
+	CONST_CONTROL
 	value.clear();
 	for(auto *data : vec)
 	{
@@ -115,4 +118,17 @@ Vector& Vector::operator=(const Vector& cp)
 {
 	copyVector(cp.value);
 	return *this;
+}
+
+void Vector::setFromData(Data *data)
+{
+	Reference::StrictInfer(&data);
+	if(dynamic_cast<Vector *>(data))
+	{
+		*this = *dynamic_cast<const Vector *>(data);
+	}
+	else
+	{
+		throw Exception("Can not convert " + data->type() + " into Vector");
+	}
 }
