@@ -1,10 +1,11 @@
 #ifndef MEMORY_HPP
 #define MEMORY_HPP
-#include "DataTypes/Slot.hpp"
+#include "DataTypes/Type.hpp"
 #include "../../String.hpp"
 #include <ctype.h>
 #include <unordered_map>
 #include <iomanip>
+#include <vector>
 
 using namespace std;
 
@@ -17,11 +18,17 @@ namespace Lizzy
 		FULL
 	};
 
-	class Memory : private unordered_map<string, Slot *>
+	typedef unordered_map<string, Data **> StackMemory;
+	typedef unordered_map<string, string> ReferencesMemory;
+	typedef vector<Data **> PersistantMemory;
+
+	class Memory
 	{
 	public:
 		const string id;
-		Memory& self;
+		StackMemory stack;
+		ReferencesMemory references;
+		static PersistantMemory persistant;
 		Memory *parent = nullptr;
 		Memory *child = nullptr;
 	public:
@@ -29,48 +36,52 @@ namespace Lizzy
 		~Memory();
 		void traceMemory();
 	public:
+		Data **findStack(string id);
+		Data **find(string id);
 		Memory *getDownMemory();
 		Memory *getUpMemory();
 		Memory *getMemoryWhereIs(string id);
 		void push(string id);
 		void pop();
 		void deleteData(string id);
-		void deletePersistantData(Reference *ref);
+		void deletePersistantData(Data **ref);
 	public:
 		//persistantMemory
-		static Slot *getPersistantDataSlot(Data *data);
+		static Data **getPersistantDataSlot(Data *data);
 		static void erasePersistantMemory();
 		//
 		vector<string> toAccessor(string id);
 		bool isAccessor(string id);
 		bool isAccessor(Data *data);
 		Data *getDataFromAccessor(string expr);
-		Slot *getDataSlotFromAccessor(string expr);
+		Data **getDataSlotFromAccessor(string expr);
 		bool exists(string id);
 		bool existsGlobalUp(string id);
 		Data *getDataGlobalUp(string id);
-		Slot *getDataSlotGlobalUp(string id);
+		Data **getDataSlotGlobalUp(string id);
+		string getReferenceGlobalUp(string id);
 		void setAttr(string id, int attr);
 		string getId(Data *);
 		string getId();
-		Slot *inferReference(string id);
+		Data **inferReference(string id);
 		int getDataSize(string id);
 		//Generic primitive
 		void addPrimitiveData(string id, string strGenValue);
-		Slot *generateDataFromValue(string value);
-		Slot *generateDataFromId(string id);
+		Data **generateDataFromValue(string value);
+		Data **generateDataFromId(string id);
 		//Specific Data
-		Slot *generateInteger(Data* value);
-		Slot *generateInteger(string value);
-		Slot *generateFloat(Data* value);
-		Slot *generateFloat(string value);
-		Slot *generateBool(Data* value);
-		Slot *generateBool(string value);
-		Slot *generateString(string value);
-		Slot *generateReference(string value);
-		Slot *generateReference(Data **value);
-		Slot *generatePersistantReference(string value);
-		Slot *generateDataSlotPersistant(string value);
+		Data **generateInteger(Data* value);
+		Data **generateInteger(string value);
+		Data **generateFloat(Data* value);
+		Data **generateFloat(string value);
+		Data **generateBool(Data* value);
+		Data **generateBool(string value);
+		Data **generateString(Data *value);
+		Data **generateString(string value);
+		Data **generateReference(string value);
+		Data **generateReference(Data **value);
+		Data **generatePersistantReference(string value);
+		Data **generateDataSlotPersistant(string value);
 		void addInteger(string id, string value);
 		void addFloat(string id, string value);
 		void addBool(string id, string value);
@@ -84,9 +95,9 @@ namespace Lizzy
 		string getType(string id);
 		string toString(string id);
 		//containers
-		Slot *generateVector(vector<string>& values);
+		Data **generateVector(vector<string>& values);
 		void addVector(string id, vector<string>& values);
-		Slot *generateTable(string value);
+		Data **generateTable(string value);
 		void addTable(string id, string value);
 		//String
 		string getCharAt(string id, string index);
@@ -99,7 +110,6 @@ namespace Lizzy
 		static bool isAllowedStringFrom(Types otherType);
 		//reference
 		void changeReference(string id, string value);
-		void toReference(string id, string value);
 		//Memory controls
 		void attr_persistant_control(Data *data);
 		void attr_const_control(string id, bool refmode=false);
@@ -123,7 +133,6 @@ namespace Lizzy
 		string add_attribute(string id, int attr);
 		string type_memory(string id);
 		string exists_memory(string id);
-		string to_reference(string id, string value);
 		string size_memory(string id);
 		string get_char_at(string id, string index);
 		string set_char_at(string id, string index, string character);

@@ -3,8 +3,12 @@
 println Lizzy Version version
 
 Integer i 666
-Float f 5.6
-Bool b true
 
-persistant Integer test 666
-println get test
+Reference r i
+
+Reference rr r
+
+set rr 1234
+
+println get  rr
+

@@ -10,6 +10,11 @@ Vector::Vector()
 
 }
 
+Vector::Vector(vector<Data **>& values)
+{
+	copyVector(values);
+}
+
 Vector::Vector(const Vector& cp)
 {
 	copyVector(cp.value);
@@ -22,9 +27,9 @@ Vector::Vector(Data *data)
 
 Vector::~Vector()
 {
-	for(auto *data : value)
+	for(auto **data : value)
 	{
-		TRY_DELETE(data);
+		TRY_SLOT_DELETE(data);
 	}
 	value.clear();
 }
@@ -32,9 +37,9 @@ Vector::~Vector()
 string Vector::toString()
 {
 	string buf;
-	for(auto *data : value)
+	for(auto **data : value)
 	{
-		buf += data->toString() + " ";
+		buf += (*data)->toString() + " ";
 	}
 	if(buf.size()) buf.pop_back();
 	else return " ";
@@ -56,60 +61,46 @@ Data *Vector::dup()
 	return new Vector(*this);
 }
 
-Data *Vector::get(int i) const noexcept(false)
+Data **Vector::get(int i) const noexcept(false)
 {
 	if(i >= value.size()) throw Exception("Index out of band : i=" + to_string(i) + " and Vector size is " + to_string(value.size()));
 	return value[i];
 }
 
-void Vector::set(Data& newData, int i) noexcept(false)
-{
-	if(i >= value.size()) throw Exception("Index out of band : i=" + to_string(i) + " and Vector size is " + to_string(value.size()));
-	value[i] = newData.dup();
-}
-
-void Vector::remove(int i) noexcept(false)
-{
-	CONST_CONTROL
-	if(i >= value.size()) throw Exception("Index out of band : i=" + to_string(i) + " and Vector size is " + to_string(value.size()));
-	delete value[i];
-	value.erase(value.begin() + i);
-}
-
 void Vector::clean()
 {
-	for(auto *data : value)
+	for(auto **data : value)
 	{
-		delete data;
+		TRY_SLOT_DELETE(data);
 	}
 	value.clear();
 }
 
-void Vector::add(Data *data)
+void Vector::add(Data **data)
 {
 	CONST_CONTROL
 	value.push_back(data);
 }
 
-void Vector::foreach(void (*operation)(Data *))
+void Vector::foreach(void (*operation)(Data **))
 {
-	for(auto *ld : value)
+	for(auto **ld : value)
 	{
 		operation(ld);
 	}
 }
 
-void Vector::copyVector(const vector<Data *>& vec)
+void Vector::copyVector(const vector<Data **>& vec)
 {
 	CONST_CONTROL
 	value.clear();
-	for(auto *data : vec)
+	for(auto **data : vec)
 	{
-		value.push_back(data->dup());
+		value.push_back(new Data*((*data)->dup()));
 	}
 }
 
-vector<Data *>& Vector::getVector()
+vector<Data **>& Vector::getVector()
 {
 	return value;
 }
@@ -122,7 +113,6 @@ Vector& Vector::operator=(const Vector& cp)
 
 void Vector::setFromData(Data *data)
 {
-	Reference::StrictInfer(&data);
 	if(dynamic_cast<Vector *>(data))
 	{
 		*this = *dynamic_cast<const Vector *>(data);
@@ -131,4 +121,9 @@ void Vector::setFromData(Data *data)
 	{
 		throw Exception("Can not convert " + data->type() + " into Vector");
 	}
+}
+
+void Vector::setFromValue(string value)
+{
+	throw Exception("Can not convert " + value + " into Vector");
 }

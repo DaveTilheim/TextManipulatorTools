@@ -8,25 +8,25 @@ namespace Lizzy
 	class Vector : public Data
 	{
 	private:
-		vector<Data *> value;
+		vector<Data **> value;
 	public:
 		Vector();
 		Vector(const Vector& cp) _dup_in_method;
 		Vector(Data *data);
+		Vector(vector<Data **>&);
 		~Vector();
 		string toString() override;
 		string type() override;
 		Types typeId() override;
 		Data *dup() override;
-		Data *get(int i) const noexcept(false);
-		void add(Data *data); _dup_in_method
-		void remove(int i) noexcept(false);
+		Data **get(int i) const noexcept(false);
+		void add(Data **data);
 		void clean();
-		void foreach(void (*operation)(Data *));
-		vector<Data *>& getVector();
-		void set(Data& data, int i) noexcept(false) _dup_in_method;
+		void foreach(void (*operation)(Data **));
+		vector<Data **>& getVector();
 		void setFromData(Data *data) override;
-		void copyVector(const vector<Data *>& vec);
+		void setFromValue(string value) override;
+		void copyVector(const vector<Data **>& vec);
 		Vector& operator=(const Vector& cp);
 	};
 }

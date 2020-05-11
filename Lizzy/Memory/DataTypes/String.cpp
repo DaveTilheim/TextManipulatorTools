@@ -114,7 +114,7 @@ void String::setCharAt(string iexpr, string chars)
 			}
 			else
 			{
-				throw Exception(chars.size() + " characers given but expected 1");
+				throw Exception(to_string(chars.size()) + " characers given but expected 1");
 			}
 		}
 		else

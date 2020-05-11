@@ -25,8 +25,8 @@ namespace Lizzy
 		static bool is(string expr);
 		string get() const;
 		void set(string newValue);
-		void setFromValue(string value);
-		void setFromData(Data *data);
+		void setFromValue(string value) override;
+		void setFromData(Data *data) override;
 		String& operator=(const String& cp);
 		char& operator[](int i);
 		string getCharAt(string iexpr);

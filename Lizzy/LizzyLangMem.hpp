@@ -24,8 +24,6 @@ namespace Lizzy
 		_decl_action(new_Bool_action_1)
 		_decl_action(new_String_action_1)
 		_decl_action(new_Reference_action_1)
-		_decl_action(to_reference_action)
-		_decl_action(to_reference_action_1)
 		//containers
 		_decl_action(new_Vector_action)
 		_decl_action(new_Table_action)

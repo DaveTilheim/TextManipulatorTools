@@ -80,18 +80,7 @@ _def_action(MemPkg::new_Reference_action_1)
 }
 
 
-_def_action(MemPkg::to_reference_action)
-{
-	string id = args("id");
-	string value = args("value", 1);
-	return MemPkg::memoryContext.to_reference(id, value);
-}
 
-_def_action(MemPkg::to_reference_action_1)
-{
-	string id = args("id");
-	return MemPkg::memoryContext.to_reference(id, "");
-}
 
 
 _def_action(MemPkg::const_action)
@@ -323,16 +312,6 @@ void MemPkg::load()
 	Action newTableAction(new_Table_action);
 		newTableAction.setNamed("id");
 		cmd("new").child("Table").setAction(1, newTableAction);
-
-
-	Action toReferenceAction(to_reference_action);
-		toReferenceAction.setNamed("id");
-		toReferenceAction.setNamed("value");
-		cmd("to").child("reference").setAction(2, toReferenceAction);
-
-	Action toReferenceAction1(to_reference_action_1);
-		toReferenceAction1.setNamed("id");
-		cmd("to").child("reference").setAction(1, toReferenceAction1);
 
 
 	Action sizeAction(size_action);
