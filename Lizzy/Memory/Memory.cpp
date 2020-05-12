@@ -24,18 +24,32 @@ Memory::~Memory()
 
 void Memory::traceMemory()
 {
-	/*Memory *memory = getUpMemory();
+	Memory *memory = getUpMemory();
 	int i = 0;
 	while(memory)
 	{
 		for(auto it : memory->stack)
 		{
-			cout << "[ " + it.first + " | ";
-			cout << it.second << " | " + (*it.second)->type() + "(" + (*it.second)->toString() + ") ]" << endl;
+			cout << endl << "[ " << it.first << " ]" << endl;
+			cout << it.second->toString() << endl;
 		}
 		memory = memory->child;
 		i++;
-	}*/
+	}
+}
+
+void Memory::trace(string id)
+{
+	if(existsGlobalUp(id))
+	{
+		Slot *slot = getDataSlotGlobalUp(id);
+		cout << endl << "[ " << id << " ]" << endl;
+		cout << slot->toString() << endl;
+	}
+	else
+	{
+		throw Exception(id + " not exists");
+	}
 }
 
 
@@ -546,9 +560,8 @@ void Memory::addReference(string id, string value)
 		if(existsGlobalUp(value))
 		{
 			Slot *slot = getDataSlotGlobalUp(value);
-			if(slot->isRestrict()) throw Exception(value + " is markedd restrict, it can not be referenced");
-			stack[id] = new Slot(slot->data);
-			stack[id]->attribs |= REFERENCE_A;
+			if(slot->isRestrict()) throw Exception(value + " is marked restrict, it can not be referenced");
+			stack[id] = new Slot(slot);
 		}
 		else
 		{
@@ -565,7 +578,7 @@ void Memory::addReference(string id)
 {
 	if(not exists(id))
 	{
-		stack[id] = new Slot(nullptr);
+		stack[id] = new Slot((Data **)nullptr);
 		stack[id]->attribs |= REFERENCE_A;
 	}
 	else
@@ -676,22 +689,8 @@ void Memory::changeReference(string id, string value)
 		if(existsGlobalUp(value))
 		{
 			Slot *refSlot = getDataSlotGlobalUp(id);
-			if(refSlot->isReference())
-			{
-				Slot *targetSlot = getDataSlotGlobalUp(value);
-				if(not targetSlot->isRestrict())
-				{
-					refSlot->data = targetSlot->data;
-				}
-				else
-				{
-					throw Exception(value + " is marked restrict, it can not be referenced");
-				}
-			}
-			else
-			{
-				throw Exception(id + " is not marked as Reference");
-			}
+			Slot *targetSlot = getDataSlotGlobalUp(value);
+			refSlot->referenceTo(targetSlot);
 		}
 	}
 	else

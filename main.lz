@@ -2,12 +2,17 @@
 
 println Lizzy Version version
 
+
+
+
 Integer i 666
+Float j 3.14
+Bool k true
+String l "Hello world!"
+Vector m i j k l
+
 Reference r i
 
 
-
-println get i type i
-println get r type r
-
+trace memory
 

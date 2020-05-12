@@ -9,7 +9,7 @@ namespace Lizzy
 		PERSISTANT_A= 0x2,
 		RESTRICT_A  = 0x4,
 		FINAL_A     = 0x8,
-		CONST_A		= 0x16
+		CONST_A		= 0x10
 	};
 
 	struct Slot
@@ -17,6 +17,7 @@ namespace Lizzy
 		Data **data = nullptr;
 		int attribs = 0x0;
 		Slot(Data **data);
+		Slot(Slot *slot);
 		~Slot();
 		bool isReference();
 		bool isPersistant();
@@ -25,6 +26,9 @@ namespace Lizzy
 		bool isFinal();
 		bool isConst();
 		void tryDelete();
+		void referenceTo(Slot *slot);
+		string toString();
+		string stack(string id);
 	};
 }
 

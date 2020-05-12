@@ -32,6 +32,7 @@ namespace Lizzy
 		Memory(Memory *parent, string id);
 		~Memory();
 		void traceMemory();
+		void trace(string id);
 	public:
 		Memory *getDownMemory();
 		Memory *getUpMemory();

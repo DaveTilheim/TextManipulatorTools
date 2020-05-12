@@ -230,6 +230,13 @@ _def_action(MemPkg::trace_memory_action)
 	return "null";
 }
 
+_def_action(MemPkg::trace_action)
+{
+	string id = args("id");
+	MemPkg::memoryContext.trace(id);
+	return id;
+}
+
 _def_action(MemPkg::field_action)
 {
 	string id = args("id");
@@ -408,4 +415,8 @@ void MemPkg::load()
 
 	Action traceMemeoryAction(trace_memory_action);
 		cmd("trace").child("memory").setAction(0, traceMemeoryAction);
+
+	Action traceAction(trace_action);
+		traceAction.setNamed("id");
+		cmd("trace").setAction(1, traceAction);
 }
