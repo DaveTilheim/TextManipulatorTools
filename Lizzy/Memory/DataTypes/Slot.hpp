@@ -1,37 +1,30 @@
 #ifndef SLOT_HPP
 #define SLOT_HPP
-#include "Type.hpp"
-
-
+#include "Data.hpp"
 namespace Lizzy
 {
-	class Slot : public Reference
+	enum SlotAttributes
 	{
-	public:
-		using Reference::Reference;
+		REFERENCE_A = 0x1,
+		PERSISTANT_A= 0x2,
+		RESTRICT_A  = 0x4,
+		FINAL_A     = 0x8,
+		CONST_A		= 0x16
+	};
+
+	struct Slot
+	{
+		Data **data = nullptr;
+		int attribs = 0x0;
+		Slot(Data **data);
 		~Slot();
-		string toString() override;
-		string type() override;
-		Types typeId() override;
-		Data *dup() override;
-		/*void setFromData(Data* data) override;
-		void setFromValue(string value) override;*/
-		void setData(Data *data);
-		void setData(string value);
-		void toReference(Data **data);
-		void toReference(string value);
-		Data *get() override;
-		Slot& operator=(Slot& other);
-		operator Data*();
-		operator Bool*();
-		operator Float*();
-		operator Integer*();
-		operator Reference*();
-		operator String*();
-		operator Table*();
-		operator Vector*();
-		static Data *generatePrimitive(string value);
-		static Data **generateSlotPrimitive(string value);
+		bool isReference();
+		bool isPersistant();
+		bool isDeleteable();
+		bool isRestrict();
+		bool isFinal();
+		bool isConst();
+		void tryDelete();
 	};
 }
 

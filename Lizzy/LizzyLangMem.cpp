@@ -86,25 +86,25 @@ _def_action(MemPkg::new_Reference_action_1)
 _def_action(MemPkg::const_action)
 {
 	string id = args("id");
-	return MemPkg::memoryContext.add_attribute(id, CONST_A);
+	return MemPkg::memoryContext.add_slot_attribute(id, CONST_A);
 }
 
 _def_action(MemPkg::final_action)
 {
 	string id = args("id");
-	return MemPkg::memoryContext.add_attribute(id, FINAL_A);
+	return MemPkg::memoryContext.add_slot_attribute(id, FINAL_A);
 }
 
 _def_action(MemPkg::restrict_action)
 {
 	string id = args("id");
-	return MemPkg::memoryContext.add_attribute(id, RESTRICT_A);
+	return MemPkg::memoryContext.add_slot_attribute(id, RESTRICT_A);
 }
 
 _def_action(MemPkg::persistant_action)
 {
 	string id = args("id");
-	return MemPkg::memoryContext.add_attribute(id, PERSISTANT_A);
+	return MemPkg::memoryContext.add_slot_attribute(id, PERSISTANT_A);
 }
 
 

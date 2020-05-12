@@ -53,20 +53,16 @@ string String::get() const
 
 void String::set(string newValue)
 {
-	CONST_CONTROL
 	value = newValue;
 }
 
 void String::setFromValue(string value)
 {
-	CONST_CONTROL
 	this->value = value;
 }
 
 void String::setFromData(Data *data)
 {
-	CONST_CONTROL
-	Reference::StrictInfer(&data);
 	value = data->toString();
 }
 
@@ -102,7 +98,6 @@ string String::getCharAt(string iexpr)
 
 void String::setCharAt(string iexpr, string chars)
 {
-	CONST_CONTROL
 	if(Integer::is(iexpr))
 	{
 		int i = atoi(iexpr.c_str());

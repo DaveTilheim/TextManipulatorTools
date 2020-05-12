@@ -36,31 +36,43 @@ Data *Type::generatePrimitive(string value)
 }
 
 
-void Type::updateSlot(Data **slot, string value)
+void Type::updateSlot(Slot *slot, string value)
 {
-	if(((*slot)->getAttr() & FINAL_A) == 0)
+	if(not slot->isFinal())
 	{
-		CONST_CONTROL_(*slot);
-		delete *slot;
-		*slot = generatePrimitive(value);
+		if(not slot->isConst())
+		{
+			delete *slot->data;
+			*slot->data = generatePrimitive(value);
+		}
+		else
+		{
+			throw Exception("Data is marked const, it can not be modified");
+		}
 	}
 	else
 	{
-		(*slot)->setFromValue(value);
+		(*slot->data)->setFromValue(value);
 	}
 }
 
-void Type::updateSlot(Data **slot, Data *data)
+void Type::updateSlot(Slot *slot, Data *data)
 {
-	if(((*slot)->getAttr() & FINAL_A) == 0)
+	if(not slot->isFinal())
 	{
-		CONST_CONTROL_(*slot);
-		delete *slot;
-		*slot = data->dup();
+		if(not slot->isConst())
+		{
+			delete *slot->data;
+			*slot->data = data->dup();
+		}
+		else
+		{
+			throw Exception("Data is marked const, it can not be modified");
+		}
 	}
 	else
 	{
-		(*slot)->setFromData(data);
+		(*slot->data)->setFromData(data);
 	}
 }
 

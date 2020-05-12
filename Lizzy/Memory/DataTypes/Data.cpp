@@ -4,41 +4,9 @@ using namespace Lizzy;
 
 
 
-string Lizzy::getAttrAsString(int attr)
-{
-	switch(attr)
-	{
-		case CONST_A: return "const";
-		case FINAL_A: return "final";
-		case RESTRICT_A: return "restrict";
-		case PERSISTANT_A: return "persistant";
-		default: return "unknown attribute";
-	}
-}
-
-
 Data::~Data()
 {
 	cout << "Data deleted " << this << endl;
-}
-
-int Data::getAttr()
-{
-	return attr;
-}
-
-void Data::setAttr(int dattr)
-{
-	if(attr & dattr) throw Exception("Attribut already set: " + getAttrAsString(dattr));
-	if(dattr == RESTRICT_A)
-	{
-		if(attr & PERSISTANT_A) throw Exception(getAttrAsString(dattr) + " attribute can not be set because Data is persistant");
-	}
-	else if(dattr == PERSISTANT_A)
-	{
-		if(attr & RESTRICT_A) throw Exception(getAttrAsString(dattr) + " attribute can not be set because Data is restrict");
-	}
-	attr = attr | dattr;
 }
 
 string Data::type()
@@ -66,12 +34,6 @@ void Data::setFromValue(string value)
 {
 
 }
-
-bool Data::hasAttr(DataAttributes attr)
-{
-	return getAttr() & (int)attr;
-}
-
 
 bool Data::isInteger(string expr)
 {

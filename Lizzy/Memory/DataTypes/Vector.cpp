@@ -10,7 +10,7 @@ Vector::Vector()
 
 }
 
-Vector::Vector(vector<Data **>& values)
+Vector::Vector(vector<Slot *>& values)
 {
 	copyVector(values);
 }
@@ -27,9 +27,14 @@ Vector::Vector(Data *data)
 
 Vector::~Vector()
 {
-	for(auto **data : value)
+	clean();
+}
+
+void Vector::clean()
+{
+	for(Slot *slot : value)
 	{
-		TRY_SLOT_DELETE(data);
+		delete slot;
 	}
 	value.clear();
 }
@@ -37,9 +42,9 @@ Vector::~Vector()
 string Vector::toString()
 {
 	string buf;
-	for(auto **data : value)
+	for(Slot*data : value)
 	{
-		buf += (*data)->toString() + " ";
+		buf += (*data->data)->toString() + " ";
 	}
 	if(buf.size()) buf.pop_back();
 	else return " ";
@@ -61,46 +66,36 @@ Data *Vector::dup()
 	return new Vector(*this);
 }
 
-Data **Vector::get(int i) const noexcept(false)
+Slot *Vector::get(int i) const noexcept(false)
 {
 	if(i >= value.size()) throw Exception("Index out of band : i=" + to_string(i) + " and Vector size is " + to_string(value.size()));
 	return value[i];
 }
 
-void Vector::clean()
-{
-	for(auto **data : value)
-	{
-		TRY_SLOT_DELETE(data);
-	}
-	value.clear();
-}
 
-void Vector::add(Data **data)
+void Vector::add(Slot *data)
 {
-	CONST_CONTROL
 	value.push_back(data);
 }
 
-void Vector::foreach(void (*operation)(Data **))
+void Vector::foreach(void (*operation)(Slot *))
 {
-	for(auto **ld : value)
+	for(auto *ld : value)
 	{
 		operation(ld);
 	}
 }
 
-void Vector::copyVector(const vector<Data **>& vec)
+void Vector::copyVector(const vector<Slot *>& vec)
 {
-	CONST_CONTROL
-	value.clear();
-	for(auto **data : vec)
+	clean();
+	for(auto *data : vec)
 	{
-		value.push_back(new Data*((*data)->dup()));
+		value.push_back(new Slot(new Data*((*data->data)->dup())));
 	}
 }
 
-vector<Data **>& Vector::getVector()
+vector<Slot *>& Vector::getVector()
 {
 	return value;
 }

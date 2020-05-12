@@ -6,7 +6,7 @@
 #include "String.hpp"
 #include "Table.hpp"
 #include "Vector.hpp"
-
+#include "Slot.hpp"
 
 namespace Lizzy
 {
@@ -16,8 +16,8 @@ namespace Lizzy
 		string inferType(string constStrGenValue);
 		Data **generateSlot(Data *data);
 		Data *generatePrimitive(string value);
-		void updateSlot(Data **slot, string value);
-		void updateSlot(Data **slot, Data *data);
+		void updateSlot(Slot *slot, string value);
+		void updateSlot(Slot *slot, Data *data);
 	}
 }
 

@@ -57,14 +57,11 @@ long Integer::get() const
 
 void Integer::set(long newValue)
 {
-	CONST_CONTROL
 	value = newValue;
 }
 
 void Integer::setFromData(Data *data)
 {
-	CONST_CONTROL
-	Reference::StrictInfer(&data);
 	if(dynamic_cast<Integer *>(data))
 	{
 		set(dynamic_cast<Integer *>(data)->get());
@@ -85,7 +82,6 @@ void Integer::setFromData(Data *data)
 
 void Integer::setFromValue(string value)
 {
-	CONST_CONTROL
 	if(Integer::is(value) or Float::is(value))
 		set(atoi(value.c_str()));
 	else if(Bool::is(value))

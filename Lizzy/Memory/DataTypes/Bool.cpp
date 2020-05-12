@@ -59,14 +59,11 @@ bool Bool::get() const
 
 void Bool::set(bool newValue)
 {
-	CONST_CONTROL
 	value = newValue;
 }
 
 void Bool::setFromData(Data *data)
 {
-	CONST_CONTROL
-	Reference::StrictInfer(&data);
 	if(dynamic_cast<Bool *>(data))
 		set(dynamic_cast<Bool *>(data)->get());
 	else if(dynamic_cast<Integer *>(data))
@@ -79,7 +76,6 @@ void Bool::setFromData(Data *data)
 
 void Bool::setFromValue(string value)
 {
-	CONST_CONTROL
 	if(Bool::is(value))
 		this->value = value == "true";
 	else if(Integer::is(value))

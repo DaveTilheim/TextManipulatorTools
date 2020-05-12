@@ -22,9 +22,14 @@ Table::Table(Data *data)
 
 Table::~Table()
 {
+	clean();
+}
+
+void Table::clean()
+{
 	for(auto it : value)
 	{
-		TRY_SLOT_DELETE(it.second);
+		delete it.second;
 	}
 	value.clear();
 }
@@ -34,7 +39,7 @@ string Table::toString()
 	string buf;
 	for(auto it : value)
 	{
-		buf += it.first + ":" + (*it.second)->toString() + " ";
+		buf += it.first + ":" + (*it.second->data)->toString() + " ";
 	}
 	if(buf.size()) buf.pop_back();
 	else return " ";
@@ -56,14 +61,14 @@ Data *Table::dup()
 	return new Table(*this);
 }
 
-Data **Table::get(string id) noexcept(false)
+Slot *Table::get(string id) noexcept(false)
 {
 	if(value.find(id) == value.end()) throw Exception("key: " + id + " not exists for the current table");
 	return value[id];
 }
 
 
-void Table::foreach(void (*operation)(Data **))
+void Table::foreach(void (*operation)(Slot *))
 {
 	for(auto it : value)
 	{
@@ -71,17 +76,16 @@ void Table::foreach(void (*operation)(Data **))
 	}
 }
 
-void Table::copyTable(const unordered_map<string, Data **>& table)
+void Table::copyTable(const unordered_map<string, Slot *>& table)
 {
-	CONST_CONTROL
-	value.clear();
+	clean();
 	for(auto it : table)
 	{
-		value[it.first] = new Data*((*it.second)->dup());
+		value[it.first] = new Slot(new Data*((*it.second->data)->dup()));
 	}
 }
 
-unordered_map<string, Data **>& Table::getTable()
+unordered_map<string, Slot *>& Table::getTable()
 {
 	return value;
 }

@@ -3,12 +3,11 @@
 println Lizzy Version version
 
 Integer i 666
-
 Reference r i
 
-Reference rr r
 
-set rr 1234
 
-println get  rr
+println get i type i
+println get r type r
+
 

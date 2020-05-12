@@ -58,7 +58,6 @@ double Float::get() const
 
 void Float::set(double newValue)
 {
-	CONST_CONTROL
 	value = newValue;
 }
 
@@ -70,8 +69,6 @@ Float& Float::operator=(const Float& cp)
 
 void Float::setFromData(Data *data)
 {
-	CONST_CONTROL
-	Reference::StrictInfer(&data);
 	if(dynamic_cast<Float *>(data))
 		set(dynamic_cast<Float *>(data)->get());
 	else if(dynamic_cast<Integer *>(data))
@@ -84,7 +81,6 @@ void Float::setFromData(Data *data)
 
 void Float::setFromValue(string value)
 {
-	CONST_CONTROL
 	if(Integer::is(value) or Float::is(value))
 		set(atof(value.c_str()));
 	else if(Bool::is(value))

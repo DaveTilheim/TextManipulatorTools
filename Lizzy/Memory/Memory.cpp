@@ -5,7 +5,7 @@ using namespace Lizzy;
 PersistantMemory Memory::persistant = PersistantMemory();
 
 
-Memory::Memory(Memory *parent, string id) : parent(parent), id(id), references(), stack()
+Memory::Memory(Memory *parent, string id) : parent(parent), id(id), stack()
 {
 	cout << "Memory created" << endl;
 }
@@ -15,17 +15,16 @@ Memory::~Memory()
 	for(auto it : stack)
 	{
 		cout << it.first << endl;
-		TRY_SLOT_DELETE(it.second);
+		deleteData(it.first);
 	}
 	stack.clear();
-	references.clear();
 	cout << "Memory deleted" << endl;
 }
 
 
 void Memory::traceMemory()
 {
-	Memory *memory = getUpMemory();
+	/*Memory *memory = getUpMemory();
 	int i = 0;
 	while(memory)
 	{
@@ -36,43 +35,35 @@ void Memory::traceMemory()
 		}
 		memory = memory->child;
 		i++;
-	}
+	}*/
 }
 
 
-Data **Memory::getPersistantDataSlot(Data *data)
+Slot *Memory::getPersistantDataSlot(Data *data)
 {
-	Reference::StrictInfer(&data);
+	/*
 	auto len = persistant.size();
 	for(int i = 0; i < len ; i++)
 	{
-		if(data == *persistant[i]) return persistant[i];
+		if(data == *persistant[i].data) return persistant[i];
 	}
-	throw Exception("Data is not persistant");
+	throw Exception("Data is not persistant");*/
+	return nullptr;
 }
 
 void Memory::erasePersistantMemory()
 {
-	for(Data **slot : persistant)
+	for(Slot *slot : persistant)
 	{
-		delete *slot;
+		delete *slot->data;
+		delete slot->data;
 		delete slot;
 	}
 }
 
-
-Data **Memory::findStack(string id)
+Slot* Memory::find(string id)
 {
 	return stack.find(id) == stack.end() ? nullptr : stack[id];
-}
-
-Data **Memory::find(string id)
-{
-	Data **slot = findStack(id);
-	if(slot) return slot;
-	if(references.find(id) != references.end())
-		return findStack(references[id]);
-	return nullptr;
 }
 
 
@@ -88,35 +79,24 @@ Memory *Memory::getMemoryWhereIs(string id)
 	throw Exception(id + " not exists");
 }
 
-void Memory::deleteData(string id) //enlever les références
+void Memory::deleteData(string id)
 {
 	Memory *memory = getMemoryWhereIs(id);
-	Data **slot = findStack(id);
+	Slot *slot = find(id);
 	if(slot)
 	{
-		TRY_SLOT_DELETE(slot);
+		delete slot;
 		stack.erase(id);
 	}
 	else
 	{
-		string ref = getReferenceGlobalUp(id);
-		slot = findStack(ref);
-		if(slot)
-		{
-			TRY_SLOT_DELETE(slot);
-			stack.erase(ref);
-			references.erase(id);
-		}
-		else
-		{
-			throw Exception(id + " not exists");
-		}
+		throw Exception(id + " not exists");
 	}
 }
 
 void Memory::deletePersistantData(Data **ref)
 {
-	auto len = persistant.size();
+	/*auto len = persistant.size();
 	for(int i = 0; i < len; i++)
 	{
 		if(persistant[i] == ref)
@@ -128,7 +108,7 @@ void Memory::deletePersistantData(Data **ref)
 			persistant.erase(persistant.begin() + i);
 			break;
 		}
-	}
+	}*/
 }
 
 Memory *Memory::getDownMemory()
@@ -272,7 +252,7 @@ return nullptr;
 }
 
 
-Data **Memory::getDataSlotFromAccessor(string expr)
+Slot *Memory::getDataSlotFromAccessor(string expr)
 {/*
 	auto accessor = toAccessor(expr);
 	auto len = accessor.size();
@@ -338,10 +318,10 @@ Data *Memory::getDataGlobalUp(string id)
 	Memory *memory = this;
 	while(memory)
 	{
-		Data **slot = nullptr;
+		Slot *slot = nullptr;
 		if((slot = memory->find(id)))
 		{
-			 return *slot;
+			 return *slot->data;
 		}
 		else
 		{
@@ -355,26 +335,6 @@ Data *Memory::getDataGlobalUp(string id)
 	throw Exception(id + " Memory not exists");
 }
 
-string Memory::getReferenceGlobalUp(string id)
-{
-	Memory *memory = this;
-	while(memory)
-	{
-		Data **slot = nullptr;
-		if(memory->references.find(id) != memory->references.end())
-		{
-			 return memory->references[id];
-		}
-		memory = memory->parent;
-	}
-	throw Exception(id + " Reference not exists");
-}
-
-void Memory::setAttr(string id, int attr)
-{
-	getDataGlobalUp(id)->setAttr(attr);
-}
-
 string Memory::getId()
 {
 	return id;
@@ -386,21 +346,21 @@ string Memory::getId(Data *d)
 	while(memory)
 	{
 		for(auto it : memory->stack)
-			if(d == *it.second)
+			if(d == *it.second->data)
 				return it.first;
 		memory = memory->parent;
 	}
 	throw Exception("Reference Memory is a reference to a Memory which not exists");
 }
 
-Data **Memory::generateDataFromValue(string value)
+Slot *Memory::generateDataFromValue(string value)
 {
-	return Type::generateSlot(Type::generatePrimitive(value));
+	return new Slot(Type::generateSlot(Type::generatePrimitive(value)));
 }
 
-Data **Memory::generateDataFromId(string id)
+Slot *Memory::generateDataFromId(string id)
 {
-	return Type::generateSlot(getDataGlobalUp(id)->dup());
+	return new Slot(Type::generateSlot(getDataGlobalUp(id)->dup()));
 }
 
 void Memory::addPrimitiveData(string id, string value)
@@ -422,12 +382,12 @@ void Memory::addPrimitiveData(string id, string value)
 	}
 }
 
-Data **Memory::generateInteger(Data *reference)
+Slot *Memory::generateInteger(Data *reference)
 {
-	return Type::generateSlot(new Integer(reference));
+	return new Slot(Type::generateSlot(new Integer(reference)));
 }
 
-Data **Memory::generateInteger(string value)
+Slot *Memory::generateInteger(string value)
 {
 	if(existsGlobalUp(value))
 	{
@@ -435,17 +395,17 @@ Data **Memory::generateInteger(string value)
 	}
 	else
 	{
-		return Type::generateSlot(new Integer(value));
+		return new Slot(Type::generateSlot(new Integer(value)));
 	}
 }
 
 
-Data **Memory::generateFloat(Data *reference)
+Slot *Memory::generateFloat(Data *reference)
 {
-	return Type::generateSlot(new Float(reference));
+	return new Slot(Type::generateSlot(new Float(reference)));
 }
 
-Data **Memory::generateFloat(string value)
+Slot *Memory::generateFloat(string value)
 {
 	if(existsGlobalUp(value))
 	{
@@ -453,16 +413,16 @@ Data **Memory::generateFloat(string value)
 	}
 	else
 	{
-		return Type::generateSlot(new Float(value));
+		return new Slot(Type::generateSlot(new Float(value)));
 	}
 }
 
-Data **Memory::generateBool(Data *reference)
+Slot *Memory::generateBool(Data *reference)
 {
-	return Type::generateSlot(new Bool(reference));
+	return new Slot(Type::generateSlot(new Bool(reference)));
 }
 
-Data **Memory::generateBool(string value)
+Slot *Memory::generateBool(string value)
 {
 	if(existsGlobalUp(value))
 	{
@@ -470,16 +430,16 @@ Data **Memory::generateBool(string value)
 	}
 	else
 	{
-		return Type::generateSlot(new Bool(value));
+		return new Slot(Type::generateSlot(new Bool(value)));
 	}
 }
 
-Data **Memory::generateString(Data *reference)
+Slot *Memory::generateString(Data *reference)
 {
-	return Type::generateSlot(new String(reference));
+	return new Slot(Type::generateSlot(new String(reference)));
 }
 
-Data **Memory::generateString(string value)
+Slot *Memory::generateString(string value)
 {
 	if(existsGlobalUp(value))
 	{
@@ -487,19 +447,19 @@ Data **Memory::generateString(string value)
 	}
 	else
 	{
-		return Type::generateSlot(new String(value));
+		return new Slot(Type::generateSlot(new String(value)));
 	}
 }
 
-Data **Memory::generateDataSlotPersistant(string value)
+Slot *Memory::generateDataSlotPersistant(string value)
 {
-	Data **slot = generateDataFromValue(value);
+	/*Data **slot = generateDataFromValue(value);
 	(*slot)->setAttr(PERSISTANT_A);
-	persistant.push_back(slot);
-	return slot;
+	persistant.push_back(slot);*/
+	return nullptr;
 }
 
-Data **Memory::generateVector(vector<string>& values)
+Slot *Memory::generateVector(vector<string>& values)
 {
 	Vector *data = new Vector();
 	for(string value : values)
@@ -513,10 +473,10 @@ Data **Memory::generateVector(vector<string>& values)
 			data->add(generateDataFromValue(value));
 		}
 	}
-	return Type::generateSlot(data);
+	return new Slot(Type::generateSlot(data));
 }
 
-Data **Memory::generateTable(string value)
+Slot *Memory::generateTable(string value)
 {
 	Table *data;
 	if(existsGlobalUp(value))
@@ -527,7 +487,7 @@ Data **Memory::generateTable(string value)
 	{
 		data = new Table();
  	}
-	return Type::generateSlot(data);
+	return new Slot(Type::generateSlot(data));
 }
 
 void Memory::addInteger(string id, string value)
@@ -585,15 +545,28 @@ void Memory::addReference(string id, string value)
 	{
 		if(existsGlobalUp(value))
 		{
-			/*if(references.find(value) != references.end())
-				value = references[value]; AVOIR N IMPORTE QUELLE REF */ 
-			RESTRICT_CONTROL(getDataGlobalUp(value));
-			references[id] = value;
+			Slot *slot = getDataSlotGlobalUp(value);
+			if(slot->isRestrict()) throw Exception(value + " is markedd restrict, it can not be referenced");
+			stack[id] = new Slot(slot->data);
+			stack[id]->attribs |= REFERENCE_A;
 		}
 		else
 		{
 			//add persistant memory
 		}
+	}
+	else
+	{
+		throw Exception(id + " Memory already exists");
+	}
+}
+
+void Memory::addReference(string id)
+{
+	if(not exists(id))
+	{
+		stack[id] = new Slot(nullptr);
+		stack[id]->attribs |= REFERENCE_A;
 	}
 	else
 	{
@@ -627,14 +600,14 @@ void Memory::addTable(string id, string value)
 
 
 
-Data **Memory::getDataSlotGlobalUp(string id)
+Slot *Memory::getDataSlotGlobalUp(string id)
 {
 	Memory *memory = this;
 	while(memory)
 	{
 		if(memory->exists(id))
 		{
-			Data **slot = nullptr;
+			Slot *slot = nullptr;
 			if((slot = memory->find(id)))
 			{
 				return slot;
@@ -651,13 +624,13 @@ Data **Memory::getDataSlotGlobalUp(string id)
 
 void Memory::setDataFromValue(string id, string value)
 {
-	Data **slot = getDataSlotGlobalUp(id);
+	Slot *slot = getDataSlotGlobalUp(id);
 	Type::updateSlot(slot, value);
 }
 
 void Memory::setDataFromId(string id, string value)
 {
-	Data **slot = getDataSlotGlobalUp(id);
+	Slot *slot = getDataSlotGlobalUp(id);
 	Type::updateSlot(slot, getDataGlobalUp(value));
 }
 
@@ -679,7 +652,7 @@ void Memory::setData(string id, string value)
 
 Data *Memory::getData(string id)
 {
-	if(exists(id)) return *stack[id];
+	if(exists(id)) return *stack[id]->data;
 	throw Exception(id + " Memory does not exists");
 }
 
@@ -702,8 +675,23 @@ void Memory::changeReference(string id, string value)
 	{
 		if(existsGlobalUp(value))
 		{
-			RESTRICT_CONTROL(getDataGlobalUp(value));
-			references[id] = value;
+			Slot *refSlot = getDataSlotGlobalUp(id);
+			if(refSlot->isReference())
+			{
+				Slot *targetSlot = getDataSlotGlobalUp(value);
+				if(not targetSlot->isRestrict())
+				{
+					refSlot->data = targetSlot->data;
+				}
+				else
+				{
+					throw Exception(value + " is marked restrict, it can not be referenced");
+				}
+			}
+			else
+			{
+				throw Exception(id + " is not marked as Reference");
+			}
 		}
 	}
 	else
@@ -717,10 +705,10 @@ string Memory::getCharAt(string id, string index)
 {
 	if(existsGlobalUp(id))
 	{
-		Data **slot = getDataSlotGlobalUp(id);
-		if(dynamic_cast<String *>(*slot))
+		Slot*slot = getDataSlotGlobalUp(id);
+		if(dynamic_cast<String *>(*slot->data))
 		{
-			return ((String *)slot)->getCharAt(index);
+			return ((String *)*slot->data)->getCharAt(index);
 		}
 		else
 		{
@@ -737,10 +725,10 @@ void Memory::setCharAt(string id, string index, string character)
 {
 	if(existsGlobalUp(id))
 	{
-		Data **slot = getDataSlotGlobalUp(id);
-		if(dynamic_cast<String *>(*slot))
+		Slot *slot = getDataSlotGlobalUp(id);
+		if(dynamic_cast<String *>(*slot->data))
 		{
-			((String *)slot)->setCharAt(index, character);
+			((String *)*slot->data)->setCharAt(index, character);
 		}
 		else
 		{
@@ -826,7 +814,7 @@ string Memory::new_String(string id, string value)
 
 string Memory::new_Reference(string id, string value)
 {
-	getDownMemory()->addReference(id, value);
+	value.size() ? getDownMemory()->addReference(id, value) : getDownMemory()->addReference(id);
 	return id;
 }
 
@@ -903,11 +891,11 @@ string Memory::del_data(string id)
 
 string Memory::del_persistant_data(string id)
 {
-	Data **ref = getDownMemory()->getDataSlotGlobalUp(id);
+	/*Data **ref = getDownMemory()->getDataSlotGlobalUp(id);
 	if(ref)
 		deletePersistantData(ref);
 	else
-		throw Exception(id + " is not a Reference");
+		throw Exception(id + " is not a Reference");*/
 	return id;
 }
 
@@ -927,19 +915,21 @@ string Memory::exists_memory(string id)
 	return getDownMemory()->existsGlobalUp(id) ? "true" : "false";
 }
 
-string Memory::add_attribute(string id, int attr)
+
+string Memory::add_slot_attribute(string id, int attr)
 {
 	Memory *memory = getDownMemory();
-	Data **slot = memory->getDataSlotGlobalUp(id);
-	memory->addAttr(*slot, attr);
-	if(attr == PERSISTANT_A)
+	Slot *slot = memory->getDataSlotGlobalUp(id);
+	memory->addSlotAttr(slot, attr);
+	/*if(attr == PERSISTANT_A)
 	{
-		persistant.push_back(slot);
-	}
+		persistant.push_back(new Slot(slot->data));
+	}*/
 	return id;
 }
 
-void Memory::addAttr(Data *data, int attr)
+void Memory::addSlotAttr(Slot *data, int attr)
 {
-	data->setAttr(attr);
+	data->attribs |= attr;
 }
+

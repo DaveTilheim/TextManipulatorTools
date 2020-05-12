@@ -5,7 +5,6 @@
 #include "Bool.hpp"
 #include "Vector.hpp"
 #include "Table.hpp"
-#include "Reference.hpp"
 
 namespace Lizzy
 {
