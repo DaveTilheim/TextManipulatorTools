@@ -60,7 +60,7 @@ class IndependantCommand : public Command
 public:
 	IndependantCommand(string name);
 	string run(Tokens& args, int forceNargs=-2) override;
-	void setChild(string name);
+	IndependantCommand& ichild(string name);
 	string getFullName() const override;
 };
 

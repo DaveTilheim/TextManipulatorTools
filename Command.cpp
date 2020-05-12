@@ -376,8 +376,8 @@ string IndependantCommand::run(Tokens& args, int forceNargs)
 	return actions[nargs]->run(args); //execution classique
 }
 
-void IndependantCommand::setChild(string name)
-{
+IndependantCommand& IndependantCommand::ichild(string name)
+{/* BUG ICI */
 	for(auto *cmdit : childs)
 	{
 		if(cmdit->getName() == name)
@@ -388,6 +388,7 @@ void IndependantCommand::setChild(string name)
 	IndependantCommand *child = new IndependantCommand(name);
 	child->setSuper(this);
 	childs.push_back(child);
+	return *child;
 }
 
 string IndependantCommand::getFullName() const

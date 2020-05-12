@@ -65,6 +65,7 @@ void Interpreter::preIntCommandsRun()
 	fileLoader.foreach([this](String& line)
 	{
 		Tokens tok = line;
+
 		String cname = tok;
 		if(isPreInt(cname))
 		{
@@ -147,7 +148,7 @@ void Interpreter::setCommentarySymbol(string symbol)
 	commentarySymbols.push_back(symbol);
 }
 
-Command& Interpreter::preIntCommand(string name)
+IndependantCommand& Interpreter::preIntCommand(string name)
 {
 	if(name.size() and name[0] != '#') name = "#" + name;
 	if(isPreInt(name)) return *preIntCommands[name];
