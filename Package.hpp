@@ -19,11 +19,12 @@ private:
 	const string name;
 	const Package *super = nullptr;
 	vector<Package *> subPackages;
-	vector<Command *> commands;
 protected:
 	Package(string name);
 	virtual ~Package();
+
 public:
+	vector<Command *> commands;
 	static vector<Package *> packages;
 	virtual void load() = 0;
 	static bool isPackage(string pkg);

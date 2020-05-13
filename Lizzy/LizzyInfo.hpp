@@ -12,6 +12,7 @@ namespace Lizzy
 		static const string VERSION;
 	protected:
 		_decl_action(version_action)
+		_decl_action(packages_action)
 	public:
 		InfoPkg();
 		void load() override;

@@ -34,7 +34,7 @@ public:
 	~Command();
 	Command& alias(const Command& cmd);
 	Command& alias(string otherName);
-	Command& child(string childname);
+	virtual Command& child(string childname);
 	string getName() const;
 	virtual string getFullName() const;
 	const Command& getSuper() const;
@@ -44,7 +44,7 @@ public:
 	int getMaximumNargs() const;
 	Action& getAction(Tokens& args);
 	Command& setAction(int nargs, const Action& action);
-	void setChild(string name);
+	virtual void setChild(string name);
 	void setSuper(const Command *super);
 	bool isChild(string name) const;
 	string action(string args="") noexcept;
@@ -60,7 +60,8 @@ class IndependantCommand : public Command
 public:
 	IndependantCommand(string name);
 	string run(Tokens& args, int forceNargs=-2) override;
-	IndependantCommand& ichild(string name);
+	void setChild(string name) override;
+	Command& child(string childname) override;
 	string getFullName() const override;
 };
 

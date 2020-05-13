@@ -5,7 +5,6 @@
 _def_pre(Lizzy::LizzyPkg::load_package_1)
 {
 	string pkg = args("name");
-	cout << "load " + Package::getPackage(pkg).getName() << endl;
 	Package::getPackage(pkg).load();
 	return pkg;
 }

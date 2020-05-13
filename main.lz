@@ -1,18 +1,27 @@
 #load package Lizzy
 
-println Lizzy Version version
+println
+println "Lizzy Version  : " version
+println "Packages loaded: " packages
+println
+
+unload package Lizzy.Info
+
+Lizzy.Std.Io.println [final]
 
 
-
-
-Integer i 666
-Float j 3.14
-Bool k true
-String l "Hello world!"
-Vector m i j k l
-
-Reference r i
 
 
 trace memory
 
+
+
+create context MAIN
+set context MAIN
+
+load package Lizzy
+
+println version
+println Lizzy.Info.version
+println MAIN.version
+println MAIN.Info.version

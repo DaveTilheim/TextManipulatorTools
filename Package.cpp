@@ -62,7 +62,6 @@ void Package::reload()
 
 void Package::addSubPackage(Package* pkg)
 {
-	//cout << "Dependance of " + getName() + " : " << pkg->getName() << endl;
 	if(pkg->super) throw Exception(pkg->getName() + " as already a child of a Package");
 	subPackages.push_back(pkg);
 	pkg->setSuper(this);
