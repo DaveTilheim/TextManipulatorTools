@@ -1,8 +1,16 @@
 #include "Command.hpp"
 
 
-unordered_map<string, Command *> Command::commandList = unordered_map<string, Command *>();
+unordered_map<string, unordered_map<string, Command *>> Command::commandList = unordered_map<string, unordered_map<string, Command *>>();
 
+string Command::currentContext = "MAIN";
+
+void Command::setContext(string context)
+{
+	currentContext = context;
+	if(commandList.find(context) == commandList.end())
+		commandList[context] = unordered_map<string, Command *>();
+}
 
 Command::Command(const Command& other)
 : Command(other.getName(), &other.getSuper())
@@ -13,10 +21,7 @@ Command::Command(const Command& other)
 
 Command::Command(string name, const Command *super) : name(name), super(super)
 {
-	if(not super) //!!!!
-	{
-		Command::commandList[name] = this;
-	}
+	load();
 	//cout << "Command " << getFullName() << endl; 
 }
 
@@ -36,6 +41,19 @@ Command::~Command()
 //cout << "~Command " << getFullName() << endl; 
 }
 
+void Command::load()
+{
+	load(currentContext);
+}
+
+void Command::load(string context)
+{
+	if(not super) //!!!!
+	{
+		Command::commandList[context][name] = this;
+	}
+}
+
 Command& Command::addCommand(Command *cmd)
 {
 	if(cmd->super)
@@ -44,7 +62,7 @@ Command& Command::addCommand(Command *cmd)
 	}
 	if(not isCommand(cmd->getName()))
 	{
-		Command::commandList[cmd->getName()] = cmd;
+		Command::commandList[currentContext][cmd->getName()] = cmd;
 	}
 	else
 	{
@@ -57,18 +75,18 @@ void Command::eraseCommand(string name)
 {
 	if(Command::isCommand(name))
 	{
-		Command *cptr = Command::commandList[name];
-		Command::commandList.erase(name);
+		Command *cptr = Command::commandList[currentContext][name];
+		Command::commandList[currentContext].erase(name);
 		vector<string> aliases;
 		//cout << "erase " << name << endl;
-		for(auto cmd : commandList)
+		for(auto cmd : commandList[currentContext])
 		{
 			if(cmd.second == cptr) aliases.push_back(cmd.first);
 		}
 		for(auto scmd : aliases)
 		{
 			//cout << "erase alias: " << scmd << endl;
-			Command::commandList.erase(scmd);
+			Command::commandList[currentContext].erase(scmd);
 		}
 	}
 	else
@@ -90,7 +108,7 @@ Command& Command::alias(string otherName)
 {
 	if(not isCommand(otherName))
 	{
-		Command::commandList[otherName] = this;
+		Command::commandList[currentContext][otherName] = this;
 		return *this;
 	}
 	throw Exception(otherName +  " Command already exists");
@@ -310,13 +328,13 @@ ostream& operator<<(ostream& out, const Command& self)
 
 bool Command::isCommand(string name)
 {
-	return Command::commandList.find(name) != Command::commandList.end();
+	return Command::commandList[currentContext].find(name) != Command::commandList[currentContext].end();
 }
 
 Command& Command::getCommand(string name)
 {
 	if(not Command::isCommand(name)) throw Exception(name + " is not a recognized Command");
-	return *commandList[name];
+	return *commandList[currentContext][name];
 }
 
 Command& Command::child(string ch)
@@ -336,8 +354,8 @@ void Command::rename(string name)
 	{
 		if(not isCommand(name))
 		{
-			Command::commandList.erase(old);
-			Command::commandList[name] = this;
+			Command::commandList[currentContext].erase(old);
+			Command::commandList[currentContext][name] = this;
 			this->name = name;
 		}
 	}

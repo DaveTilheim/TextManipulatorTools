@@ -7,21 +7,9 @@ println
 
 unload package Lizzy.Info
 
-Lizzy.Std.Io.println [final]
 
-
-
+Integer i 666
 
 trace memory
 
 
-
-create context MAIN
-set context MAIN
-
-load package Lizzy
-
-println version
-println Lizzy.Info.version
-println MAIN.version
-println MAIN.Info.version
