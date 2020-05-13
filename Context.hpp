@@ -1,18 +1,26 @@
 #ifndef CONTEXT_HPP
 #define CONTEXT_HPP
-#include "Command.hpp"
-/*
+#include <unordered_map>
+#include <string>
+#include "Exception.hpp"
+
+using namespace std;
+
+class Command;
 
 class Context
 {
 private:
-	vector<Command *> commands;
+	static unordered_map<string, Command *> *current;
+	static unordered_map<string, unordered_map<string, Command *>> contexts;
 public:
-	Context();
-	~Context();
-	void load(vector<Command *>& commands);
-	void unload(vector<Command *>& commands);
+	static bool exists(string id);
+	static void create(string id);
+	static void set(string id);
+	static void use(string id);
+	static unordered_map<string, Command *>& get(string id);
+	static unordered_map<string, Command *>& get();
 };
-*/
+
 
 #endif

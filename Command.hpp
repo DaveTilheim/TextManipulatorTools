@@ -11,7 +11,7 @@ struct Attributes
 	int nargs = -2;
 };
 
-#define PermCommand static Command
+
 
 class Command
 {
