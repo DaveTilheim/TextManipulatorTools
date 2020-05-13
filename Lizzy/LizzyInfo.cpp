@@ -26,6 +26,11 @@ _def_action(InfoPkg::packages_action)
 	return buf;
 }
 
+_def_action(InfoPkg::context_action)
+{
+	return Context::getId();
+}
+
 
 InfoPkg::InfoPkg() : Package("Info")
 {
@@ -40,4 +45,7 @@ void InfoPkg::load()
 
 	Action packagesAction(packages_action);
 	cmd("packages").setAction(0, packagesAction);
+
+	Action contextAction(context_action);
+	cmd("context").setAction(0, contextAction);
 }

@@ -1,7 +1,7 @@
 #ifndef COMMAND_HPP
 #define COMMAND_HPP
 #include "Action.hpp"
-#include "Exception.hpp"
+#include "Context.hpp"
 #include <unordered_map>
 #include <cstdlib>
 
@@ -16,15 +16,15 @@ struct Attributes
 class Command
 {
 protected:
-	static unordered_map<string, unordered_map<string, Command *>> commandList;
-	static string currentContext;
+	//static unordered_map<string, unordered_map<string, Command *>> commandList;
+	//static string currentContext;
 	string name;
 	const Command *super;
 	unordered_map<int, Action *> actions;
 	vector<Command *> childs;
 	bool isAlias = false;
 public:
-	static void setContext(string context);
+	//static void setContext(string context);
 	static void eraseCommand(string name);
 	static bool isCommand(string name);
 	static Command& getCommand(string name);
@@ -33,9 +33,12 @@ public:
 	Command() = delete;
 	Command(const Command& other);
 	Command(string name, const Command *super=nullptr);
+	Command(string name, string context);
 	~Command();
 	void load();
 	void load(string context);
+	void forceLoad();
+	void forceLoad(string context);
 	Command& alias(const Command& cmd);
 	Command& alias(string otherName);
 	virtual Command& child(string childname);
@@ -58,7 +61,7 @@ public:
 	Command& operator=(const Command& other) = delete;
 	friend ostream& operator<<(ostream& out, const Command& self);
 };
-
+/*
 class IndependantCommand : public Command
 {
 public:
@@ -68,7 +71,7 @@ public:
 	Command& child(string childname) override;
 	string getFullName() const override;
 };
-
+*/
 
 
 #endif

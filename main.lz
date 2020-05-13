@@ -1,15 +1,27 @@
 #load package Lizzy
 
-println
-println "Lizzy Version  : " version
-println "Packages loaded: " packages
-println
 
-unload package Lizzy.Info
+println "Lizzy Version  : " version
+println "Context        : " context
+
+
+load extern context TEST
+load command to context [Integer] TEST
+load command to context [trace] TEST
+load command to context [load] TEST
+load context TEST
+
+
+
 
 
 Integer i 666
 
-trace memory
+trace i
+
+
+load context MAIN
+
+println "Hello world!"
 
 

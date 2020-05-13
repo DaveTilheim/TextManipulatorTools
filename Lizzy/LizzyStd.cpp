@@ -39,6 +39,30 @@ _def_action(StdPkg::alias_action)
 }
 
 
+_def_action(StdPkg::load_context_action)
+{
+	string context = args("id");
+	Context::set(context);
+	return context;
+}
+
+_def_action(StdPkg::load_extern_context_action)
+{
+	string context = args("id");
+	Context::create(context);
+	return context;
+}
+
+_def_action(StdPkg::load_command_to_context_action)
+{
+	string command = args("command");
+	string context = args("context", 1);
+	cout << command << " " << context << endl;
+	Command::getCommand(command).forceLoad(context);
+	return command + " => " + context;
+}
+
+
 
 StdPkg::StdPkg() : Package("Std")
 {
@@ -61,4 +85,22 @@ void StdPkg::load()
 	cmd("unload").child("package").setAction(1, unload_packageAction);
 	cmd("reload").child("package").setAction(1, reload_packageAction);
 	cmd("load").child("package").setAction(1, load_packageAction);
+
+
+	Action loadContext(load_context_action);
+	loadContext.setNamed("id");
+	cmd("load").child("context").setAction(1, loadContext);
+
+	Action loadExternContext(load_extern_context_action);
+	loadExternContext.setNamed("id");
+	cmd("load").child("extern").child("context").setAction(1, loadExternContext);
+
+	Action loadCommandToContextAction(load_command_to_context_action);
+	loadCommandToContextAction.setNamed("command");
+	loadCommandToContextAction.setNamed("context");
+	cmd("load").child("command").child("to").child("context").setAction(2, loadCommandToContextAction);
+
+
+
+
 }

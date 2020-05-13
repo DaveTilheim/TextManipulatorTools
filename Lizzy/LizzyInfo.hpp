@@ -13,6 +13,7 @@ namespace Lizzy
 	protected:
 		_decl_action(version_action)
 		_decl_action(packages_action)
+		_decl_action(context_action)
 	public:
 		InfoPkg();
 		void load() override;

@@ -9,6 +9,8 @@ Interpreter::Interpreter() : fileLoader()
 	{
 		Interpreter::mainFileLoader = &fileLoader;
 	}
+	Context::use("MAIN");
+	Context::create("PRE_INT");
 }
 
 
@@ -17,12 +19,13 @@ void Interpreter::renamePreInt(string cmdname, string name)
 	string old = cmdname;
 	if(not isPreInt(name))
 	{
-		IndependantCommand *ic = preIntCommands[old];
-		preIntCommands.erase(old);
-		preIntCommands[name] = ic;
-		preIntCommands[name]->rename(name);
+		Command *ic = Context::get("PRE_INT")[old];
+		Context::get("PRE_INT").erase(old);
+		Context::get("PRE_INT")[name] = ic;
+		Context::get("PRE_INT")[name]->rename(name);
 	}
 }
+
 void Interpreter::removeAttributed()
 {
 	for(auto att : attributedCommands)
@@ -33,10 +36,10 @@ void Interpreter::removeAttributed()
 
 Interpreter::~Interpreter()
 {
-	for(auto c : preIntCommands)
+	/*for(auto c : preIntCommands)
 	{
 		delete c.second;
-	}
+	}*/
 	removeAttributed();
 }
 
@@ -57,7 +60,7 @@ void Interpreter::removeCommentary()
 
 bool Interpreter::isPreInt(string str)
 {
-	return preIntCommands.find(str) != preIntCommands.end();
+	return Context::get("PRE_INT").find(str) != Context::get("PRE_INT").end();
 }
 
 void Interpreter::preIntCommandsRun()
@@ -69,7 +72,7 @@ void Interpreter::preIntCommandsRun()
 		String cname = tok;
 		if(isPreInt(cname))
 		{
-			preIntCommands[cname]->run(tok);
+			Context::get("PRE_INT")[cname]->run(tok);
 			fileLoader.drop();
 			fileLoader.prec();
 		}
@@ -148,12 +151,12 @@ void Interpreter::setCommentarySymbol(string symbol)
 	commentarySymbols.push_back(symbol);
 }
 
-IndependantCommand& Interpreter::preIntCommand(string name)
+Command& Interpreter::preIntCommand(string name)
 {
 	if(name.size() and name[0] != '#') name = "#" + name;
-	if(isPreInt(name)) return *preIntCommands[name];
-	IndependantCommand *c = new IndependantCommand(name);
-	preIntCommands[name] = c;
+	if(isPreInt(name)) return *Context::get("PRE_INT")[name];
+	Command *c = new Command(name);
+	Context::get("PRE_INT")[name] = c;
 	return *c;
 }
 

@@ -12,6 +12,9 @@ namespace Lizzy
 		_decl_action(reload_package_action)
 		_decl_action(unload_package_action)
 		_decl_action(load_package_action)
+		_decl_action(load_context_action)
+		_decl_action(load_extern_context_action)
+		_decl_action(load_command_to_context_action)
 		_decl_action(alias_action)
 	public:
 		StdPkg();

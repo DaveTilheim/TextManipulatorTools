@@ -9,7 +9,7 @@ class Interpreter
 private:
 	static FileLoader *mainFileLoader;
 	FileLoader fileLoader;
-	unordered_map<string, IndependantCommand *> preIntCommands;
+	//unordered_map<string, IndependantCommand *> preIntCommands;
 	vector<string> commentarySymbols;
 	vector<const Command *> attributedCommands;
 	void preinterpretation();
@@ -25,7 +25,7 @@ public:
 	vector<string> launch(string expr);
 	void setCommentarySymbol(string symbol);
 	bool isPreInt(string str);
-	IndependantCommand& preIntCommand(string name);
+	Command& preIntCommand(string name);
 	Command& attributedCommand(string name);
 	void renamePreInt(string, string name);
 	void removeAttributed();

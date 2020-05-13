@@ -1,5 +1,5 @@
 #include "Command.hpp"
-
+/*
 
 unordered_map<string, unordered_map<string, Command *>> Command::commandList = unordered_map<string, unordered_map<string, Command *>>();
 
@@ -11,7 +11,7 @@ void Command::setContext(string context)
 	if(commandList.find(context) == commandList.end())
 		commandList[context] = unordered_map<string, Command *>();
 }
-
+*/
 Command::Command(const Command& other)
 : Command(other.getName(), &other.getSuper())
 {
@@ -23,6 +23,11 @@ Command::Command(string name, const Command *super) : name(name), super(super)
 {
 	load();
 	//cout << "Command " << getFullName() << endl; 
+}
+
+Command::Command(string name, string context) : name(name), super(nullptr)
+{
+	load(context);
 }
 
 Command::~Command()
@@ -38,31 +43,45 @@ Command::~Command()
 			delete it.second;
 		}
 	}
-//cout << "~Command " << getFullName() << endl; 
+	//cout << "~Command " << getFullName() << endl; 
 }
 
 void Command::load()
 {
-	load(currentContext);
+	if(not super)
+	{
+		Context::get()[name] = this;
+	}
 }
 
 void Command::load(string context)
 {
 	if(not super) //!!!!
 	{
-		Command::commandList[context][name] = this;
+		cout << getFullName() << endl;
+		Context::get(context)[name] = this;
 	}
+}
+
+void Command::forceLoad()
+{
+	Context::get()[name] = this;
+}
+
+void Command::forceLoad(string context)
+{
+	Context::get(context)[name] = this;
 }
 
 Command& Command::addCommand(Command *cmd)
 {
 	if(cmd->super)
 	{
-		throw Exception("can not add " + cmd->getFullName() + " as gloabal command because it is a child Command of " + cmd->super->getFullName());
+		throw Exception("can not add " + cmd->getFullName() + " as global command because it is a child Command of " + cmd->super->getFullName());
 	}
 	if(not isCommand(cmd->getName()))
 	{
-		Command::commandList[currentContext][cmd->getName()] = cmd;
+		Context::get()[cmd->getName()] = cmd;
 	}
 	else
 	{
@@ -75,18 +94,17 @@ void Command::eraseCommand(string name)
 {
 	if(Command::isCommand(name))
 	{
-		Command *cptr = Command::commandList[currentContext][name];
-		Command::commandList[currentContext].erase(name);
+		Command *cptr = Context::get()[name];
+		Context::get().erase(name);
 		vector<string> aliases;
-		//cout << "erase " << name << endl;
-		for(auto cmd : commandList[currentContext])
+		for(auto cmd : Context::get())
 		{
-			if(cmd.second == cptr) aliases.push_back(cmd.first);
+			if(cmd.second == cptr)
+				aliases.push_back(cmd.first);
 		}
 		for(auto scmd : aliases)
 		{
-			//cout << "erase alias: " << scmd << endl;
-			Command::commandList[currentContext].erase(scmd);
+			Context::get().erase(scmd);
 		}
 	}
 	else
@@ -108,7 +126,7 @@ Command& Command::alias(string otherName)
 {
 	if(not isCommand(otherName))
 	{
-		Command::commandList[currentContext][otherName] = this;
+		Context::get()[otherName] = this;
 		return *this;
 	}
 	throw Exception(otherName +  " Command already exists");
@@ -328,13 +346,13 @@ ostream& operator<<(ostream& out, const Command& self)
 
 bool Command::isCommand(string name)
 {
-	return Command::commandList[currentContext].find(name) != Command::commandList[currentContext].end();
+	return Context::get().find(name) != Context::get().end();
 }
 
 Command& Command::getCommand(string name)
 {
 	if(not Command::isCommand(name)) throw Exception(name + " is not a recognized Command");
-	return *commandList[currentContext][name];
+	return *Context::get()[name];
 }
 
 Command& Command::child(string ch)
@@ -354,13 +372,13 @@ void Command::rename(string name)
 	{
 		if(not isCommand(name))
 		{
-			Command::commandList[currentContext].erase(old);
-			Command::commandList[currentContext][name] = this;
+			Context::get().erase(old);
+			Context::get()[name] = this;
 			this->name = name;
 		}
 	}
 }
-
+/*
 IndependantCommand::IndependantCommand(string name) : Command(name, this)
 {
 
@@ -395,7 +413,7 @@ string IndependantCommand::run(Tokens& args, int forceNargs)
 }
 
 void IndependantCommand::setChild(string name)
-{/* BUG ICI*/
+{
 	for(auto *cmdit : childs)
 	{
 		if(cmdit->getName() == name)
@@ -425,5 +443,5 @@ string IndependantCommand::getFullName() const
 	return getName();
 }
 
-
+*/
 

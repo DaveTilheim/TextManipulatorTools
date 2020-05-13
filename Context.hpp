@@ -11,6 +11,7 @@ class Command;
 class Context
 {
 private:
+	static string id;
 	static unordered_map<string, Command *> *current;
 	static unordered_map<string, unordered_map<string, Command *>> contexts;
 public:
@@ -20,6 +21,7 @@ public:
 	static void use(string id);
 	static unordered_map<string, Command *>& get(string id);
 	static unordered_map<string, Command *>& get();
+	static string getId();
 };
 
 

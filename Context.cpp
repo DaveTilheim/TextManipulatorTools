@@ -2,6 +2,7 @@
 
 unordered_map<string, Command *> *Context::current = nullptr;
 unordered_map<string, unordered_map<string, Command *>> Context::contexts = unordered_map<string, unordered_map<string, Command *>>();
+string Context::id = string();
 
 
 bool Context::exists(string id)
@@ -21,6 +22,7 @@ void Context::set(string id)
 {
 	if(exists(id))
 	{
+		Context::id = id;
 		current = &Context::contexts[id];
 	}
 	else
@@ -29,12 +31,10 @@ void Context::set(string id)
 
 void Context::use(string id)
 {
-	if(exists(id))
-	{
-		current = &Context::contexts[id];
-	}
-	else
+	if(not exists(id))
 		Context::contexts[id] = unordered_map<string, Command *>();
+	current = &Context::contexts[id];
+	Context::id = id;
 }
 
 unordered_map<string, Command *>& Context::get(string id)
@@ -48,5 +48,10 @@ unordered_map<string, Command *>& Context::get(string id)
 unordered_map<string, Command *>& Context::get()
 {
 	return *Context::current;
+}
+
+string Context::getId()
+{
+	return id;
 }
 
