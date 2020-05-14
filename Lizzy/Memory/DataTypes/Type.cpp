@@ -42,8 +42,8 @@ void Type::updateSlot(Slot *slot, string value)
 	{
 		if(not slot->isConst())
 		{
-			delete *slot->data;
-			*slot->data = generatePrimitive(value);
+			delete *slot->get();
+			*slot->get() = generatePrimitive(value);
 		}
 		else
 		{
@@ -52,7 +52,7 @@ void Type::updateSlot(Slot *slot, string value)
 	}
 	else
 	{
-		(*slot->data)->setFromValue(value);
+		(*slot->get())->setFromValue(value);
 	}
 }
 
@@ -62,8 +62,8 @@ void Type::updateSlot(Slot *slot, Data *data)
 	{
 		if(not slot->isConst())
 		{
-			delete *slot->data;
-			*slot->data = data->dup();
+			delete *slot->get();
+			*slot->get() = data->dup();
 		}
 		else
 		{
@@ -72,7 +72,7 @@ void Type::updateSlot(Slot *slot, Data *data)
 	}
 	else
 	{
-		(*slot->data)->setFromData(data);
+		(*slot->get())->setFromData(data);
 	}
 }
 

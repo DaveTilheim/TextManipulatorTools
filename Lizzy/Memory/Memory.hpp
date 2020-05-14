@@ -12,11 +12,6 @@ using namespace std;
 
 namespace Lizzy
 {
-
-	
-
-	
-
 	typedef unordered_map<string, Slot *> StackMemory;
 	typedef vector<Slot *> PersistantMemory;
 
@@ -40,7 +35,7 @@ namespace Lizzy
 		void push(string id);
 		void pop();
 		void deleteData(string id);
-		void deletePersistantData(Data **ref);
+		void deletePersistantData(Slot *ref);
 		Slot *find(string id);
 	public:
 		//persistantMemory
@@ -48,10 +43,10 @@ namespace Lizzy
 		static void erasePersistantMemory();
 		//
 		vector<string> toAccessor(string id);
-		bool isAccessor(string id);
 		bool isAccessor(Data *data);
 		Data *getDataFromAccessor(string expr);
 		Slot *getDataSlotFromAccessor(string expr);
+		bool existsAsAccessor(string expr);
 		bool exists(string id);
 		bool existsGlobalUp(string id);
 		Data *getDataGlobalUp(string id);

@@ -13,10 +13,12 @@ namespace Lizzy
 	protected:
 		_decl_pre(load_package_1)
 		_decl_pre(load_package_0)
+		_decl_pre(load_symbol_commentary)
 	public:
 		LizzyPkg();
 		void load() override;
 		Interpreter lizzyInt;
+		static Interpreter *pLizzyInt;
 	};
 }
 

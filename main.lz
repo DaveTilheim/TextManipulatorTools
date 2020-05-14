@@ -1,27 +1,20 @@
 #load package Lizzy
+#load symbol commentary %
 
 
 println "Lizzy Version  : " version
 println "Context        : " context
 
 
-load extern context TEST
-load command to context [Integer] TEST
-load command to context [trace] TEST
-load command to context [load] TEST
-load context TEST
+Reference r
+
+push test
+
+	persistant Bool b true
+	set reference r b
+
+pop
 
 
-
-
-
-Integer i 666
-
-trace i
-
-
-load context MAIN
-
-println "Hello world!"
-
+trace memory
 

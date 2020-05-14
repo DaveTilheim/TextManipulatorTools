@@ -39,7 +39,7 @@ string Table::toString()
 	string buf;
 	for(auto it : value)
 	{
-		buf += it.first + ":" + (*it.second->data)->toString() + " ";
+		buf += it.first + ":" + (*it.second->get())->toString() + " ";
 	}
 	if(buf.size()) buf.pop_back();
 	else return " ";
@@ -81,7 +81,7 @@ void Table::copyTable(const unordered_map<string, Slot *>& table)
 	clean();
 	for(auto it : table)
 	{
-		value[it.first] = new Slot(new Data*((*it.second->data)->dup()));
+		value[it.first] = new Slot(new Data*((*it.second->get())->dup()));
 	}
 }
 

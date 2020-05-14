@@ -18,6 +18,14 @@ void Context::create(string id)
 		throw Exception(id + " context already exists");
 }
 
+void Context::erase(string id)
+{
+	if(exists(id))
+		Context::contexts.erase(id);
+	else
+		throw Exception(id + " context not exists");
+}
+
 void Context::set(string id)
 {
 	if(exists(id))

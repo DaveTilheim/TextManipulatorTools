@@ -19,6 +19,7 @@ Slot::Slot(Slot *slot)
 Slot::~Slot()
 {
 	tryDelete();
+	cout << "Slot removed" << endl;
 }
 
 bool Slot::isReference()
@@ -62,8 +63,22 @@ void Slot::tryDelete()
 	}
 }
 
+Data **Slot::get()
+{
+	if(data)
+		return data;
+	else
+		throw Exception("Access to null value");
+}
+
 void Slot::referenceTo(Slot *slot)
 {
+	if(slot == nullptr)
+	{
+		data = nullptr;
+		attribs = REFERENCE_A;
+		return;
+	}
 	if(isReference())
 	{
 		if(not slot->isRestrict())
@@ -84,6 +99,10 @@ void Slot::referenceTo(Slot *slot)
 
 string Slot::toString()
 {
+	string type = data == nullptr ? "null" : (*data)->type();
+	string ptrPtrValue = data == nullptr ? "null" : to_string((long long)data);
+	string ptrValue = data == nullptr ? "null" : to_string((long long)*data);
+	string value = data == nullptr ? "null" : (*data)->toString();
 	string buf;
 	buf += "\tREFERENCE  : "  + (isReference() ? string("YES") : string("NO"));
 	buf += "\n\tRESTRICT   : " + (isRestrict() ? string("YES") : string("NO"));
@@ -91,14 +110,8 @@ string Slot::toString()
 	buf += "\n\tFINAL      : " + (isFinal() ? string("YES") : string("NO"));
 	buf += "\n\tCONST      : " + (isConst() ? string("YES") : string("NO"));
 	buf += "\n";
-	buf += "\t" + (*data)->type() + " ** : " + to_string((long long)data) +
-	"\n\t" + (*data)->type() + " *  : " + to_string((long long)*data) +
-	"\n\t" + (*data)->type() + "    : " + (*data)->toString();
-	return buf;
-}
-
-string Slot::stack(string id)
-{
-	string buf = "[" + id + " | " + to_string((long long)data) + " | " + to_string((long long)*data) + " | " + (*data)->toString() + "]";
+	buf += "\t" + type + " ** : " + ptrPtrValue +
+	"\n\t" + type + " *  : " + ptrValue +
+	"\n\t" + type + "    : " + value;
 	return buf;
 }

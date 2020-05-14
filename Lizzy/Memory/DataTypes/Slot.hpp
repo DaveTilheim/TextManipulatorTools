@@ -14,7 +14,6 @@ namespace Lizzy
 
 	struct Slot
 	{
-		Data **data = nullptr;
 		int attribs = 0x0;
 		Slot(Data **data);
 		Slot(Slot *slot);
@@ -27,8 +26,10 @@ namespace Lizzy
 		bool isConst();
 		void tryDelete();
 		void referenceTo(Slot *slot);
+		Data **get();
 		string toString();
-		string stack(string id);
+	private:
+		Data **data = nullptr;
 	};
 }
 

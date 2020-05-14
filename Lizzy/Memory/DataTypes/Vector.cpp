@@ -44,7 +44,7 @@ string Vector::toString()
 	string buf;
 	for(Slot*data : value)
 	{
-		buf += (*data->data)->toString() + " ";
+		buf += (*data->get())->toString() + " ";
 	}
 	if(buf.size()) buf.pop_back();
 	else return " ";
@@ -91,7 +91,7 @@ void Vector::copyVector(const vector<Slot *>& vec)
 	clean();
 	for(auto *data : vec)
 	{
-		value.push_back(new Slot(new Data*((*data->data)->dup())));
+		value.push_back(new Slot(new Data*((*data->get())->dup())));
 	}
 }
 

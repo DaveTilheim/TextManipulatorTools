@@ -5,6 +5,7 @@ FileLoader *Interpreter::mainFileLoader = nullptr;
 
 Interpreter::Interpreter() : fileLoader()
 {
+
 	if(not Interpreter::mainFileLoader)
 	{
 		Interpreter::mainFileLoader = &fileLoader;
@@ -26,21 +27,10 @@ void Interpreter::renamePreInt(string cmdname, string name)
 	}
 }
 
-void Interpreter::removeAttributed()
-{
-	for(auto att : attributedCommands)
-	{
-		delete att;
-	}
-}
 
 Interpreter::~Interpreter()
 {
-	/*for(auto c : preIntCommands)
-	{
-		delete c.second;
-	}*/
-	removeAttributed();
+	
 }
 
 void Interpreter::removeCommentary()
@@ -77,21 +67,18 @@ void Interpreter::preIntCommandsRun()
 			fileLoader.prec();
 		}
 	});
+	for(auto it : Context::get("PRE_INT"))
+	{
+		delete it.second;
+	}
+	Context::erase("PRE_INT");
 }
 
-void Interpreter::setAttributedCommandTag()
-{
-	fileLoader.foreach([this](String& line)
-	{
-		line.replace("@", to_string(reinterpret_cast<uintptr_t>(this)));
-	});
-}
 
 void Interpreter::preinterpretation()
 {
 	preIntCommandsRun();
 	removeCommentary();
-	setAttributedCommandTag();
 }
 
 
@@ -159,16 +146,3 @@ Command& Interpreter::preIntCommand(string name)
 	Context::get("PRE_INT")[name] = c;
 	return *c;
 }
-
-Command& Interpreter::attributedCommand(string name)
-{
-	string cid = to_string(reinterpret_cast<uintptr_t>(this)) + name;
-	if(Command::isCommand(cid))
-	{
-		return Command::getCommand(cid);
-	}
-	Command *c = new Command(cid);
-	attributedCommands.push_back(c);
-	return *c;
-}
-
