@@ -23,6 +23,7 @@ namespace Lizzy
 		void foreach(void (*operation)(Slot *));
 		unordered_map<string, Slot *>& getTable();
 		void setFromData(Data *data) override;
+		void setField(string name, Slot *value);
 		void copyTable(const unordered_map<string, Slot *>& vec);
 		Table& operator=(const Table& cp);
 	};

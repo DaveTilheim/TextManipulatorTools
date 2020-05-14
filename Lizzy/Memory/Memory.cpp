@@ -172,7 +172,7 @@ bool Memory::isAccessor(Data *data)
 
 bool Memory::existsAsAccessor(string expr)
 {
-	auto accessor = toAccessor(id);
+	auto accessor = toAccessor(expr);
 	if(accessor.size() > 1)
 	{
 		Slot *slot = find(accessor[0]);
@@ -205,84 +205,63 @@ bool Memory::existsGlobalUp(string id)
 	return false;
 }
 
-Slot *getSlotFromVectorAccessor(Slot *slot, vector<string>& indexes)
+Slot *Memory::getSlotFromVectorAccessor(Slot *slot, string indexExpr)
 {
-	auto len = indexes.size();
+	cmd::String expr = indexExpr;
+	long index = -1;
+	if(expr.isPacked("{"))
+	{
+		expr.unpack("{");
+		Slot *tmp = getDataSlotGlobalUp((string)expr);
+		index = Type::extractIndex(tmp);
+	}
+	else
+	{
+		index = Type::extractIndex(expr);
+	}
+	return dynamic_cast<Vector *>(*slot->get())->get(index);
+}
+
+Slot *Memory::getSlotFromFieldAccessor(Slot *slot, string fieldExpr)
+{
+	cmd::String expr = fieldExpr;
+	string field;
+	if(expr.isPacked("{"))
+	{
+		expr.unpack("{");
+		Slot *tmp = getDataSlotGlobalUp((string)expr);
+		field = (*tmp->get())->toString();
+	}
+	else
+	{
+		field = expr;
+	}
+	return dynamic_cast<Table *>(*slot->get())->get(field);
+}
+
+Slot *Memory::getDataSlotFromAccessor(string expr)
+{
+	auto accessor = toAccessor(expr);
+	auto len = accessor.size();
+	Slot *slot = getDataSlotGlobalUp(accessor[0]);
 	for(int i = 1; i < len; i++)
 	{
-		
+		if(dynamic_cast<Vector *>(*slot->get()))
+		{
+			slot = getSlotFromVectorAccessor(slot, accessor[i]);
+		}
+		else
+		{
+			slot = getSlotFromFieldAccessor(slot, accessor[i]);
+		}
 	}
+	return slot;
 }
+
 
 Data *Memory::getDataFromAccessor(string expr)
 {
-	auto accessor = toAccessor(expr);
-	Slot *slot = getDataSlotGlobalUp(accessor[0]);
-	if(dynamic_cast<Vector *>(*slot->get()))
-		return *getSlotFromVectorAccessor(slot, accessor);
-	else
-		return *getSlotFromFieldAccessor(slot, accessor);
-}
-
-
-Slot *Memory::getDataSlotFromAccessor(string expr)
-{/*
-	auto accessor = toAccessor(expr);
-	auto len = accessor.size();
-	if(len > 1)
-	{
-		Data **data = getDataSlotGlobalUp(accessor[0]);
-		for(int i = 1; i < len; i++)
-		{
-			Data **elem = nullptr;
-			int j = 0;
-			if(existsGlobalUp(accessor[i]))
-			{
-				 elem = getDataSlotGlobalUp(accessor[i]);
-				 if(*elem)
-				 {
-				 	if((*elem)->typeId() == INTEGER_T)
-				 	{
-				 		j = dynamic_cast<Integer *>(*elem)->get();
-				 	}
-				 	else
-				 	{
-				 		accessor[i] = (*elem)->toString();
-				 	}
-				 }
-			}
-			else
-			{
-				if(type(accessor[i]) == INTEGER_T)
-				{
-					j = atoi(accessor[i].c_str());
-				}
-				else
-				{
-					j = -1;
-				}
-			}
-			switch((*data)->typeId())
-			{
-				case VECTOR_T:
-					if(dynamic_cast<Reference *>(*data)) data = dynamic_cast<Reference *>(*data)->getSlot();
-					if(j < 0 or j >= dynamic_cast<Vector *>(*data)->getVector().size())
-						throw Exception(to_string(j) + " is out ouf band of the size of vector");
-					data = &dynamic_cast<Vector *>(*data)->getVector()[j];
-					break;
-
-				case TABLE_T:
-					if(dynamic_cast<Reference *>(*data)) data = dynamic_cast<Reference *>(*data)->getSlot();
-					data = dynamic_cast<Table *>(*data)->getAddr(accessor[i]);
-					break;
-				default:
-					throw Exception(expr + " try to access to a non accessible data type: " + (*data)->type());
-			}
-		}
-		return data;
-	}
-	throw Exception(expr + " does not represents an accessor expression");*/
-return nullptr;
+	return *getDataSlotFromAccessor(expr)->get();
 }
 
 
@@ -336,18 +315,16 @@ Slot *Memory::generateDataFromId(string id)
 	return new Slot(Type::generateSlot(getDataGlobalUp(id)->dup()));
 }
 
+Slot *Memory::generateDataSlot(string value)
+{
+	return existsGlobalUp(value) ? generateDataFromId(value) : generateDataFromValue(value);
+}
+
 void Memory::addPrimitiveData(string id, string value)
 {
 	if(not exists(id))
 	{
-		if(existsGlobalUp(value))
-		{
-			stack[id] = generateDataFromId(value);
-		}
-		else
-		{
-			stack[id] = generateDataFromValue(value);
-		}
+		stack[id] = generateDataSlot(value);
 	}
 	else
 	{
@@ -511,22 +488,33 @@ void Memory::addString(string id, string value)
 	}
 }
 
-
-void Memory::addReference(string id, string value)
+Slot *Memory::generateReference(string value)
 {
-	if(not exists(id))
+	if(value.size())
 	{
 		if(existsGlobalUp(value))
 		{
 			Slot *slot = getDataSlotGlobalUp(value);
 			if(slot->isRestrict()) throw Exception(value + " is marked restrict, it can not be referenced");
-			stack[id] = new Slot(slot);
+			return new Slot(slot);
 		}
 		else
 		{
 			Slot *slot = generateDataSlotPersistant(value);
-			stack[id] = new Slot(slot);
+			return new Slot(slot);
 		}
+	}
+	else
+	{
+		return new Slot((Slot *)nullptr);
+	}
+}
+
+void Memory::addReference(string id, string value)
+{
+	if(not exists(id))
+	{
+		stack[id] = generateReference(value);
 	}
 	else
 	{
@@ -538,8 +526,7 @@ void Memory::addReference(string id)
 {
 	if(not exists(id))
 	{
-		stack[id] = new Slot((Data **)nullptr);
-		stack[id]->attribs |= REFERENCE_A;
+		stack[id] = generateReference("");
 	}
 	else
 	{
@@ -693,7 +680,7 @@ void Memory::setCharAt(string id, string index, string character)
 		Slot *slot = getDataSlotGlobalUp(id);
 		if(dynamic_cast<String *>(*slot->get()))
 		{
-			((String *)*slot->get())->setCharAt(index, character);
+			dynamic_cast<String *>(*slot->get())->setCharAt(index, character);
 		}
 		else
 		{
@@ -706,46 +693,6 @@ void Memory::setCharAt(string id, string index, string character)
 	}
 }
 
-void Memory::field(string id, string value)
-{/*
-	if(isAccessor(id))
-	{
-		auto acc = toAccessor(id);
-		int i;
-		id = "";
-		for(i = 0; i < acc.size() - 1; i++)
-		{
-			id += acc[i] + ".";
-		}
-		id.pop_back();
-		Data *data = getDataGlobalUp(id);
-		if(data->typeId() != TABLE_T) throw Exception(id + " is not a table");
-		Table *table = dynamic_cast<Reference *>(data) ? (Table *)dynamic_cast<Reference *>(data)->get() : (Table *)data;
-
-		if(table->getTable().find(acc[i]) == table->getTable().end())
-		{
-			if(value.size())
-			{
-				if(existsGlobalUp(value))
-				{
-					table->set(*generateDataFromId(value), acc[i]);
-				}
-				else
-				{
-					table->set(*generateDataFromValue(value), acc[i]);
-				}
-			}
-			else
-			{
-				table->set(*generateTable(value), acc[i]);
-			}
-		}
-		else
-		{
-			throw Exception(acc[i] + " field already exists in " + id + " Table");
-		}
-	}*/
-}
 
 string Memory::new_primitive(string id, string value)
 {
@@ -809,12 +756,6 @@ string Memory::set_reference(string id, string value)
 	return id;
 }
 
-string Memory::field_memory(string id, string value)
-{
-	Memory *memory = getDownMemory();
-	field(id, value);
-	return id;
-}
 
 int Memory::getDataSize(string id)
 {
@@ -898,3 +839,88 @@ void Memory::addSlotAttr(Slot *data, int attr)
 	}
 }
 
+
+
+
+
+void Memory::field(string id, string field, Slot*(Memory::*generator)(string), string value)
+{
+	if(existsGlobalUp(id))
+	{
+		Slot *slot = getDataSlotGlobalUp(id);
+		if(dynamic_cast<Table *>(*slot->get()))
+		{
+			cmd::String expr = field;
+			if(expr.isPacked("{"))
+			{
+				expr.unpack("{");
+				if(existsGlobalUp((string)expr))
+				{
+					Slot *value = getDataSlotGlobalUp((string)expr);
+					expr = (*value->get())->toString();
+				}
+				else
+				{
+					Exception(expr + " not exists");
+				}
+			}
+			Type::setField(slot, expr, invoke(generator, *this, value));
+		}
+		else
+		{
+			throw Exception(id + " is not a Table");
+		}
+	}
+	else
+	{
+		throw Exception(id + " not exists");
+	}
+}
+
+string Memory::field_memory(string id, string fieldn, string value)
+{
+	getDownMemory()->field(id, fieldn, &Memory::generateDataSlot, value);
+	return id + "." + fieldn;
+}
+
+string Memory::field_Integer_memory(string id, string fieldn, string value)
+{
+	getDownMemory()->field(id, fieldn, &Memory::generateInteger, value);
+	return id + "." + fieldn;
+}
+
+string Memory::field_Float_memory(string id, string fieldn, string value)
+{
+	getDownMemory()->field(id, fieldn, &Memory::generateFloat, value);
+	return id + "." + fieldn;
+}
+
+string Memory::field_Bool_memory(string id, string fieldn, string value)
+{
+	getDownMemory()->field(id, fieldn, &Memory::generateBool, value);
+	return id + "." + fieldn;
+}
+
+string Memory::field_String_memory(string id, string fieldn, string value)
+{
+	getDownMemory()->field(id, fieldn, &Memory::generateString, value);
+	return id + "." + fieldn;
+}
+
+string Memory::field_Reference_memory(string id, string fieldn, string value)
+{
+	getDownMemory()->field(id, fieldn, &Memory::generateReference, value);
+	return id + "." + fieldn;
+}
+
+string Memory::field_Vector_memory(string id, string fieldn, string value)
+{
+	//getDownMemory()->field(id, fieldn, &Memory::generateVector, value);
+	return id + "." + fieldn;
+}
+
+string Memory::field_Table_memory(string id, string fieldn, string value)
+{
+	getDownMemory()->field(id, fieldn, &Memory::generateTable, value);
+	return id + "." + fieldn;
+}

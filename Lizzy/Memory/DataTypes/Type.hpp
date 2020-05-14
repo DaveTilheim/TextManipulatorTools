@@ -18,6 +18,9 @@ namespace Lizzy
 		Data *generatePrimitive(string value);
 		void updateSlot(Slot *slot, string value);
 		void updateSlot(Slot *slot, Data *data);
+		long extractIndex(Slot *slot);
+		long extractIndex(string expr);
+		void setField(Slot *tableSlot, string fieldname, Slot *value);
 	}
 }
 

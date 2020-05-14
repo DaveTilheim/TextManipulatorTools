@@ -237,19 +237,110 @@ _def_action(MemPkg::trace_action)
 	return id;
 }
 
-_def_action(MemPkg::field_action)
+_def_action(MemPkg::field_action_1)
 {
-	string id = args("id");
-	string value = args("value", 1);
-	MemPkg::memoryContext.field_memory(id, value);
-	return id;
+	string id = args("*id");
+	string name = args("*name", 1);
+	return MemPkg::memoryContext.field_memory(id, name, "0");
 }
 
-_def_action(MemPkg::field_action_0)
+_def_action(MemPkg::field_action_2)
 {
-	string id = args("id");
-	MemPkg::memoryContext.field_memory(id, "");
-	return id;
+	string id = args("*id");
+	string name = args("*name", 1);
+	string value = args("*value", 2);
+	return MemPkg::memoryContext.field_memory(id, name, value);
+}
+
+
+_def_action(MemPkg::field_Integer_action_1)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	return MemPkg::memoryContext.field_Integer_memory(id, name, "0");
+}
+
+_def_action(MemPkg::field_Integer_action_2)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	string value = args("*value", 2);
+	return MemPkg::memoryContext.field_Integer_memory(id, name, value);
+}
+
+_def_action(MemPkg::field_Float_action_1)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	return MemPkg::memoryContext.field_Float_memory(id, name, "0.0");
+}
+
+_def_action(MemPkg::field_Float_action_2)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	string value = args("*value", 2);
+	return MemPkg::memoryContext.field_Float_memory(id, name, value);
+}
+
+_def_action(MemPkg::field_Bool_action_1)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	return MemPkg::memoryContext.field_Bool_memory(id, name, "false");
+}
+
+_def_action(MemPkg::field_Bool_action_2)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	string value = args("*value", 2);
+	return MemPkg::memoryContext.field_Bool_memory(id, name, value);
+}
+
+_def_action(MemPkg::field_String_action_1)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	return MemPkg::memoryContext.field_String_memory(id, name, " ");
+}
+
+_def_action(MemPkg::field_String_action_2)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	string value = args("*value", 2);
+	return MemPkg::memoryContext.field_String_memory(id, name, value);
+}
+
+_def_action(MemPkg::field_Reference_action_1)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	return MemPkg::memoryContext.field_Reference_memory(id, name, "");
+}
+
+_def_action(MemPkg::field_Reference_action_2)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	string value = args("*value", 2);
+	return MemPkg::memoryContext.field_Reference_memory(id, name, value);
+}
+
+_def_action(MemPkg::field_Table_action_1)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	return MemPkg::memoryContext.field_Table_memory(id, name, "");
+}
+
+_def_action(MemPkg::field_Table_action_2)
+{
+	string id = args("*id");
+	string name = args("*name", 1);
+	string value = args("*value", 2);
+	return MemPkg::memoryContext.field_Table_memory(id, name, value);
 }
 
 
@@ -324,15 +415,6 @@ void MemPkg::load()
 	Action sizeAction(size_action);
 		sizeAction.setNamed("id");
 		cmd("size").setAction(1, sizeAction);
-
-	Action fieldAction(field_action);
-		fieldAction.setNamed("id");
-		fieldAction.setNamed("value");
-		cmd("field").setAction(2, fieldAction);
-
-	Action fieldAction0(field_action_0);
-		fieldAction0.setNamed("id");
-		cmd("field").setAction(1, fieldAction0);
 
 
 	cmd("var").setAction(2, newAction);
@@ -419,4 +501,81 @@ void MemPkg::load()
 	Action traceAction(trace_action);
 		traceAction.setNamed("id");
 		cmd("trace").setAction(1, traceAction);
+
+
+
+
+	Action fieldAction1(field_action_1);
+		fieldAction1.setNamed("*id");
+		fieldAction1.setNamed("*name");
+		cmd("field").setAction(2, fieldAction1);
+
+	Action fieldAction2(field_action_2);
+		fieldAction2.setNamed("*id");
+		fieldAction2.setNamed("*name");
+		fieldAction2.setNamed("*value");
+		cmd("field").setAction(3, fieldAction2);
+
+
+	Action fieldIntegerAction1(field_Integer_action_1);
+	Action fieldIntegerAction2(field_Integer_action_2);
+	Action fieldFloatAction1(field_Float_action_1);
+	Action fieldFloatAction2(field_Float_action_2);
+	Action fieldBoolAction1(field_Bool_action_1);
+	Action fieldBoolAction2(field_Bool_action_2);
+	Action fieldStringAction1(field_String_action_1);
+	Action fieldStringAction2(field_String_action_2);
+	Action fieldReferenceAction1(field_Reference_action_1);
+	Action fieldReferenceAction2(field_Reference_action_2);
+	Action fieldTableAction1(field_Table_action_1);
+	Action fieldTableAction2(field_Table_action_2);
+
+	fieldIntegerAction1.setNamed("*id");
+	fieldIntegerAction1.setNamed("*name");
+	fieldIntegerAction2.setNamed("*id");
+	fieldIntegerAction2.setNamed("*name");
+	fieldIntegerAction2.setNamed("*value");
+
+	fieldFloatAction1.setNamed("*id");
+	fieldFloatAction1.setNamed("*name");
+	fieldFloatAction2.setNamed("*id");
+	fieldFloatAction2.setNamed("*name");
+	fieldFloatAction2.setNamed("*value");
+
+	fieldBoolAction1.setNamed("*id");
+	fieldBoolAction1.setNamed("*name");
+	fieldBoolAction2.setNamed("*id");
+	fieldBoolAction2.setNamed("*name");
+	fieldBoolAction2.setNamed("*value");
+
+	fieldStringAction1.setNamed("*id");
+	fieldStringAction1.setNamed("*name");
+	fieldStringAction2.setNamed("*id");
+	fieldStringAction2.setNamed("*name");
+	fieldStringAction2.setNamed("*value");
+
+	fieldReferenceAction1.setNamed("*id");
+	fieldReferenceAction1.setNamed("*name");
+	fieldReferenceAction2.setNamed("*id");
+	fieldReferenceAction2.setNamed("*name");
+	fieldReferenceAction2.setNamed("*value");
+
+	fieldTableAction1.setNamed("*id");
+	fieldTableAction1.setNamed("*name");
+	fieldTableAction2.setNamed("*id");
+	fieldTableAction2.setNamed("*name");
+	fieldTableAction2.setNamed("*value");
+
+	cmd("field").child("Integer").setAction(2, fieldIntegerAction1);
+	cmd("field").child("Integer").setAction(3, fieldIntegerAction2);
+	cmd("field").child("Float").setAction(2, fieldFloatAction1);
+	cmd("field").child("Float").setAction(3, fieldFloatAction2);
+	cmd("field").child("Bool").setAction(2, fieldBoolAction1);
+	cmd("field").child("Bool").setAction(3, fieldBoolAction2);
+	cmd("field").child("String").setAction(2, fieldStringAction1);
+	cmd("field").child("String").setAction(3, fieldStringAction2);
+	cmd("field").child("Reference").setAction(2, fieldReferenceAction1);
+	cmd("field").child("Reference").setAction(3, fieldReferenceAction2);
+	cmd("field").child("Table").setAction(2, fieldTableAction1);
+	cmd("field").child("Table").setAction(3, fieldTableAction2);
 }

@@ -23,6 +23,7 @@ namespace cmd
 		double toDouble() const;
 		void pack(string expr="[");
 		void unpack(string expr="[");
+		bool isPacked(string expr="[");
 		operator int() const;
 		operator double() const;
 	};

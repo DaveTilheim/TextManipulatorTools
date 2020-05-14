@@ -28,8 +28,20 @@ namespace Lizzy
 		_decl_action(new_Vector_action)
 		_decl_action(new_Table_action)
 		_decl_action(new_Table_action_1)
-		_decl_action(field_action);
-		_decl_action(field_action_0);
+		_decl_action(field_action_1);
+		_decl_action(field_action_2);
+		_decl_action(field_Integer_action_1);
+		_decl_action(field_Integer_action_2);
+		_decl_action(field_Float_action_1);
+		_decl_action(field_Float_action_2);
+		_decl_action(field_Bool_action_1);
+		_decl_action(field_Bool_action_2);
+		_decl_action(field_String_action_1);
+		_decl_action(field_String_action_2);
+		_decl_action(field_Reference_action_1);
+		_decl_action(field_Reference_action_2);
+		_decl_action(field_Table_action_1);
+		_decl_action(field_Table_action_2);
 		_decl_action(size_action);
 		//String
 		_decl_action(set_char_action)

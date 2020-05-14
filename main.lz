@@ -1,20 +1,31 @@
 #load package Lizzy
 #load symbol commentary %
 
-
+println
 println "Lizzy Version  : " version
 println "Context        : " context
+println
 
 
-Reference r
-
-push test
-
-	persistant Bool b true
-	set reference r b
-
-pop
+Table model
+const field String model name
+const field Integer model age
+const model
 
 
-trace memory
+
+final Table user model
+final user.name
+final user.age
+set user.name input "Enter your name: "
+set user.age input "Enter your age: "
+
+
+println
+println "User: "
+println "     Name: " get user.name
+println "     Age : " get user.age
+
+
+
 

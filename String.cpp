@@ -138,6 +138,15 @@ void String::unpack(string expr)
 	}
 }
 
+bool String::isPacked(string expr)
+{
+	if(expr == "(") return front() == '(' and back() == ')';
+	else if(expr == "[") return front() == '[' and back() == ']';
+	else if(expr == "{") return front() == '{' and back() == '}';
+	else if(expr == "<") return front() == '<' and back() == '>';
+	else return substr(0, expr.size()) == expr and substr(size() - expr.size()) == expr;
+}
+
 String::operator int() const
 {
 	return toInt();

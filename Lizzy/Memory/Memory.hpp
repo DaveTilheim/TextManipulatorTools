@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <iomanip>
 #include <vector>
+#include <functional>
 
 using namespace std;
 
@@ -46,6 +47,8 @@ namespace Lizzy
 		bool isAccessor(Data *data);
 		Data *getDataFromAccessor(string expr);
 		Slot *getDataSlotFromAccessor(string expr);
+		Slot *getSlotFromVectorAccessor(Slot *slot, string expr);
+		Slot *getSlotFromFieldAccessor(Slot *slot, string expr);
 		bool existsAsAccessor(string expr);
 		bool exists(string id);
 		bool existsGlobalUp(string id);
@@ -58,6 +61,7 @@ namespace Lizzy
 		void addPrimitiveData(string id, string strGenValue);
 		Slot *generateDataFromValue(string value);
 		Slot *generateDataFromId(string id);
+		Slot *generateDataSlot(string value);
 		//Specific Data
 		Slot *generateInteger(Data* value);
 		Slot *generateInteger(string value);
@@ -107,7 +111,7 @@ namespace Lizzy
 		void addDataAttr(Slot *data, int attr);
 		void addSlotAttr(Slot *data, int attr);
 		//
-		void field(string, string);
+		void field(string, string, Slot*(Memory::*generator)(string), string);
 	public: //command bridge
 		string new_primitive(string id, string value);
 		string new_Integer(string id, string value);
@@ -128,7 +132,14 @@ namespace Lizzy
 		string set_char_at(string id, string index, string character);
 		string del_data(string id);
 		string del_persistant_data(string id);
-		string field_memory(string id, string value);
+		string field_memory(string id, string field, string value);
+		string field_Integer_memory(string id, string field, string value);
+		string field_Float_memory(string id, string field, string value);
+		string field_Bool_memory(string id, string field, string value);
+		string field_String_memory(string id, string field, string value);
+		string field_Reference_memory(string id, string field, string value);
+		string field_Vector_memory(string id, string field, string value);
+		string field_Table_memory(string id, string field, string value);
 	};
 }
 

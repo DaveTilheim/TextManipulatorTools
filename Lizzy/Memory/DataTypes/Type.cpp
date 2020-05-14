@@ -58,6 +58,10 @@ void Type::updateSlot(Slot *slot, string value)
 
 void Type::updateSlot(Slot *slot, Data *data)
 {
+	if(*slot->get() == data)
+	{
+		throw Exception("Can not modify Data with its own value");
+	}
 	if(not slot->isFinal())
 	{
 		if(not slot->isConst())
@@ -76,6 +80,40 @@ void Type::updateSlot(Slot *slot, Data *data)
 	}
 }
 
+long Type::extractIndex(Slot *slot)
+{
+	Data *data = *slot->get();
+	if(dynamic_cast<Integer *>(data))
+		return dynamic_cast<Integer *>(data)->get();
+	if(dynamic_cast<Float *>(data))
+		return (long)dynamic_cast<Float *>(data)->get();
+	if(dynamic_cast<Bool *>(data))
+		return (long)dynamic_cast<Bool *>(data)->get();
+	throw Exception("can not extract index from " + data->type());
+}
+
+long Type::extractIndex(string value)
+{
+	if(Integer::is(value))
+		return atoi(value.c_str());
+	if(Float::is(value))
+		return (long)atof(value.c_str());
+	if(Bool::is(value))
+		return (long)(value == "true");
+	throw Exception("can not extract index from " + inferType(value));
+}
 
 
-
+void Type::setField(Slot *tableSlot, string fieldname, Slot *value)
+{
+	Table *tableData = dynamic_cast<Table *>(*tableSlot->get());
+	auto& table = tableData->getTable();
+	if(not tableSlot->isConst())
+	{
+		tableData->setField(fieldname, value);
+	}
+	else
+	{
+		throw Exception("Table is marked const, can not set new field");
+	}
+}

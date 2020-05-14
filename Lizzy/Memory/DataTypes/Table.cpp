@@ -107,3 +107,15 @@ void Table::setFromData(Data *data)
 		throw Exception("Can not convert " + data->type() + " into Table");
 	}
 }
+
+void Table::setField(string name, Slot *dvalue)
+{
+	if(value.find(name) == value.end())
+	{
+		value[name] = dvalue;
+	}
+	else
+	{
+		throw Exception(name + " field already exists for the current Table");
+	}
+}

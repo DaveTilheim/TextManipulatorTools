@@ -187,7 +187,8 @@ int Command::getMaximumNargs() const
 	if(actions.find(-1) != actions.end()) return -1;
 	for(auto it : actions)
 	{
-		maxi = it.first;
+		if(it.first > maxi)
+			maxi = it.first;
 	}
 	return maxi;
 }
