@@ -1,1 +1,4 @@
-println "This is an other file"
+println "run other.lz"
+load package Lizzy
+
+println hello world!

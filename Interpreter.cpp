@@ -2,6 +2,12 @@
 
 
 FileLoader *Interpreter::mainFileLoader = nullptr;
+Interpreter *Interpreter::instance = nullptr;
+
+Interpreter& Interpreter::get()
+{
+	return *instance;
+}
 
 Interpreter::Interpreter() : fileLoader()
 {
@@ -9,6 +15,10 @@ Interpreter::Interpreter() : fileLoader()
 	if(not Interpreter::mainFileLoader)
 	{
 		Interpreter::mainFileLoader = &fileLoader;
+	}
+	if(not Interpreter::instance)
+	{
+		Interpreter::instance = this;
 	}
 	Context::use("MAIN");
 	Context::create("PRE_INT");
@@ -99,7 +109,7 @@ vector<string> Interpreter::launch(string expr)
 }
 
 
-vector<string>  Interpreter::launchFile(string filename)
+vector<string> Interpreter::launchFile(string filename)
 {
 	vector<string> results;
 	fileLoader.update(filename);

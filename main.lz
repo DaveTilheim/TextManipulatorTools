@@ -7,25 +7,4 @@ println "Context        : " context
 println
 
 
-Table model
-const field String model name
-const field Integer model age
-const model
-
-
-
-final Table user model
-final user.name
-final user.age
-set user.name input "Enter your name: "
-set user.age input "Enter your age: "
-
-
-println
-println "User: "
-println "     Name: " get user.name
-println "     Age : " get user.age
-
-
-
-
+run input "file to run: "

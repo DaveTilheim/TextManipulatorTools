@@ -81,13 +81,17 @@ bool FileLoader::end() const
 	return getIndex() >= content.size();
 }
 
-void FileLoader::insert(FileLoader& other)
+void FileLoader::insert(FileLoader& other, int i)
 {
-	other.foreach([this](String& line)
+	if(i == -1)
+		i = getIndex();
+	other.foreach([this, i](String& line) mutable
 	{
-		content.insert(content.begin() + getIndex(), line);
+		content.insert(content.begin() + i, line);
+		i++;
 		next();
 	});
+	setIndex(i);
 }
 
 void FileLoader::foreach(function<void(String&)> action)

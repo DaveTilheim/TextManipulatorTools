@@ -27,7 +27,7 @@ public:
 	void next();
 	void prec();
 	bool end() const;
-	void insert(FileLoader& other);
+	void insert(FileLoader& other, int i=-1);
 	void foreach(function<void(String&)> action);
 	int size() const;
 	friend ostream& operator<<(ostream& out, const FileLoader& fr);

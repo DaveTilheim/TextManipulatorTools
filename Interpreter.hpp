@@ -8,14 +8,15 @@ class Interpreter
 {
 private:
 	static FileLoader *mainFileLoader;
+	static Interpreter *instance;
 	FileLoader fileLoader;
 	vector<string> commentarySymbols;
 	void preinterpretation();
 	void removeCommentary();
 	void preIntCommandsRun();
-	FileLoader& getFileLoader();
 public:
 	static FileLoader& getMainFileLoader();
+	static Interpreter& get();
 	Interpreter();
 	~Interpreter();
 	vector<string> launchFile(string filename);
@@ -24,6 +25,7 @@ public:
 	bool isPreInt(string str);
 	Command& preIntCommand(string name);
 	void renamePreInt(string, string name);
+	FileLoader& getFileLoader();
 };
 
 #endif
