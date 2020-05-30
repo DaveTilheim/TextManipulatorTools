@@ -162,7 +162,28 @@ void Memory::pop()
 
 vector<string> Memory::toAccessor(string id)
 {
-	return cmd::String(id).split_std(".");
+	auto len = id.size();
+	vector<string> accessor;
+	int beg = id.find("{");
+	int end = id.find("}");
+	if(beg != -1)
+	{
+		if(end != -1)
+		{
+			accessor = cmd::String(id.substr(0, beg)).split_std(".");
+			accessor.push_back(id.substr(beg, end));
+		}
+		else
+		{
+			throw Exception("accessor format error for " + id);
+		}
+	}
+	else
+	{
+		accessor = cmd::String(id).split_std(".");
+	}
+	
+	return accessor;
 }
 
 bool Memory::isAccessor(Data *data)
@@ -284,6 +305,7 @@ Data *Memory::getDataGlobalUp(string id)
 		}
 		memory = memory->parent;
 	}
+
 	throw Exception(id + " Memory not exists");
 }
 
@@ -579,6 +601,7 @@ Slot *Memory::getDataSlotGlobalUp(string id)
 		}
 		memory = memory->parent;
 	}
+
 	throw Exception(id + " Memory not exists");
 }
 

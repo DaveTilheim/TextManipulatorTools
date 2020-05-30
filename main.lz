@@ -1,18 +1,15 @@
 $load package Lizzy
-$load symbol commentary %
 
 println
-println "Lizzy Version  : " version
-println "Context        : " context
+println "Lizzy Version  : " Lizzy.Info.version
 println
 
 $use file other.lz
 
 
-var n1 input "n1: "
-var n2 input "n2: "
+Table custom
 
+field custom "Hello world!" pi
 
-
-println add n1 n2 sub n1 n2 mul n1 n2 div n1 n2
-
+println "Custom Table: " get custom
+println "Custom Table: " get "custom.Hello world!"

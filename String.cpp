@@ -157,4 +157,3 @@ String::operator double() const
 	return toDouble();
 }
 
-
