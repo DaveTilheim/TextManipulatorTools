@@ -96,3 +96,7 @@ bool Bool::is(string expr)
 {
 	return expr == "true" or expr == "false";
 }
+
+
+
+

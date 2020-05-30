@@ -117,3 +117,132 @@ void Type::setField(Slot *tableSlot, string fieldname, Slot *value)
 		throw Exception("Table is marked const, can not set new field");
 	}
 }
+
+
+string Type::operation(string v1, string v2, string (*ope)(Data *, Data *))
+{
+	string buf;
+	Data *d1 = generatePrimitive(v1);
+	Data *d2 = generatePrimitive(v2);
+	buf = ope(d1, d2);
+	delete d1;
+	delete d2;
+	return buf;
+}
+
+string Type::operation(Slot *v1, string v2, string (*ope)(Data *, Data *))
+{
+	string buf;
+	Data *d2 = generatePrimitive(v2);
+	buf = ope((*v1->get()), d2);
+	delete d2;
+	return buf;
+}
+
+string Type::operation(string v1, Slot *v2, string (*ope)(Data *, Data *))
+{
+	string buf;
+	Data *d1 = generatePrimitive(v1);
+	buf = ope(d1, (*v2->get()));
+	delete d1;
+	return buf;
+}
+
+string Type::operation(Slot *v1, Slot *v2, string (*ope)(Data *, Data *))
+{
+	return ope((*v1->get()), (*v2->get()));
+}
+
+
+string Type::add(Data *d1, Data *d2)
+{
+	if(dynamic_cast<Integer *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _add(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _add(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _add(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	if(dynamic_cast<Float *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _add(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _add(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _add(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	if(dynamic_cast<Bool *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _add(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _add(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _add(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	throw Exception(d1->type() + " can not be operate with " + d2->type());
+}
+
+string Type::sub(Data *d1, Data *d2)
+{
+	if(dynamic_cast<Integer *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _sub(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _sub(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _sub(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	if(dynamic_cast<Float *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _sub(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _sub(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _sub(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	if(dynamic_cast<Bool *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _sub(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _sub(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _sub(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	throw Exception(d1->type() + " can not be operate with " + d2->type());
+}
+
+string Type::mul(Data *d1, Data *d2)
+{
+	if(dynamic_cast<Integer *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _mul(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _mul(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _mul(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	if(dynamic_cast<Float *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _mul(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _mul(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _mul(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	if(dynamic_cast<Bool *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _mul(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _mul(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _mul(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	throw Exception(d1->type() + " can not be operate with " + d2->type());
+}
+
+string Type::div(Data *d1, Data *d2)
+{
+	if(dynamic_cast<Integer *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _div(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _div(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _div(dynamic_cast<Integer *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	if(dynamic_cast<Float *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _div(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _div(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _div(dynamic_cast<Float *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	if(dynamic_cast<Bool *>(d1))
+	{
+		if(dynamic_cast<Integer *>(d2)) return _div(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Integer *>(d2)->get());
+		if(dynamic_cast<Float *>(d2)) return _div(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Float *>(d2)->get());
+		if(dynamic_cast<Bool *>(d2)) return _div(dynamic_cast<Bool *>(d1)->get(), dynamic_cast<Bool *>(d2)->get());
+	}
+	throw Exception(d1->type() + " can not be operate with " + d2->type());
+}
+

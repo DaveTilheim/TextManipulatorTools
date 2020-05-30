@@ -1,6 +1,7 @@
 #ifndef LIZZY_LANG_MEM_HPP
 #define LIZZY_LANG_MEM_HPP
 #include "LizzyStdIo.hpp"
+#include "LizzyLangMemOpe.hpp"
 #include "Memory/Memory.hpp"
 
 

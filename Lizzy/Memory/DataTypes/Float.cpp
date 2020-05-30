@@ -109,3 +109,4 @@ bool Float::is(string expr)
 	}
 	return true;
 }
+

@@ -71,3 +71,4 @@ bool Data::isBool(string expr)
 {
 	return expr == "true" or expr == "false";
 }
+

@@ -924,3 +924,38 @@ string Memory::field_Table_memory(string id, string fieldn, string value)
 	getDownMemory()->field(id, fieldn, &Memory::generateTable, value);
 	return id + "." + fieldn;
 }
+
+
+
+
+
+string Memory::operation(string v1, string v2, string (*ope)(Data *, Data *))
+{
+	Slot *d1 = existsGlobalUp(v1) ? getDataSlotGlobalUp(v1) : nullptr;
+	Slot *d2 = existsGlobalUp(v2) ? getDataSlotGlobalUp(v2) : nullptr;
+	if(d1 and d2) return Type::operation(d1, d2, ope);
+	if(not d1 and not d2) return Type::operation(v1, v2, ope);
+	if(not d1 and d2) return Type::operation(v1, d2, ope);
+	return Type::operation(d1, v2, ope);
+}
+
+
+string Memory::add_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::add);
+}
+
+string Memory::sub_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::sub);
+}
+
+string Memory::mul_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::mul);
+}
+
+string Memory::div_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::div);
+}

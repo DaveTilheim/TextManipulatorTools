@@ -105,3 +105,6 @@ bool Integer::is(string expr)
 	}
 	return true;
 }
+
+
+

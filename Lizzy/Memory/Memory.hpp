@@ -112,6 +112,8 @@ namespace Lizzy
 		void addSlotAttr(Slot *data, int attr);
 		//
 		void field(string, string, Slot*(Memory::*generator)(string), string);
+	public:
+		string operation(string v1, string v2, string (*ope)(Data *, Data *));
 	public: //command bridge
 		string new_primitive(string id, string value);
 		string new_Integer(string id, string value);
@@ -140,6 +142,11 @@ namespace Lizzy
 		string field_Reference_memory(string id, string field, string value);
 		string field_Vector_memory(string id, string field, string value);
 		string field_Table_memory(string id, string field, string value);
+	public:
+		string add_memory(string vorid1, string vorid2);
+		string sub_memory(string vorid1, string vorid2);
+		string mul_memory(string vorid1, string vorid2);
+		string div_memory(string vorid1, string vorid2);
 	};
 }
 

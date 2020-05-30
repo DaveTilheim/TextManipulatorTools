@@ -347,6 +347,7 @@ _def_action(MemPkg::field_Table_action_2)
 MemPkg::MemPkg() : Package("Mem")
 {
 	CALL_ONCE
+	addSubPackage(new OpePkg(MemPkg::_memoryContext));
 }
 
 MemPkg::~MemPkg()
@@ -578,4 +579,6 @@ void MemPkg::load()
 	cmd("field").child("Reference").setAction(3, fieldReferenceAction2);
 	cmd("field").child("Table").setAction(2, fieldTableAction1);
 	cmd("field").child("Table").setAction(3, fieldTableAction2);
+
+	loadSubPackages();
 }
