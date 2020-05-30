@@ -11,9 +11,11 @@ namespace Lizzy
 	class LizzyPkg final : public Package
 	{
 	protected:
+		
 		_decl_pre(load_package_1)
 		_decl_pre(load_package_0)
 		_decl_pre(load_symbol_commentary)
+		_decl_action(use_file_action)
 	public:
 		LizzyPkg();
 		void load() override;

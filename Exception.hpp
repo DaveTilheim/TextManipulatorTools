@@ -19,4 +19,10 @@ public:
 	string getMessage() const;
 };
 
+class PackageAlreadyExistsException : public Exception
+{
+public:
+	using Exception::Exception;
+};
+
 #endif

@@ -10,7 +10,7 @@ using namespace std;
 #define _decl_pre(name) static string name(Args args);
 #define _def_pre(fullname) string fullname(Args args)
 
-#define CALL_ONCE static bool _once_guard=false; if(_once_guard) throw Exception(getName() + " is already loaded");_once_guard = true;
+#define CALL_ONCE static bool _once_guard=false; if(_once_guard) throw PackageAlreadyExistsException(getName() + " is already loaded");_once_guard = true;
 
 
 class Package

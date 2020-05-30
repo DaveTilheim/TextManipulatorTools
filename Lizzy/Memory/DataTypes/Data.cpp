@@ -35,6 +35,7 @@ void Data::setFromValue(string value)
 
 }
 
+
 bool Data::isInteger(string expr)
 {
 	auto len = expr.size();

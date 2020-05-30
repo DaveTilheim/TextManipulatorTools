@@ -81,7 +81,8 @@ void Interpreter::preIntCommandsRun()
 	{
 		delete it.second;
 	}
-	Context::erase("PRE_INT");
+	cout << fileLoader << endl;
+	//Context::erase("PRE_INT");
 }
 
 
@@ -150,8 +151,11 @@ void Interpreter::setCommentarySymbol(string symbol)
 
 Command& Interpreter::preIntCommand(string name)
 {
-	if(name.size() and name[0] != '#') name = "#" + name;
-	if(isPreInt(name)) return *Context::get("PRE_INT")[name];
+	if(name.size() and name[0] != '$') name = "$" + name;
+	if(isPreInt(name))
+	{
+		return *Context::get("PRE_INT")[name];
+	}
 	Command *c = new Command(name);
 	Context::get("PRE_INT")[name] = c;
 	return *c;

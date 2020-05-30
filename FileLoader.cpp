@@ -87,7 +87,7 @@ void FileLoader::insert(FileLoader& other, int i)
 		i = getIndex();
 	other.foreach([this, i](String& line) mutable
 	{
-		content.insert(content.begin() + i, line);
+		content.insert(content.begin() + i + 1, line);
 		i++;
 		next();
 	});

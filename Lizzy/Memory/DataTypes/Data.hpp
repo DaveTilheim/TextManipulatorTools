@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <fstream>
 #include "../../../Exception.hpp"
 
 #define _dup_in_method

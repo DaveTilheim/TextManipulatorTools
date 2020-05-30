@@ -1,10 +1,14 @@
-#load package Lizzy
-#load symbol commentary %
+$load package Lizzy
+$load symbol commentary %
 
 println
 println "Lizzy Version  : " version
 println "Context        : " context
 println
 
+$use file other.lz
 
-run input "file to run: "
+
+printmln CONST pi
+
+

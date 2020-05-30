@@ -9,7 +9,7 @@ int main(int argc, char const *argv[])
 	cout <<"---------------------------------------" << endl;
 	try
 	{
-		lizzyPkg.lizzyInt.launchFile("main.lz");
+		lizzyPkg.lizzyInt.launchFile(argc == 2 ? argv[1] : "main.lz");
 	}
 	catch(const Exception& e)
 	{

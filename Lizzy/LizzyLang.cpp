@@ -2,20 +2,27 @@
 
 using namespace Lizzy;
 
+vector<string> Lizzy::LangPkg::usedFiles = vector<string>();
 
-
-_def_action(LangPkg::run_action)
+bool Lizzy::LangPkg::isUsed(string filename)
 {
-	string filename = args("file");
-	auto results = Interpreter().launchFile(filename);
-	string buf;
-	for(auto r : results)
+	for(string s : Lizzy::LangPkg::usedFiles)
 	{
-		buf += r + " ";
+		if(s == filename) return true;
 	}
-	if(buf.size()) buf.pop_back();
-	else buf = " ";
-	return buf;
+	return false;
+}
+
+_def_action(LangPkg::use_file_action)
+{
+	string filename = args("*file");
+	if(not isUsed(filename))
+	{
+		FileLoader floader(filename);
+		Interpreter::getMainFileLoader().insert(floader);
+		Lizzy::LangPkg::usedFiles.push_back(filename);
+	}
+	return filename;
 }
 
 
@@ -29,9 +36,5 @@ void LangPkg::load()
 {
 	CALL_ONCE
 	loadSubPackages();
-
-	Action runAction(run_action);
-	runAction.setNamed("file");
-	cmd("run").setAction(1, runAction);
 
 }

@@ -19,7 +19,14 @@ _def_action(StdPkg::unload_package_action)
 _def_action(StdPkg::load_package_action)
 {
 	string pkg = args("name");
-	Package::getPackage(pkg).load();
+	try
+	{
+		Package::getPackage(pkg).load();
+	}
+	catch(const PackageAlreadyExistsException& e)
+	{
+		//cout << "%%ignore load " << pkg << endl;
+	}
 	return pkg;
 }
 
