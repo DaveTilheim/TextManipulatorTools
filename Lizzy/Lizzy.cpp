@@ -41,6 +41,19 @@ _def_action(Lizzy::LizzyPkg::use_file_action)
 	return Lizzy::LangPkg::use_file_action(args);
 }
 
+_def_action(Lizzy::LizzyPkg::int_action)
+{
+	string cmd = args.list();
+	string buf;
+	for(string s : pLizzyInt->launch(cmd))
+	{
+		buf += s + " ";
+	}
+	if(buf.size()) buf.pop_back();
+	else buf = " ";
+	return buf;
+}
+
 
 
 Lizzy::LizzyPkg::LizzyPkg() : Package("Lizzy")
@@ -64,6 +77,9 @@ Lizzy::LizzyPkg::LizzyPkg() : Package("Lizzy")
 	Action useFileAction(use_file_action);
 	useFileAction.setNamed("*file");
 	lizzyInt.preIntCommand("use").child("file").setAction(1, useFileAction);
+
+	Action intAction(int_action);
+	cmd("int").setAction(1, intAction);
 }
 
 void Lizzy::LizzyPkg::load()

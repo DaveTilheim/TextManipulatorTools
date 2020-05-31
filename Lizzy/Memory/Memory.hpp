@@ -113,7 +113,7 @@ namespace Lizzy
 		//
 		void field(string, string, Slot*(Memory::*generator)(string), string);
 	public:
-		string operation(string v1, string v2, string (*ope)(Data *, Data *));
+		
 	public: //command bridge
 		string new_primitive(string id, string value);
 		string new_Integer(string id, string value);
@@ -143,10 +143,37 @@ namespace Lizzy
 		string field_Vector_memory(string id, string field, string value);
 		string field_Table_memory(string id, string field, string value);
 	public:
+		string operation(string v1, string v2, string (*ope)(Data *, Data *));
+		string operation(string v1, string (*ope)(Data *));
 		string add_memory(string vorid1, string vorid2);
 		string sub_memory(string vorid1, string vorid2);
 		string mul_memory(string vorid1, string vorid2);
 		string div_memory(string vorid1, string vorid2);
+		string mod_memory(string vorid1, string vorid2);
+		string land_memory(string vorid1, string vorid2);
+		string lor_memory(string vorid1, string vorid2);
+		string lxor_memory(string vorid1, string vorid2);
+		string lnot_memory(string vorid1);
+		string pre_inc_memory(string vorid1);
+		string post_inc_memory(string vorid1);
+		string pre_dec_memory(string vorid1);
+		string post_dec_memory(string vorid1);
+		string and_memory(string vorid1, string vorid2);
+		string or_memory(string vorid1, string vorid2);
+		string not_memory(string vorid1);
+		string rshift_memory(string vorid1, string vorid2);
+		string lshift_memory(string vorid1, string vorid2);
+		string ternary_memory(string n1, string n2, string n3);
+		string equal_memory(string vorid1, string vorid2);
+		string not_equal_memory(string vorid1, string vorid2);
+		string lesser_memory(string vorid1, string vorid2);
+		string bigger_memory(string vorid1, string vorid2);
+	public:
+		string as(string value, Types type);
+		string as_Integer(string value);
+		string as_Float(string value);
+		string as_Bool(string value);
+		string as_String(string value);
 	};
 }
 

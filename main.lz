@@ -4,12 +4,14 @@ println
 println "Lizzy Version  : " Lizzy.Info.version
 println
 
-$use file other.lz
+println "Program which gives you the number of year to obtain majority!"
+println
+
+Table user
+field String user name input "Your name: "
+field Integer user age input "Your age: "
 
 
-Table custom
 
-field custom "Hello world!" pi
 
-println "Custom Table: " get custom
-println "Custom Table: " get "custom.Hello world!"
+int ternary lesser user.age 18 "printmln again sub 18 user.age before majority" "printmln user.name is major"

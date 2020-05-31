@@ -15,7 +15,8 @@ namespace Lizzy
 		_decl_pre(load_package_1)
 		_decl_pre(load_package_0)
 		_decl_pre(load_symbol_commentary)
-		_decl_action(use_file_action)
+		_decl_pre(use_file_action)
+		_decl_action(int_action)
 	public:
 		LizzyPkg();
 		void load() override;

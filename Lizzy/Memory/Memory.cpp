@@ -963,6 +963,14 @@ string Memory::operation(string v1, string v2, string (*ope)(Data *, Data *))
 }
 
 
+string Memory::operation(string v1, string (*ope)(Data *))
+{
+	Slot *d1 = existsGlobalUp(v1) ? getDataSlotGlobalUp(v1) : nullptr;
+	if(d1) return Type::operation(d1, ope);
+	return Type::operation(v1, ope);
+}
+
+
 string Memory::add_memory(string vorid1, string vorid2)
 {
 	return getDownMemory()->operation(vorid1, vorid2, Type::add);
@@ -981,4 +989,142 @@ string Memory::mul_memory(string vorid1, string vorid2)
 string Memory::div_memory(string vorid1, string vorid2)
 {
 	return getDownMemory()->operation(vorid1, vorid2, Type::div);
+}
+
+string Memory::mod_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::mod);
+}
+
+string Memory::land_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::land);
+}
+
+string Memory::lor_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::lor);
+}
+
+string Memory::lxor_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::lxor);
+}
+
+string Memory::lnot_memory(string vorid1)
+{
+	return getDownMemory()->operation(vorid1, Type::lnot);
+}
+
+string Memory::pre_inc_memory(string vorid1)
+{
+	return getDownMemory()->operation(vorid1, Type::pre_inc);
+}
+
+string Memory::post_inc_memory(string vorid1)
+{
+	return getDownMemory()->operation(vorid1, Type::post_inc);
+}
+
+string Memory::pre_dec_memory(string vorid1)
+{
+	return getDownMemory()->operation(vorid1, Type::pre_dec);
+}
+
+string Memory::post_dec_memory(string vorid1)
+{
+	return getDownMemory()->operation(vorid1, Type::post_dec);
+}
+
+string Memory::and_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::cand);
+}
+
+string Memory::or_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::cor);
+}
+
+string Memory::not_memory(string vorid1)
+{
+	return getDownMemory()->operation(vorid1, Type::cnot);
+}
+
+string Memory::rshift_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::rshift);
+}
+
+
+string Memory::lshift_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::lshift);
+}
+
+
+string Memory::ternary_memory(string v1, string v2, string v3)
+{
+	return existsGlobalUp(v1) ? (Type::evaluate(getDataGlobalUp(v1)) ? v2 : v3) : (Type::evaluate(v1) ? v2 : v3);
+}
+
+string Memory::equal_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::equal);
+}
+
+string Memory::not_equal_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::not_equal);
+}
+
+string Memory::lesser_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::lesser);
+}
+
+string Memory::bigger_memory(string vorid1, string vorid2)
+{
+	return getDownMemory()->operation(vorid1, vorid2, Type::bigger);
+}
+
+
+
+string Memory::as(string value, Types type)
+{
+	Data *d = nullptr;
+	if(existsGlobalUp(value))
+	{
+		d = getDataGlobalUp(value);
+		return Type::cast(d, type);
+	}
+	else
+	{
+		string buf;
+		d = Type::generatePrimitive(value);
+		buf = Type::cast(d, type);
+		delete d;
+		return buf;
+	}
+	throw Exception("can not cast " + value + " into Integer");
+}
+
+string Memory::as_Integer(string value)
+{
+	return as(value, INTEGER_T);
+}
+
+string Memory::as_Float(string value)
+{
+	return as(value, FLOAT_T);
+}
+
+string Memory::as_Bool(string value)
+{
+	return as(value, BOOL_T);
+}
+
+string Memory::as_String(string value)
+{
+	return as(value, STRING_T);
 }
