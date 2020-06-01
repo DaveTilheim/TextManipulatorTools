@@ -3,7 +3,7 @@
 
 //Interpreter Lizzy::LizzyPkg::lizzyInt = Interpreter();
 Interpreter *Lizzy::LizzyPkg::pLizzyInt = nullptr;
-
+Lizzy::Memory *Lizzy::LizzyPkg::memoryContext = nullptr;
 
 _def_pre(Lizzy::LizzyPkg::load_package_1)
 {
@@ -54,6 +54,95 @@ _def_action(Lizzy::LizzyPkg::int_action)
 	return buf;
 }
 
+unsigned long Lizzy::LizzyPkg::blockCounter = 0;
+bool allowedElse=false;
+
+_def_action(Lizzy::LizzyPkg::if_action)
+{
+	allowedElse = true;
+	if(pLizzyInt->getIgnore())
+	{
+		blockCounter++;
+	}
+	else
+	{
+		string arg = args.list();
+		bool result = memoryContext->evaluate(arg);
+		if(result)
+		{
+			memoryContext->push(".");
+		}
+		else
+		{
+			pLizzyInt->setIgnore(true);
+		}
+	}
+	return "/";
+}
+
+_def_action(Lizzy::LizzyPkg::end_if_action)
+{
+	allowedElse = true;
+	if(pLizzyInt->getIgnore())
+	{
+		if(not blockCounter)
+		{
+			pLizzyInt->setIgnore(false);
+		}
+		blockCounter--;
+	}
+	else
+	{
+		memoryContext->pop();
+	}
+	return "/";
+}
+
+
+_def_action(Lizzy::LizzyPkg::else_action)
+{
+	if(not allowedElse) throw Exception("else not allowed here");
+	allowedElse = false;
+	if(pLizzyInt->getIgnore())
+	{
+		if(not blockCounter)
+		{
+			pLizzyInt->setIgnore(false);
+			memoryContext->push(".");
+		}
+	}
+	else
+	{
+		memoryContext->pop();
+		pLizzyInt->setIgnore(true);
+	}
+	return "/";
+}
+
+_def_action(Lizzy::LizzyPkg::elif_action)
+{
+	if(not allowedElse) throw Exception("elif not allowed here");
+	if(pLizzyInt->getIgnore())
+	{
+		
+		if(not blockCounter)
+		{
+			string arg = args.list();
+			bool result = memoryContext->evaluate(arg);
+			if(result)
+			{
+				pLizzyInt->setIgnore(false);
+				memoryContext->push(".");
+			}
+		}
+	}
+	else
+	{
+		memoryContext->pop();
+		pLizzyInt->setIgnore(true);
+	}
+	return "/";
+}
 
 
 Lizzy::LizzyPkg::LizzyPkg() : Package("Lizzy")
@@ -64,6 +153,7 @@ Lizzy::LizzyPkg::LizzyPkg() : Package("Lizzy")
 	addSubPackage(new Lizzy::InfoPkg());
 	addSubPackage(new Lizzy::StdPkg());
 	addSubPackage(new Lizzy::LangPkg());
+	memoryContext = Lizzy::MemPkg::_memoryContext;
 
 	Action load_package_0Action(load_package_0);
 	Action load_package_1Action(load_package_1);
@@ -79,6 +169,24 @@ Lizzy::LizzyPkg::LizzyPkg() : Package("Lizzy")
 	lizzyInt.preIntCommand("use").child("file").setAction(1, useFileAction);
 
 	Action intAction(int_action);
+
+
+	Action ifAction(if_action);
+	cmd("if").setAction(1, ifAction);
+	Action endifAction(end_if_action);
+	cmd("end").child("if").setAction(0, endifAction);
+	Action elseAction(else_action);
+	cmd("else").setAction(0, elseAction);
+	Action elifAction(elif_action);
+	cmd("else").child("if").setAction(1, elifAction);
+	pLizzyInt->addFilterElement("if");
+	pLizzyInt->addFilterElement("end");
+	pLizzyInt->addFilterElement("else");
+	pLizzyInt->addFilterElement("elif");
+
+	cmdAlias(cmd("else").child("if"), "elif");
+
+
 	cmd("int").setAction(1, intAction);
 }
 

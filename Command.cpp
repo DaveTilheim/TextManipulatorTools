@@ -255,16 +255,19 @@ string Command::run(Tokens& args, int forceNargs)
 	}
 
 	Tokens arguments;
-	if(nargs) // cas d'une commande possédant des arguments
+	String element = args.getCurrent();
+	Attributes attributes;
+	if(element.size()) //cas d'une commande fille
 	{
-		String element = args.getCurrent();
-		Attributes attributes = Command::extractAttributes(element);
+		attributes = Command::extractAttributes(element);
 		if(forceNargs == -2 and not attributes.root and isChild(element)) //commande fille
 		{
 			args.next();
 			return getChild(element).run(args, attributes.nargs);
 		}
-
+	}
+	if(nargs) // cas d'une commande possédant des arguments
+	{
 		int i = 0;
 		int ret = nargs;
 		if(nargs == -1) nargs = args.partialSize();

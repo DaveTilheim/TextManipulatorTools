@@ -174,6 +174,7 @@ namespace Lizzy
 		string as_Float(string value);
 		string as_Bool(string value);
 		string as_String(string value);
+		bool evaluate(string value);
 	};
 }
 

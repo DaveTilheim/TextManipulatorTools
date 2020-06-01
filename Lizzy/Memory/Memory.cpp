@@ -7,7 +7,7 @@ PersistantMemory Memory::persistant = PersistantMemory();
 
 Memory::Memory(Memory *parent, string id) : parent(parent), id(id), stack()
 {
-	cout << "Memory created" << endl;
+	cout << "Memory created : " << id << endl;
 }
 
 Memory::~Memory()
@@ -17,8 +17,10 @@ Memory::~Memory()
 		cout << it.first << endl;
 		deleteData(it.first);
 	}
+	if(child)
+		delete child;
 	stack.clear();
-	cout << "Memory deleted" << endl;
+	cout << "Memory deleted : " << id << endl;
 }
 
 
@@ -95,11 +97,11 @@ Memory *Memory::getMemoryWhereIs(string id)
 void Memory::deleteData(string id)
 {
 	Memory *memory = getMemoryWhereIs(id);
-	Slot *slot = find(id);
+	Slot *slot = memory->find(id);
 	if(slot)
 	{
 		delete slot;
-		stack.erase(id);
+		memory->stack.erase(id);
 	}
 	else
 	{
@@ -157,6 +159,10 @@ void Memory::pop()
 	{
 		delete memory->child;
 		memory->child = nullptr;
+	}
+	else
+	{
+		throw Exception("can not remove Memory from stack");
 	}
 }
 
@@ -814,15 +820,16 @@ string Memory::set_char_at(string id, string index, string character)
 
 string Memory::del_data(string id)
 {
-	deleteData(id);
+	getDownMemory()->deleteData(id);
 	return id;
 }
 
 string Memory::del_persistant_data(string id)
 {
-	Slot *ref = getDownMemory()->getDataSlotGlobalUp(id);
+	Memory *m = getDownMemory();
+	Slot *ref = m->getDataSlotGlobalUp(id);
 	if(ref)
-		deletePersistantData(ref);
+		m->deletePersistantData(ref);
 	else
 		throw Exception(id + " is not a Reference");
 	return id;
@@ -1127,4 +1134,10 @@ string Memory::as_Bool(string value)
 string Memory::as_String(string value)
 {
 	return as(value, STRING_T);
+}
+
+
+bool Memory::evaluate(string value)
+{
+	return existsGlobalUp(value) ? Type::evaluate(getDataGlobalUp(value)) : Type::evaluate(value);
 }

@@ -255,16 +255,16 @@ void OpePkg::load()
 
 
 	Action equalAction(equal_action);
-	cmd("equal").setAction(2, equalAction);
+	cmd("eq").setAction(2, equalAction);
 
 	Action notEqualAction(not_equal_action);
 	cmd("not").child("equal").setAction(2, notEqualAction);
 
 	Action lesserAction(lesser_action);
-	cmd("lesser").setAction(2, lesserAction);
+	cmd("lt").setAction(2, lesserAction);
 
 	Action biggerAction(bigger_action);
-	cmd("bigger").setAction(2, biggerAction);
+	cmd("gt").setAction(2, biggerAction);
 	
 
 	

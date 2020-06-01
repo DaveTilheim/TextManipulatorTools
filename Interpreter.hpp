@@ -9,6 +9,8 @@ class Interpreter
 private:
 	static FileLoader *mainFileLoader;
 	static Interpreter *instance;
+	bool ignore = false;
+	vector<string> ignoreFilter;
 	FileLoader fileLoader;
 	vector<string> commentarySymbols;
 	void preinterpretation();
@@ -26,6 +28,9 @@ public:
 	Command& preIntCommand(string name);
 	void renamePreInt(string, string name);
 	FileLoader& getFileLoader();
+	void setIgnore(bool s);
+	bool getIgnore() { return ignore; }
+	void addFilterElement(string f);
 };
 
 #endif

@@ -102,9 +102,24 @@ vector<string> Interpreter::launch(string expr)
 	{
 		String commandName = exprTok;
 		Attributes attributes = Command::extractAttributes(commandName);
-		if(not Command::isCommand(commandName))
-			throw Exception("'" + commandName + "' is not a recognised Command");
-		ret.push_back(Command::getCommand(commandName).run(exprTok, attributes.nargs));
+		if(ignore)
+		{
+			for(auto f : ignoreFilter)
+			{
+				if(f == commandName)
+				{
+					if(not Command::isCommand(commandName))
+						throw Exception("'" + commandName + "' is not a recognised Command");
+					ret.push_back(Command::getCommand(commandName).run(exprTok, attributes.nargs));
+				}
+			}
+		}
+		else
+		{
+			if(not Command::isCommand(commandName))
+				throw Exception("'" + commandName + "' is not a recognised Command");
+			ret.push_back(Command::getCommand(commandName).run(exprTok, attributes.nargs));
+		}
 	}
 	return ret;
 }
@@ -159,4 +174,14 @@ Command& Interpreter::preIntCommand(string name)
 	Command *c = new Command(name);
 	Context::get("PRE_INT")[name] = c;
 	return *c;
+}
+
+void Interpreter::setIgnore(bool s)
+{
+	ignore = s;
+}
+
+void Interpreter::addFilterElement(string f)
+{
+	ignoreFilter.push_back(f);
 }
