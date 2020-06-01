@@ -81,7 +81,7 @@ void Interpreter::preIntCommandsRun()
 	{
 		delete it.second;
 	}
-	cout << fileLoader << endl;
+	//cout << fileLoader << endl;
 	//Context::erase("PRE_INT");
 }
 
@@ -132,6 +132,7 @@ vector<string> Interpreter::launchFile(string filename)
 	try
 	{
 		preinterpretation();
+		//Interpreter::launch((string)fileLoader.getAll());
 		while(not fileLoader.end())
 		{
 			String line = fileLoader.getLine();

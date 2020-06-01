@@ -21,6 +21,9 @@ public:
 	void update(string filename, bool flush=true);
 	String& getLine(int i=-1);
 	string getCurrentFile() const;
+	void separate(string sep);
+	void keepsep(string sep);
+	String getAll();
 	int getIndex() const;
 	void setIndex(int i);
 	void drop();

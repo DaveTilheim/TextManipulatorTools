@@ -4,21 +4,16 @@ println
 println "Lizzy Version  : " Lizzy.Info.version
 println
 
-if true
+if false
 
-	println "STEP 1"
+	println hello
 
-	if false
-		println "STEP 2"
-		println "STEP 3"
+else
 
-	elif true
-		println "STEP 5"
-	elif true
-		println "STEP 5"
-	else
-		println "STEP wgfd"
-	
-	end if
-	println "STEP 6"
+	println bye
+
+else
+
+	println bye
+
 end if

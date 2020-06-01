@@ -21,8 +21,9 @@ void FileLoader::update(string filename, bool flush)
 	{
 		currentFile = filename;
 		String buf;
-		while(getline(file, buf))
+		while(getline(file, buf, '\n'))
 		{
+			//buf.replace("\n", " ");
 			buf.remove();
 			if(buf.size())
 			{
@@ -119,3 +120,35 @@ ostream& operator<<(ostream& out, const FileLoader& fr)
 	}
 	return out;
 }
+
+void FileLoader::separate(string sep)
+{
+	auto len = content.size();
+	for(int i = 0; i < len; i++)
+		content[i] += " " + sep;
+}
+
+void FileLoader::keepsep(string sep)
+{
+	vector<String> tmp;
+	for(auto s : content)
+	{
+		for(auto ss : s.split(sep, true))
+		{
+			tmp.push_back(ss);
+		}
+	}
+	content = tmp;
+}
+
+String FileLoader::getAll()
+{
+	String buf;
+	for(auto s : content)
+	{
+		buf += s + " ";
+	}
+	if(buf.size()) buf.pop_back();
+	return buf;
+}
+
